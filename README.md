@@ -1,4 +1,4 @@
-# Hy-MT2 Windows：NVIDIA 批量翻译加速
+# Hy-MT2-Windows
 
 基于腾讯 **Hy-MT2-1.8B** 和 llama.cpp 的原生 Windows 翻译推理。提供 4 位量化、专用批量翻译程序和兼容 OpenAI 的本地 API，重点优化多条翻译的总吞吐。
 
@@ -6,7 +6,7 @@
 
 ## 快速开始
 
-1. 从本仓库 **Releases** 下载 `HyMT-Windows-NVIDIA-runtime.zip` 并解压。GitHub 的源码 ZIP 不包含运行环境。
+1. 从 [最新 Release](https://github.com/divingclone/Hy-MT2-Windows/releases/latest) 下载 [Windows 运行包](https://github.com/divingclone/Hy-MT2-Windows/releases/latest/download/HyMT-Windows-NVIDIA-runtime.zip) 并解压。GitHub 的源码 ZIP 不包含运行环境。
 2. 安装适合显卡的 NVIDIA 驱动 **580.88 或更新版本**。运行包自带 Python 和 CUDA/MSVC 运行库，无需另装 Python、CUDA Toolkit 或 Visual Studio。
 3. 在解压目录打开终端，下载模型并翻译：
 

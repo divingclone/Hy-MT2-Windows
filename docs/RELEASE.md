@@ -23,6 +23,18 @@ Git 保存代码、补丁和文档；GitHub Releases 保存 Windows 运行环境
 
 用户首次下载由 `setup-model.cmd` 完成，使用标准库 HTTPS、断点续传、文件大小和 SHA-256 检查。模型清单可将 `revision` 固定到上传后的 commit ID；即使使用 `main`，文件仍必须匹配记录的 SHA-256。
 
+## 仅更新模型卡
+
+发布代码、性能结果或下载链接后，更新本地 `huggingface/README.md` 和 `huggingface/MODEL_CHANGES.md`，再执行：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/publish_models.py --update-card
+```
+
+此模式只向已经存在的模型仓库提交 `README.md` 和 `MODEL_CHANGES.md`，不创建仓库，不读取或上传本地 GGUF，也不修改模型、manifest、许可证或来源记录。提交前后均检查仓库可见性、两个远程模型的大小与 LFS SHA-256 是否匹配 `models/manifest.json`；使用提交前的 `main` commit ID 防止覆盖并发更新，并确认其他文件未变。默认要求公开仓库；私有仓库必须显式传 `--private`。
+
+独立结果写入 `.local/huggingface-card-update.json`，保留首次上传证据 `.local/huggingface-upload.json`。`--update-card` 与 `--upload`、`--login`、`--status` 互斥；继续使用已有本地登录，不把 Token 写进命令。上传后应匿名打开模型页面，确认 GitHub 和 Release 链接可访问。
+
 ## 打包运行环境
 
 构建产物通常位于 `build/portable/bin`；已整理的本机运行目录也可使用 `bin`：
@@ -46,13 +58,14 @@ Git 保存代码、补丁和文档；GitHub Releases 保存 Windows 运行环境
 
 ## 上传 GitHub
 
-先在 GitHub 创建空仓库，然后在项目根目录执行（替换为自己的 URL）：
+公开代码仓库为 [`divingclone/Hy-MT2-Windows`](https://github.com/divingclone/Hy-MT2-Windows)，运行环境发布到 [`v0.1.0` Release](https://github.com/divingclone/Hy-MT2-Windows/releases/tag/v0.1.0)。维护者在项目根目录确认 `origin` 指向该仓库后推送：
 
 ```powershell
-git remote add origin https://github.com/YOUR_NAME/YOUR_REPOSITORY.git
+git remote get-url origin
+# 应为 https://github.com/divingclone/Hy-MT2-Windows.git
 git push -u origin main
 ```
 
-在 GitHub 的 Releases 页面创建版本，例如 `v0.1.0`，附加 `HyMT-Windows-NVIDIA-runtime.zip` 和对应 `.sha256` 文件。运行用户下载这个环境包，不能把 GitHub 自动生成的 Source code ZIP 当作运行环境。
+在该仓库的 [Releases 页面](https://github.com/divingclone/Hy-MT2-Windows/releases) 创建 `v0.1.0`，附加 `HyMT-Windows-NVIDIA-runtime.zip` 和对应 `.sha256` 文件。代码推送与 Release 附件完成后，再执行上面的 `--update-card` 同步 Hugging Face 说明。运行用户下载运行环境包，不能把 GitHub 自动生成的 Source code ZIP 当作运行环境。
 
 上传代码前确认 `git status` 不包含模型、二进制或 `.local`，并使用自己的提交署名。CI 在 Windows 上运行无 GPU 单元测试及固定源码补丁复现；真实 GPU 测试仍需本地进行。
