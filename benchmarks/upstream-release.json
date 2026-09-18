@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "upstream_repository": "https://github.com/ggml-org/llama.cpp",
+  "requested_tag": "b11030",
+  "requested_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+  "requested_release": {
+    "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11030",
+    "workflow_url": "https://github.com/ggml-org/llama.cpp/actions/runs/35317699033",
+    "workflow_conclusion": "cancelled",
+    "windows_cuda_binary_available_at_check": false,
+    "checked_date": "2026-09-18"
+  },
+  "selected_release": {
+    "tag": "b11029",
+    "commit": "5c53396b89b05666c9d57445b7616a35f6198a16",
+    "release_url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11029",
+    "published_utc": "2026-09-18T07:34:36Z"
+  },
+  "source_comparison": {
+    "selected_release_is_direct_parent": true,
+    "inference_source_identical": true,
+    "changed_paths": [
+      ".github/workflows/build-android.yml",
+      ".github/workflows/release.yml"
+    ],
+    "change": "Only Android setup-action references and an Android package option changed between the two commits.",
+    "commit_evidence_url": "https://github.com/ggml-org/llama.cpp/commit/bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+    "comparison_url": "https://github.com/ggml-org/llama.cpp/compare/b11029...b11030"
+  },
+  "binary_asset": {
+    "filename": "llama-b11029-bin-win-cuda-13.4-x64.zip",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11029/llama-b11029-bin-win-cuda-13.4-x64.zip",
+    "size_bytes": 150102429,
+    "sha256": "2a12109be0fa8b80f715919de61fb6b5004faf21d2cee1a8b42762edf7f7c762",
+    "github_asset_digest_verified": true,
+    "extracted_files": 52,
+    "binaries_modified": false
+  },
+  "version_check": {
+    "executable": "llama-server.exe",
+    "arguments": ["--version"],
+    "exit_code": 0,
+    "output": [
+      "version: 0.4.1-dev (build 11029, commit 5c53396b8)",
+      "built with Clang 20.1.8 for Windows x86_64"
+    ],
+    "help_exit_code": 0
+  },
+  "build": {
+    "official_cuda_toolkit": "13.4",
+    "official_cpu_compiler_reported": "Clang 20.1.8",
+    "official_cpu_all_variants": true,
+    "official_cuda_architecture_selection": "Pinned source CMake defaults, including 120a-real for Blackwell; binary architecture inventory was not independently dumped.",
+    "official_workflow_url": "https://github.com/ggml-org/llama.cpp/blob/5c53396b89b05666c9d57445b7616a35f6198a16/.github/workflows/release.yml",
+    "custom_cuda_toolkit": "13.0",
+    "custom_cpu_compiler": "MSVC 14.43.34808",
+    "custom_cpu_baseline": "x86-64/SSE2"
+  },
+  "runtime_dependency_check": {
+    "method": "Windows LoadLibrary of the unmodified official ggml-cuda.dll with only the official binary directory and existing project CUDA/MSVC runtime directories explicitly added.",
+    "ggml_cuda_load_succeeded": true,
+    "gpu_inference_run_by_this_check": false,
+    "loaded_cuda_dependencies": [
+      {
+        "filename": "cublas64_13.dll",
+        "project_relative_path": "runtime/cuda/cublas64_13.dll",
+        "file_version": "6,14,11,1300",
+        "product_version": "6,14,11,1300",
+        "runtime_distribution": "CUDA 13.0"
+      },
+      {
+        "filename": "cublasLt64_13.dll",
+        "project_relative_path": "runtime/cuda/cublasLt64_13.dll",
+        "file_version": "6,14,11,1300",
+        "product_version": "6,14,11,1300",
+        "runtime_distribution": "CUDA 13.0"
+      }
+    ],
+    "dynamic_cudart_dll_observed": false,
+    "note": "The loader check proves DLL resolution only. Model loading, device selection, correctness and performance are established by the separate benchmark runs. An installed cudart DLL does not identify the version of a statically linked CUDA runtime."
+  },
+  "matching_runtime_asset_not_downloaded": {
+    "filename": "cudart-llama-bin-win-cuda-13.4-x64.zip",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11029/cudart-llama-bin-win-cuda-13.4-x64.zip",
+    "size_bytes": 423535356,
+    "sha256": "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668"
+  },
+  "comparison_limitations": [
+    "The official package is not the exact requested commit, but the direct parent has identical inference source.",
+    "Official and custom binaries use different toolchains, CUDA toolkit versions, CPU build settings and GPU compilation targets.",
+    "This is a comparison of the published unmodified upstream binary against the custom deployment, not a build-controlled attribution of speedup to the patch alone.",
+    "Official upstream must receive standard-layout models, reconstructed without changing tensor bytes; it must not load the custom fused-layout GGUF files directly."
+  ]
+}

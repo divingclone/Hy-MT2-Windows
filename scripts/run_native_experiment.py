@@ -239,7 +239,7 @@ def run(args: argparse.Namespace) -> int:
             "text_tokens_without_eog excludes terminal EOG. Both counters exclude every dummy padding token.",
             "Native wall_s includes first-use warm-up, JSONL reading/writing, templates, tokenization, prefill, sampling and decode.",
             "Native wall_s excludes model/context initialization; process_wall_s_including_initialization includes it.",
-            "The HTTP harness runs separate warm-up requests; direct native-versus-HTTP timing has this protocol difference.",
+            "Historical HTTP runs used separate warm-up; benchmark_upstream.py uses no separate warm-up on either side.",
             "Requests, round IDs, prompt text and seed progression match benchmark.py and translate_many.",
             "This is a fixed smoke/performance workload, not a scored translation-quality benchmark.",
         ],

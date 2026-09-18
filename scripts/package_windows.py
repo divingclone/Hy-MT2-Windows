@@ -36,7 +36,8 @@ MSVC_DLLS = (
 SCRIPTS = (
     "translate_batch.py", "translate.py", "serve.ps1",
     "stop-server.ps1", "serve.py", "gpu_config.py", "run-python.cmd", "setup_model.py",
-    "run_native_experiment.py", "benchmark_cases.json",
+    "run_native_experiment.py", "benchmark_cases.json", "benchmark_upstream.py",
+    "summarize_upstream_benchmark.py", "unpack_hymt_gguf.py",
 )
 LAUNCHERS = ("translate-batch.cmd", "start-server.cmd", "stop-server.cmd", "gpu-info.cmd", "setup-model.cmd")
 MODELS = ("Hy-MT2-1.8B-Q4_K_M-fused.gguf", "Hy-MT2-1.8B-NVFP4-fused.gguf")

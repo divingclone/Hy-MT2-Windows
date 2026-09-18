@@ -1,24 +1,72 @@
 # 实测性能
 
-测试设备：RTX 5090 32 GB、Ryzen 7 9800X3D、Windows 11，NVIDIA 驱动 596.36，CUDA 13.0 / MSVC 14.43。历史 `optimized` 构建使用本机 CPU 指令与 `sm_120a`；便携构建使用 x64/SSE2 CPU 基线和五种 GPU 架构。只有 RTX 5090 实测，不能外推其他显卡。
+## 主对比：原版 Q4_K_M → 本项目 NVFP4
 
-逐次数字、配置、原报告哈希和输出哈希见 [脱敏性能数据](../benchmarks/rtx5090-windows.json)。公开摘要保留 27 次关键运行，包括后续较慢的复测；没有发布个人路径、设备 UUID、进程 ID 或逐条翻译历史。
+本次主对照直接比较**未修改的官方 llama.cpp** 与本项目完整部署方案。量化选择计入本项目的收益，不要求两端采用同一种四位格式。
+
+RTX 5090 32 GB、Ryzen 7 9800X3D、Windows 11，NVIDIA 驱动 596.36。同一组 512 条请求、同样 256 并发、每条上下文 1024、batch/ubatch 2048、8 个推理 CPU 线程；每侧三次，每次启动全新进程，按“原版→本项目”的顺序交替执行，没有单独预热请求。
+
+| 方案 | 量化 / 接口 | completion token/s 中位数 | 三次范围 | 推理墙钟中位数 |
+| --- | --- | ---: | ---: | ---: |
+| 官方原版 llama.cpp `b11029` | 腾讯 Q4_K_M / HTTP | 721.73 | 711.35–723.67 | 46.394 s |
+| 本项目便携构建 | NVFP4 / 原生 JSONL | **5386.26** | 5133.05–5460.50 | **6.185 s** |
+
+吞吐中位数比为 **7.463 倍（提高 646.3%）**，512 条墙钟减少 **86.7%**。本项目包含初始化的进程总时间中位数为 **7.463 秒**。六次运行均完成全部 512 条请求，错误、截断和空输出均为零；逐条 token 合计、结束状态和独立种子序列也已复核。
+
+这是**量化、代码、调度、接口和构建共同作用下的整体方案比较**，不是纯源码或单一 CUDA kernel 的收益，也没有证明两种量化的译文相同或质量等效。原版三次实际输出为 33491 / 33553 / 33484 个 completion token，本项目三次均为 33314；时间比与 token 吞吐比因此略有不同。没有穷举原版所有并发与参数，不将这次相同并发对照称作原版的绝对最高性能。
+
+公开证据：[逐次摘要与哈希](../benchmarks/upstream-comparison.json)、[原版发布来源](../benchmarks/upstream-release.json)。摘要没有本机路径、GPU UUID、PID 或逐条译文。
+
+### 原版身份与模型证明
+
+使用 [官方 b11029 Windows CUDA 发布包](https://github.com/ggml-org/llama.cpp/releases/tag/b11029)，未经源码补丁或二进制修改。资产为 `llama-b11029-bin-win-cuda-13.4-x64.zip`，SHA-256 为 `2a12109be0fa8b80f715919de61fb6b5004faf21d2cee1a8b42762edf7f7c762`，已核对官方资产摘要及程序 `--version`。
+
+本项目基线为 `b11030` / `bdcbaaf6`；该次官方 Windows CUDA 构建取消，故采用直接父提交 `b11029` / `5c53396b8`。两提交只改了 Android/发布 workflow，推理源码相同，详见 [官方提交差异](https://github.com/ggml-org/llama.cpp/compare/b11029...b11030)。仍需保留以下构建差异：
+
+| 项目 | 官方原版 | 本项目便携构建 |
+| --- | --- | --- |
+| CUDA Toolkit | 13.4 | 13.0 |
+| CPU 编译器 | Clang 20.1.8 | MSVC 14.43 |
+| CPU 构建 | 官方多指令集变体 | x64/SSE2 基线 |
+| 调度 / 采样 | 上游 HTTP 动态请求调度 | 固定波次、GPU 批量前缀＋1 线程 CPU 尾部 |
+
+此次官方程序复用了工程内 CUDA 13.0 的 cuBLAS DLL；官方程序文件本身未修改。加载到的依赖版本记录在发布来源 JSON 中。这是实际可运行部署的对照，不是严格控制编译器与运行库的消融。
+
+原版加载标准张量布局，不能直接加载本项目 `*-fused.gguf`。用 [无损逆重排脚本](../scripts/unpack_hymt_gguf.py) 拆回标准布局，验证全部 354 个张量的 shape、类型和字节 SHA，保留除私有布局标记外的 metadata。恢复后的 Q4_K_M 整文件 SHA-256：
+
+`dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699`
+
+它与 [腾讯固定版本原文件](https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/resolve/a0c709d9fac510f2c807aa3af52872340dc37a4a/Hy-MT2-1.8B-Q4_K_M.gguf) 完全一致。摘要中的 `unpack_verification` 保留片段验证数量和字节数；NVFP4 也验证了逆重排不改量化字节。Q4_K_M 与 NVFP4 之间并非字节无损转换。
+
+### 附加对照：两端均使用 NVFP4
+
+另三对新进程运行使用相同 NVFP4 权重载荷，尺寸和采样参数不变：
+
+| 方案 | completion token/s 中位数 | 三次范围 | 墙钟中位数 |
+| --- | ---: | ---: | ---: |
+| 未修改官方程序，标准布局 | 714.66 | 682.07–745.78 | 46.557 s |
+| 本项目，重排布局 | 5026.12 | 5005.23–5374.95 | 6.628 s |
+
+中位数比为 **7.033 倍**。该附加对照减少了量化格式差异，但仍包含接口、调度、构建等差异，不能作为单一源码改动的加速倍数。它在主对照之前单独测量，不把两组结果合并挑选最高值。所有请求均完整结束，不作跨实现译文相同的声明。
 
 ## 测量口径
 
 素材为 [benchmark_cases.json](../scripts/benchmark_cases.json) 的 64 条固定翻译，重复 8 轮，共 512 条。跨轮原文重复；API 关闭 prompt cache，原生程序清空各波 KV，没有跨请求前缀共享。这不是翻译质量评测，也不覆盖所有文本长度与语言分布。
 
-采样设置：temperature 0.7、top-p 0.6、top-k 20、repeat penalty 1.05、min-p 0，惩罚窗口 4096；每条请求独立种子为 `42 + 全局请求序号`。以下 NVFP4 原生主要对照均为并发 256、每条上下文 1024、batch/ubatch 2048、最大生成 512。
+采样设置：temperature 0.7、top-p 0.6、top-k 20、repeat penalty 1.05、min-p 0，惩罚窗口 4096；每条请求独立种子为 `42 + 全局请求序号`。新对照两端均为并发 256、每条上下文 1024、batch/ubatch 2048、最大生成 512。
 
 - **completion token/s**：真实生成 token 数除以墙钟，包含实际结束 EOG，排除填充 token；填充工作消耗的时间仍计入墙钟。
 - **正文 token/s**：进一步排除 EOG。
 - **原生推理墙钟**：包括输入读取、模板与分词、prefill、采样、decode、输出写入和首次图准备；排除模型及 context 初始化。
 - **进程总时间**：从启动原生进程到退出，包含初始化。
-- **HTTP 墙钟**：包含队列、请求和服务处理，排除独立预热。与原生计时边界不同，差距不能全归为 CUDA kernel 加速。
+- **HTTP 墙钟**：包含队列、请求、服务处理及首次推理，排除初始化和测量后的 JSONL 磁盘写入。新对照没有单独预热；下方早期历史 HTTP 记录使用过独立预热。
+- **HTTP 含启动时间**：`loaded_process_wall_s` 在最后一条 HTTP 请求返回后截止，尚未停止服务、写出 JSONL，因此不能与原生进程启动到退出的总时间直接对比。
 
 下表中的有效运行均完整完成 512 条，无错误、截断或空输出。正常结束不代表翻译语义完全正确。
 
-## 第二轮：GPU 批量采样前缀
+## 历史记录：第二轮 GPU 批量采样前缀
+
+以下为之前阶段的实验，使用历史本机 optimized 构建；保留作追溯，不作为 README 的原版主对照。27 次历史摘要见 [rtx5090-windows.json](../benchmarks/rtx5090-windows.json)。
 
 相同 NVFP4、输入和生成参数，每项三次：
 
@@ -38,7 +86,7 @@
 
 GPU 批量前缀目前只用于专用文件程序，HTTP 服务未使用这条路径。
 
-## 后续复测与波动
+## 历史记录：后续复测与波动
 
 | 后续场景 | 运行次数 | completion token/s |
 | --- | ---: | ---: |
@@ -52,7 +100,7 @@ GPU 批量前缀目前只用于专用文件程序，HTTP 服务未使用这条�
 
 便携构建单次推理墙钟 6.219 秒、进程总时间 7.641 秒；33314 个 completion token，其中 512 个 EOG，正文吞吐 5274.81 token/s。它是兼容构建的验证，**不是相对旧构建的成对加速对照**。
 
-## 首轮和源码开关消融
+## 历史记录：首轮和源码开关消融
 
 首轮以下每项三次、每次 512 条：
 
@@ -81,14 +129,21 @@ HTTP 与原生方案包含接口、调度、并发及部分量化差异，不是
 
 源码改动与数值验证范围见 [优化说明](OPTIMIZATIONS.md)。没有用合成 decode 峰值替代真实翻译吞吐，没有宣称量化无损或已获得正式 COMET/BLEU 质量结论。
 
-## 复现
+## 复现原版对照
 
-使用源码仓库中的实验脚本，配合运行包的 `bin`、`runtime` 和下载好的模型。下例对应 RTX 5090 的大显存配置，实验脚本不会替你自动选择显存预算；其他卡请降低并发并选择适用量化。
+先完成模型安装并停止其他 GPU 工作负载。以下是 RTX 5090 大显存配置，脚本不自动降低并发；显存较少时应调整尺寸。
+
+1. 下载上面链接的官方 `b11029` Windows CUDA 13.4 程序 ZIP，解压到 `.local/upstream-benchmark-bin`，其中应直接包含 `llama-server.exe`。记录资产 SHA 和 `--version`。
+2. 将上面固定版本的腾讯原始 Q4_K_M 下载为 `.local/upstream-benchmark-models/Hy-MT2-1.8B-Q4_K_M.gguf`，校验其 SHA。也可按 [源码准备](BUILD.md) 获得 gguf-py 和开发 Python，再用 `unpack_hymt_gguf.py` 从本项目 Q4_K_M 恢复；无需重新量化。
+3. 下载本项目 NVFP4，运行三对比较：
 
 ```powershell
+.\setup-model.cmd --profile fast
 .\stop-server.cmd
-.\scripts\run-python.cmd scripts\run_native_experiment.py --binary bin/hy-batch.exe --model models/Hy-MT2-1.8B-NVFP4-fused.gguf --parallel 256 --context 1024 --batch 2048 --ubatch 2048 --sampling-threads 1 --rounds 8 --eager-graphs --gpu-prefix --label native-prefix-r1
-.\scripts\run-python.cmd scripts\run_native_experiment.py --binary bin/hy-batch.exe --model models/Hy-MT2-1.8B-NVFP4-fused.gguf --parallel 256 --context 1024 --batch 2048 --ubatch 2048 --sampling-threads 4 --rounds 8 --eager-graphs --label native-cpu-r1
+.\scripts\run-python.cmd scripts\benchmark_upstream.py --stock-dir .local/upstream-benchmark-bin --stock-model .local/upstream-benchmark-models/Hy-MT2-1.8B-Q4_K_M.gguf --optimized-model models/Hy-MT2-1.8B-NVFP4-fused.gguf --quantization Q4_K_M --optimized-quantization NVFP4 --parallel 256 --repeats 3 --rounds 8 --label my-q4-to-nvfp4
+.\scripts\run-python.cmd scripts\summarize_upstream_benchmark.py --report results/my-q4-to-nvfp4/report.json --output results/my-upstream-summary.json
 ```
 
-每次换一个 `--label`，至少分别重复三次，并报告全部结果。程序保存配置、summary、译文和日志；提交 Git 或分享前先脱敏。跨运行时的 GPU 占用、驱动、构建和文本分布都会影响结果，当前机器不一定复现历史绝对值。
+实验每轮启动原版服务，测量后关闭，再启动本项目原生进程。更换 `--label` 才能重新运行，避免覆盖原记录。`report.json` 保存版本、模型及二进制 SHA、参数和逐次数据；脱敏脚本只输出白名单证据，并拒绝未完成的重复测量。完整报告含译文和本机信息，不应直接提交 Git。
+
+复现历史原生开关实验可使用 `scripts/run_native_experiment.py`；显式指定 `--binary bin/hy-batch.exe --context 1024 --parallel 256 --ubatch 2048`。不同驱动、构建、系统状态、语言和文本长度都会影响绝对速度，应保留全部运行，不能只选最快的一次。

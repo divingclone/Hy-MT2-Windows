@@ -1,0 +1,1083 @@
+{
+  "schema_version": 1,
+  "summarized_utc": "2026-09-18T12:25:47.632641+00:00",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "vram_gb": 32,
+    "cpu": "AMD Ryzen 7 9800X3D",
+    "os": "Windows 11 x64",
+    "nvidia_driver": "596.36",
+    "cuda_toolkit": "13.0",
+    "msvc": "14.43"
+  },
+  "hardware_source": "First benchmark report; per-report GPU observations are retained separately",
+  "comparisons": [
+    {
+      "source_report_sha256": "ccdc1b846fbbb63de44dab30a6a6ec5ce0dcbc988e9b327c88abd0ab978dd0a8",
+      "baseline_quantization": "Q4_K_M",
+      "optimized_quantization": "NVFP4",
+      "quantization_differs": true,
+      "baseline": {
+        "source_commit": "5c53396b89b05666c9d57445b7616a35f6198a16",
+        "tag": "b11029",
+        "version": "version: 0.4.1-dev (build 11029, commit 5c53396b8)\r\nbuilt with Clang 20.1.8 for Windows x86_64\r\n",
+        "binary_sha256": {
+          "ggml-base.dll": "5943101eb3144089aec6f50dc423d9298b6021bbf3218fd6e1ce39df74158a5e",
+          "ggml-cpu-alderlake.dll": "248cfc0605a3df408790abdf90e145f22f9bc5a057e092cf70353ff42da2be75",
+          "ggml-cpu-cannonlake.dll": "ee67eebc81ab06a915c0d24500d8d6d150b29ca4bcdde2a4503dced3e76ced84",
+          "ggml-cpu-cascadelake.dll": "9c3efa0ca8af009e1c6f90e9e8b99e6d1c240dfe449065f0258bd7af1e91ae7a",
+          "ggml-cpu-cooperlake.dll": "703d353c737f033c39ac98487c54eda8361b7fd2f262143cf90095878a37ebf8",
+          "ggml-cpu-haswell.dll": "37fe04b1ef32cc682658a855d44557d9f4f31d272fac30ea0e4d473269ce8773",
+          "ggml-cpu-icelake.dll": "79fc7deae8a6f0d523ec5199ce207c1b990e0ad61ae61c41b16a75b0179205fe",
+          "ggml-cpu-ivybridge.dll": "69235b8869065123a07c7a8318b892d56fd80991fe0ffbb6a5b7c2d9971775d4",
+          "ggml-cpu-piledriver.dll": "9d88b0e418c4a4a8748356c9770307cb8e23275c974b45d26159f48c7f9cda8f",
+          "ggml-cpu-sandybridge.dll": "a2d51da1d061a42547c8076a0a601c17d823f3e408da96de32e56d3247230f95",
+          "ggml-cpu-sapphirerapids.dll": "659116a9149f205f41204ee4e463a2c7e2a39455947d3c4886ca660ca3be3c5d",
+          "ggml-cpu-skylakex.dll": "5716356e90eab2b85c0e4a738bace9a6d6965dc048b93e350d451f9657916ea7",
+          "ggml-cpu-sse42.dll": "813645d2be767611ac161ea9f7653ca088c0ca76026ce1a2a1bca26b01f1d934",
+          "ggml-cpu-x64.dll": "ade9bb417b8a27ebb9a745e4328d83b9cd863f9f8b8cb44c0fc2e71b09865894",
+          "ggml-cpu-zen4.dll": "b20038350a5ce2aa086c28b3e73ce093f07828b1c3c684f614add5f8159071c0",
+          "ggml-cuda.dll": "9bd7383deceb324898cc81d9bfc3aa6c2c6456df2b575e8d4b02b8c3017f298a",
+          "ggml-rpc-server.exe": "9ef873aabc011766d52e4690ca0b06d9fd93d40ad514284a32136c916504c770",
+          "ggml-rpc.dll": "f48005559ea52f06e1603a586948509a6e9c28db666c80a7dea1a878bbf73e15",
+          "ggml.dll": "49ce46ba81a0e2c8b5b330b42a8013900e3e7420c266eb69ef646877f76a7683",
+          "libomp.dll": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c",
+          "llama-batched-bench-impl.dll": "187b914edd9c9ef854abf5c93475e40d07ee399a9867539508befa15e499d0b3",
+          "llama-batched-bench.exe": "46120cb58c61275f967ae972090ffe0079a596bf2afdd754be8f069c03653827",
+          "llama-bench-impl.dll": "bc87d652133fa6b672246af69f80ebe02826d7ae2a2edbf566cd84ef82e405a2",
+          "llama-bench.exe": "7f675708dcb34165646264b9609d2ef412f385cc8e5b9a0c620177387c0734cd",
+          "llama-cli-impl.dll": "f219b1edaebccf4f43c1b48c120494726d302aa476902e90b0529f5897f7c718",
+          "llama-cli.exe": "d7f9714af94eb36a43e8ec695690696de7c3dc6a387909dfc9c140782fe38cba",
+          "llama-common.dll": "e4486be21fa1adfc3caffda56c72f4a886a6e2c455fa0114ffef0053649d01bc",
+          "llama-completion-impl.dll": "781433962eabdcc40456cf500f7e02e9f0d8c5779cc0b9114d8bba8b8454748a",
+          "llama-completion.exe": "e3465d223b406f06cdf9e85c23dfd2c955f9b93f3c7474b20b54dbbb60703828",
+          "llama-fit-params-impl.dll": "903b94cc47128bd83539cc067fe0a19069d7ec031fa399d274fdc987a6c87dfe",
+          "llama-fit-params.exe": "aa09113c77110b238e73f016512b901aeba9937ea04eaf6ed24cc4ed1bc46648",
+          "llama-gemma3-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-gguf-split.exe": "8d82b182b5210f58bce7e3f2b2bb68abd5e1f6fd9ab494582e6e899e24936041",
+          "llama-imatrix.exe": "047bea6a397f1ecba0210e0dd93f2d9fd7dea897372493a4d79742aac2670433",
+          "llama-llava-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-minicpmv-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-mtmd-cli.exe": "145c830e4c108bc2155e0d495ca1e6555b054f7bcba972df0a50cecb1995254a",
+          "llama-mtmd-debug.exe": "9407b5ccd6654d40080cbc4c712dd9509e03d2ea2dcac58abfb619890e4e87f6",
+          "llama-perplexity-impl.dll": "4f3cda413918728fd94a19b469f7182dd12830cb1dd35c1a2eac91d8c690d651",
+          "llama-perplexity.exe": "a07ae6628c0bd795772df17854c80e0eec970fa5ee76ecbf0ec34c338fc59f4a",
+          "llama-quantize-impl.dll": "7d8e8205e9a874f98a177258a1f3a3fe402d5e5ec9fc1b91705bbe92f7f34bcf",
+          "llama-quantize.exe": "50706e17028de55501a3d3d2dd2a70a694e9517143fd3c0dd8bf4cf3b4fb4b88",
+          "llama-qwen2vl-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-results.exe": "79e29210e3207d79fc934a636e410d77d0442730079586a69ecd3b8d3ddc8ba5",
+          "llama-server-impl.dll": "119ff192e5c1733ae40c45a2408b1ca6bfbeca2c77c755d1eee32a2fcfae88ab",
+          "llama-server.exe": "c798e5381dbb515fc36e3a83a8f48ad3dac6b2d4d6d1d0b738ff94f5db653c2a",
+          "llama-tokenize.exe": "2b7dd997ee37939cbe3a6e90938700ecd0842838e36a50341f420ccf5ff6bd9a",
+          "llama-tts.exe": "7a0e38f5e1f55d2ba3f85eea0784a472c2004a20c3b9a46d3bed7866c0e82f2f",
+          "llama.dll": "43bf5b290c601024c2d9ab0d661d3cad14be4aa180a84add72845daaa6a886b5",
+          "llama.exe": "9c05c576b33c5b7e8ad9ec705308084b461d975b630c2d24a0e07893ed32b5d7",
+          "mtmd.dll": "29d56cea8ba0a661c20d18a1e16c88a4cc5deb1569e02521e274fb795615c723"
+        },
+        "configuration": {
+          "gpu_layers": "all",
+          "flash_attention": "on",
+          "total_context": 262144,
+          "parallel": 256,
+          "batch": 2048,
+          "ubatch": 2048,
+          "cpu_threads": 8,
+          "cpu_batch_threads": 8,
+          "temperature": 0.7,
+          "top_p": 0.6,
+          "top_k": 20,
+          "min_p": 0,
+          "repeat_penalty": 1.05,
+          "repeat_last_n": 4096,
+          "jinja": true,
+          "startup_warmup": false
+        }
+      },
+      "models": {
+        "stock": {
+          "filename": "Hy-MT2-1.8B-Q4_K_M.gguf",
+          "sha256": "dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699"
+        },
+        "optimized": {
+          "filename": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "sha256": "e2f80bfbaca8084574e836d46224a5470d07931162c1f8e7a3a8689a5b2d17f3"
+        }
+      },
+      "workload": {
+        "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+        "requests": 512,
+        "parallel": 256,
+        "context_per_sequence": 1024,
+        "batch": 2048,
+        "ubatch": 2048,
+        "cpu_threads": 8,
+        "seed_rule": "42 + request index",
+        "cache_prompt": false,
+        "warmup": "none; first graph work included",
+        "repeats": 3,
+        "sampling": {
+          "temperature": 0.7,
+          "top_p": 0.6,
+          "top_k": 20,
+          "repeat_penalty": 1.05,
+          "max_tokens": 512,
+          "seed": 42,
+          "greedy": false
+        }
+      },
+      "runs": [
+        {
+          "implementation": "upstream",
+          "repeat": 1,
+          "output_jsonl_sha256": "1a79c0ee4b5cb8fd7eecf1e2c9a24a7b5e7935c9500d2b27c5b8fb4fc718ff03",
+          "metrics": {
+            "wall_s": 46.27958719999879,
+            "initialization_s": 1.3620718000020133,
+            "loaded_process_wall_s": 47.6429136999941,
+            "output_tokens": 33491,
+            "output_tokens_per_second": 723.666783268129,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33491,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "optimized",
+          "repeat": 1,
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "seed": 42,
+            "greedy": false,
+            "sampling_threads": 1,
+            "batch_snapshot": true,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "gpu_prefix": true,
+            "continuous": false,
+            "refill_min": 1,
+            "pad_final_wave_effective": true,
+            "temperature": 0.699999988079071,
+            "top_p": 0.6000000238418579,
+            "top_k": 20,
+            "min_p": 0.0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 4096
+          },
+          "source_report_sha256": "2158c2751ae32f4b721de513a2931ea4c4fbb223e190de1dbdfede987ab46b98",
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992",
+          "metrics": {
+            "wall_s": 6.4900967,
+            "initialization_s": 0.9111438,
+            "process_wall_s_including_initialization": 7.8208901999896625,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5133.05140738504,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "complete_output_tokens": 33314,
+            "complete_output_tokens_per_second": 5133.05140738504,
+            "complete_translations_per_second": 78.88942548421505,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5054.161981900825,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33314,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "upstream",
+          "repeat": 2,
+          "output_jsonl_sha256": "5ccb6a84940635ca12c3bdf7321860da6384d633ca9fda6d93376b164484b6d1",
+          "metrics": {
+            "wall_s": 47.16819019999821,
+            "initialization_s": 1.362574600003427,
+            "loaded_process_wall_s": 48.532747599994764,
+            "output_tokens": 33553,
+            "output_tokens_per_second": 711.3480474389979,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33553,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "optimized",
+          "repeat": 2,
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "seed": 42,
+            "greedy": false,
+            "sampling_threads": 1,
+            "batch_snapshot": true,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "gpu_prefix": true,
+            "continuous": false,
+            "refill_min": 1,
+            "pad_final_wave_effective": true,
+            "temperature": 0.699999988079071,
+            "top_p": 0.6000000238418579,
+            "top_k": 20,
+            "min_p": 0.0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 4096
+          },
+          "source_report_sha256": "4d64c7223b11c962fd0a06434466a89326028955b633283c9e3d389bd93bec2c",
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992",
+          "metrics": {
+            "wall_s": 6.1009043,
+            "initialization_s": 0.8665352,
+            "process_wall_s_including_initialization": 7.357793000002857,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5460.501978370649,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "complete_output_tokens": 33314,
+            "complete_output_tokens_per_second": 5460.501978370649,
+            "complete_translations_per_second": 83.92198513915388,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5376.579993231496,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33314,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "upstream",
+          "repeat": 3,
+          "output_jsonl_sha256": "1655e86feb417de49c4ac72cdafa3ee4235c5a1e1f8e5b32be5feefebaef1c75",
+          "metrics": {
+            "wall_s": 46.393930500009446,
+            "initialization_s": 1.337281800006167,
+            "loaded_process_wall_s": 47.73331569999573,
+            "output_tokens": 33484,
+            "output_tokens_per_second": 721.732339535086,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33484,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "optimized",
+          "repeat": 3,
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "seed": 42,
+            "greedy": false,
+            "sampling_threads": 1,
+            "batch_snapshot": true,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "gpu_prefix": true,
+            "continuous": false,
+            "refill_min": 1,
+            "pad_final_wave_effective": true,
+            "temperature": 0.699999988079071,
+            "top_p": 0.6000000238418579,
+            "top_k": 20,
+            "min_p": 0.0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 4096
+          },
+          "source_report_sha256": "fdd916decb06448d7ab466a96154f253f862e4afb831a54be470d2e1d35f470e",
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992",
+          "metrics": {
+            "wall_s": 6.1849953,
+            "initialization_s": 0.8843661,
+            "process_wall_s_including_initialization": 7.462859999999637,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5386.261166601048,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "complete_output_tokens": 33314,
+            "complete_output_tokens_per_second": 5386.261166601048,
+            "complete_translations_per_second": 82.7809844899963,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5303.480182111052,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33314,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        }
+      ],
+      "summary": {
+        "upstream": {
+          "runs": 3,
+          "all_valid": true,
+          "completion_tps": {
+            "median": 721.732339535086,
+            "min": 711.3480474389979,
+            "max": 723.666783268129,
+            "values": [
+              723.666783268129,
+              711.3480474389979,
+              721.732339535086
+            ]
+          },
+          "wall_s": {
+            "median": 46.393930500009446,
+            "min": 46.27958719999879,
+            "max": 47.16819019999821,
+            "values": [
+              46.27958719999879,
+              47.16819019999821,
+              46.393930500009446
+            ]
+          }
+        },
+        "optimized": {
+          "runs": 3,
+          "all_valid": true,
+          "completion_tps": {
+            "median": 5386.261166601048,
+            "min": 5133.05140738504,
+            "max": 5460.501978370649,
+            "values": [
+              5133.05140738504,
+              5460.501978370649,
+              5386.261166601048
+            ]
+          },
+          "wall_s": {
+            "median": 6.1849953,
+            "min": 6.1009043,
+            "max": 6.4900967,
+            "values": [
+              6.4900967,
+              6.1009043,
+              6.1849953
+            ]
+          }
+        }
+      },
+      "all_valid": true,
+      "median_tps_ratio": 7.462962197413356,
+      "median_wall_ratio": 7.501045392873532,
+      "optimized": {
+        "binary_sha256": {
+          "ggml-base.dll": "e46db339c31dd22d6719a31f704f94d7d668e52c8c521c497b97c92230efcf55",
+          "ggml-cpu.dll": "f5efc893c0cd9f6e33d4d85ea626d6e0d93bc4f2e9e00a68e11f27a823fe3dc3",
+          "ggml-cuda.dll": "63b06a1268b39cb8906d47a3798c316bc049a16558c73dc75d8115ecada76590",
+          "ggml.dll": "0f5b4f07eaae4ae554fdd080b864cdfad22465452c5ed6487b705a602f003c19",
+          "hy-batch.exe": "44daabfd07ce3016a288afdf1e82ae81f8d05094741bfa10cb9759aa1597e764",
+          "llama-common.dll": "881886254caad4cfe6e34e4cc727ca5eee4228284a5e197cd03de15378d00d71",
+          "llama-server-impl.dll": "9664dda0000411533ead95b5b2fb98f513fe07a317a25ecbcc6a24adde52bf92",
+          "llama-server.exe": "bf8f339af7c046aa4bb64ba3029ab181a10fa99458b10c22e5b2cc4cea7b540f",
+          "llama.dll": "805616f4258d76289bc272b91af587aa870b7d1cfe550fb49ab197f5ee1ef71c",
+          "mtmd.dll": "c2bb9bb18e8e741cfddcd77f1635d8286b55ce62415eeedf3093eab587285a58"
+        },
+        "build": {
+          "platform": "windows-x86_64",
+          "cuda_toolkit": "13.0",
+          "architectures": [
+            "75",
+            "80",
+            "86",
+            "89",
+            "120a"
+          ],
+          "ptx_architectures": [],
+          "cpu_baseline": "x86-64/SSE2",
+          "ggml_native": false,
+          "cpu_avx": false,
+          "cpu_avx2": false,
+          "cpu_avx512": false,
+          "source_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+          "source_dirty": true,
+          "build_type": "Release"
+        },
+        "binary_hash_capture": "Recorded in the benchmark report before its repetitions"
+      },
+      "hardware": {
+        "gpu": "NVIDIA GeForce RTX 5090",
+        "vram_gb": 32,
+        "cpu": "AMD Ryzen 7 9800X3D",
+        "os": "Windows 11 x64",
+        "nvidia_driver": "596.36",
+        "cuda_toolkit": "13.0",
+        "msvc": "14.43"
+      },
+      "gpu_before_measurement": [
+        {
+          "name": "NVIDIA GeForce RTX 5090",
+          "driver": "596.36",
+          "total_memory_mib": 32607.0,
+          "used_memory_mib": 2907.0,
+          "utilization_percent": 3.0,
+          "temperature_c": 56.0
+        }
+      ]
+    },
+    {
+      "source_report_sha256": "fdd32ca1a0830e28a578f909d73e43caa73704446a97621bcd648fe9ee6ae452",
+      "baseline_quantization": "NVFP4",
+      "optimized_quantization": "NVFP4",
+      "quantization_differs": false,
+      "baseline": {
+        "source_commit": "5c53396b89b05666c9d57445b7616a35f6198a16",
+        "tag": "b11029",
+        "version": "version: 0.4.1-dev (build 11029, commit 5c53396b8)\r\nbuilt with Clang 20.1.8 for Windows x86_64\r\n",
+        "binary_sha256": {
+          "ggml-base.dll": "5943101eb3144089aec6f50dc423d9298b6021bbf3218fd6e1ce39df74158a5e",
+          "ggml-cpu-alderlake.dll": "248cfc0605a3df408790abdf90e145f22f9bc5a057e092cf70353ff42da2be75",
+          "ggml-cpu-cannonlake.dll": "ee67eebc81ab06a915c0d24500d8d6d150b29ca4bcdde2a4503dced3e76ced84",
+          "ggml-cpu-cascadelake.dll": "9c3efa0ca8af009e1c6f90e9e8b99e6d1c240dfe449065f0258bd7af1e91ae7a",
+          "ggml-cpu-cooperlake.dll": "703d353c737f033c39ac98487c54eda8361b7fd2f262143cf90095878a37ebf8",
+          "ggml-cpu-haswell.dll": "37fe04b1ef32cc682658a855d44557d9f4f31d272fac30ea0e4d473269ce8773",
+          "ggml-cpu-icelake.dll": "79fc7deae8a6f0d523ec5199ce207c1b990e0ad61ae61c41b16a75b0179205fe",
+          "ggml-cpu-ivybridge.dll": "69235b8869065123a07c7a8318b892d56fd80991fe0ffbb6a5b7c2d9971775d4",
+          "ggml-cpu-piledriver.dll": "9d88b0e418c4a4a8748356c9770307cb8e23275c974b45d26159f48c7f9cda8f",
+          "ggml-cpu-sandybridge.dll": "a2d51da1d061a42547c8076a0a601c17d823f3e408da96de32e56d3247230f95",
+          "ggml-cpu-sapphirerapids.dll": "659116a9149f205f41204ee4e463a2c7e2a39455947d3c4886ca660ca3be3c5d",
+          "ggml-cpu-skylakex.dll": "5716356e90eab2b85c0e4a738bace9a6d6965dc048b93e350d451f9657916ea7",
+          "ggml-cpu-sse42.dll": "813645d2be767611ac161ea9f7653ca088c0ca76026ce1a2a1bca26b01f1d934",
+          "ggml-cpu-x64.dll": "ade9bb417b8a27ebb9a745e4328d83b9cd863f9f8b8cb44c0fc2e71b09865894",
+          "ggml-cpu-zen4.dll": "b20038350a5ce2aa086c28b3e73ce093f07828b1c3c684f614add5f8159071c0",
+          "ggml-cuda.dll": "9bd7383deceb324898cc81d9bfc3aa6c2c6456df2b575e8d4b02b8c3017f298a",
+          "ggml-rpc-server.exe": "9ef873aabc011766d52e4690ca0b06d9fd93d40ad514284a32136c916504c770",
+          "ggml-rpc.dll": "f48005559ea52f06e1603a586948509a6e9c28db666c80a7dea1a878bbf73e15",
+          "ggml.dll": "49ce46ba81a0e2c8b5b330b42a8013900e3e7420c266eb69ef646877f76a7683",
+          "libomp.dll": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c",
+          "llama-batched-bench-impl.dll": "187b914edd9c9ef854abf5c93475e40d07ee399a9867539508befa15e499d0b3",
+          "llama-batched-bench.exe": "46120cb58c61275f967ae972090ffe0079a596bf2afdd754be8f069c03653827",
+          "llama-bench-impl.dll": "bc87d652133fa6b672246af69f80ebe02826d7ae2a2edbf566cd84ef82e405a2",
+          "llama-bench.exe": "7f675708dcb34165646264b9609d2ef412f385cc8e5b9a0c620177387c0734cd",
+          "llama-cli-impl.dll": "f219b1edaebccf4f43c1b48c120494726d302aa476902e90b0529f5897f7c718",
+          "llama-cli.exe": "d7f9714af94eb36a43e8ec695690696de7c3dc6a387909dfc9c140782fe38cba",
+          "llama-common.dll": "e4486be21fa1adfc3caffda56c72f4a886a6e2c455fa0114ffef0053649d01bc",
+          "llama-completion-impl.dll": "781433962eabdcc40456cf500f7e02e9f0d8c5779cc0b9114d8bba8b8454748a",
+          "llama-completion.exe": "e3465d223b406f06cdf9e85c23dfd2c955f9b93f3c7474b20b54dbbb60703828",
+          "llama-fit-params-impl.dll": "903b94cc47128bd83539cc067fe0a19069d7ec031fa399d274fdc987a6c87dfe",
+          "llama-fit-params.exe": "aa09113c77110b238e73f016512b901aeba9937ea04eaf6ed24cc4ed1bc46648",
+          "llama-gemma3-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-gguf-split.exe": "8d82b182b5210f58bce7e3f2b2bb68abd5e1f6fd9ab494582e6e899e24936041",
+          "llama-imatrix.exe": "047bea6a397f1ecba0210e0dd93f2d9fd7dea897372493a4d79742aac2670433",
+          "llama-llava-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-minicpmv-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-mtmd-cli.exe": "145c830e4c108bc2155e0d495ca1e6555b054f7bcba972df0a50cecb1995254a",
+          "llama-mtmd-debug.exe": "9407b5ccd6654d40080cbc4c712dd9509e03d2ea2dcac58abfb619890e4e87f6",
+          "llama-perplexity-impl.dll": "4f3cda413918728fd94a19b469f7182dd12830cb1dd35c1a2eac91d8c690d651",
+          "llama-perplexity.exe": "a07ae6628c0bd795772df17854c80e0eec970fa5ee76ecbf0ec34c338fc59f4a",
+          "llama-quantize-impl.dll": "7d8e8205e9a874f98a177258a1f3a3fe402d5e5ec9fc1b91705bbe92f7f34bcf",
+          "llama-quantize.exe": "50706e17028de55501a3d3d2dd2a70a694e9517143fd3c0dd8bf4cf3b4fb4b88",
+          "llama-qwen2vl-cli.exe": "9ce9f3518fc612443b85932613e3f915ef4b2dfd508b50edae328ce0d7a24d1f",
+          "llama-results.exe": "79e29210e3207d79fc934a636e410d77d0442730079586a69ecd3b8d3ddc8ba5",
+          "llama-server-impl.dll": "119ff192e5c1733ae40c45a2408b1ca6bfbeca2c77c755d1eee32a2fcfae88ab",
+          "llama-server.exe": "c798e5381dbb515fc36e3a83a8f48ad3dac6b2d4d6d1d0b738ff94f5db653c2a",
+          "llama-tokenize.exe": "2b7dd997ee37939cbe3a6e90938700ecd0842838e36a50341f420ccf5ff6bd9a",
+          "llama-tts.exe": "7a0e38f5e1f55d2ba3f85eea0784a472c2004a20c3b9a46d3bed7866c0e82f2f",
+          "llama.dll": "43bf5b290c601024c2d9ab0d661d3cad14be4aa180a84add72845daaa6a886b5",
+          "llama.exe": "9c05c576b33c5b7e8ad9ec705308084b461d975b630c2d24a0e07893ed32b5d7",
+          "mtmd.dll": "29d56cea8ba0a661c20d18a1e16c88a4cc5deb1569e02521e274fb795615c723"
+        },
+        "configuration": {
+          "gpu_layers": "all",
+          "flash_attention": "on",
+          "total_context": 262144,
+          "parallel": 256,
+          "batch": 2048,
+          "ubatch": 2048,
+          "cpu_threads": 8,
+          "cpu_batch_threads": 8,
+          "temperature": 0.7,
+          "top_p": 0.6,
+          "top_k": 20,
+          "min_p": 0,
+          "repeat_penalty": 1.05,
+          "repeat_last_n": 4096,
+          "jinja": true,
+          "startup_warmup": false
+        }
+      },
+      "models": {
+        "stock": {
+          "filename": "Hy-MT2-1.8B-NVFP4.gguf",
+          "sha256": "78a2db6f9e098c7608f0a2156c220af952ec4d73d85b1dde8aa02475f40a57cb"
+        },
+        "optimized": {
+          "filename": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "sha256": "e2f80bfbaca8084574e836d46224a5470d07931162c1f8e7a3a8689a5b2d17f3"
+        }
+      },
+      "workload": {
+        "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+        "requests": 512,
+        "parallel": 256,
+        "context_per_sequence": 1024,
+        "batch": 2048,
+        "ubatch": 2048,
+        "cpu_threads": 8,
+        "seed_rule": "42 + request index",
+        "cache_prompt": false,
+        "warmup": "none; first graph work included",
+        "repeats": 3,
+        "sampling": {
+          "temperature": 0.7,
+          "top_p": 0.6,
+          "top_k": 20,
+          "repeat_penalty": 1.05,
+          "max_tokens": 512,
+          "seed": 42,
+          "greedy": false
+        }
+      },
+      "runs": [
+        {
+          "implementation": "upstream",
+          "repeat": 1,
+          "output_jsonl_sha256": "da8023d7ea5119ace18b45bd29b5aa67daea58630633cb08b855448cdeaf4cf2",
+          "metrics": {
+            "wall_s": 48.84697159999632,
+            "initialization_s": 1.362196900008712,
+            "loaded_process_wall_s": 50.21069060001173,
+            "output_tokens": 33317,
+            "output_tokens_per_second": 682.0688961606477,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33317,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "optimized",
+          "repeat": 1,
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "seed": 42,
+            "greedy": false,
+            "sampling_threads": 1,
+            "batch_snapshot": true,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "gpu_prefix": true,
+            "continuous": false,
+            "refill_min": 1,
+            "pad_final_wave_effective": true,
+            "temperature": 0.699999988079071,
+            "top_p": 0.6000000238418579,
+            "top_k": 20,
+            "min_p": 0.0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 4096
+          },
+          "source_report_sha256": "eb5c99f4e125f1328ff4ff5cb100a9ec9e85f5cbe9b2b315dfffcdae45f6162b",
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992",
+          "metrics": {
+            "wall_s": 6.6281711,
+            "initialization_s": 0.9058883,
+            "process_wall_s_including_initialization": 7.992978199996287,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5026.122515153539,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "complete_output_tokens": 33314,
+            "complete_output_tokens_per_second": 5026.122515153539,
+            "complete_translations_per_second": 77.24604453859074,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 4948.876470614948,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33314,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "upstream",
+          "repeat": 2,
+          "output_jsonl_sha256": "2d31072f67ef4102e9ad8912a2bb484875f9a2248ddd7daafab723387db8b312",
+          "metrics": {
+            "wall_s": 46.55659169999126,
+            "initialization_s": 1.3508808000042336,
+            "loaded_process_wall_s": 47.90950440001325,
+            "output_tokens": 33272,
+            "output_tokens_per_second": 714.6571255559983,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33272,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "optimized",
+          "repeat": 2,
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "seed": 42,
+            "greedy": false,
+            "sampling_threads": 1,
+            "batch_snapshot": true,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "gpu_prefix": true,
+            "continuous": false,
+            "refill_min": 1,
+            "pad_final_wave_effective": true,
+            "temperature": 0.699999988079071,
+            "top_p": 0.6000000238418579,
+            "top_k": 20,
+            "min_p": 0.0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 4096
+          },
+          "source_report_sha256": "39cdf1aa935b5a70204ebc8b345ca66598cc94020a417b711c84c7f421fd1ca2",
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992",
+          "metrics": {
+            "wall_s": 6.1980075,
+            "initialization_s": 0.8989316,
+            "process_wall_s_including_initialization": 7.479823400004534,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5374.953160350322,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "complete_output_tokens": 33314,
+            "complete_output_tokens_per_second": 5374.953160350322,
+            "complete_translations_per_second": 82.60719271475551,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5292.345967635567,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33314,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "upstream",
+          "repeat": 3,
+          "output_jsonl_sha256": "9b3a1e6f21651f059f1c72d297e23d7624871ad6463c38221ed29ffcc8864614",
+          "metrics": {
+            "wall_s": 44.54520649999904,
+            "initialization_s": 1.3755947000026936,
+            "loaded_process_wall_s": 45.923174700001255,
+            "output_tokens": 33221,
+            "output_tokens_per_second": 745.7817038069117,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33221,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        },
+        {
+          "implementation": "optimized",
+          "repeat": 3,
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "seed": 42,
+            "greedy": false,
+            "sampling_threads": 1,
+            "batch_snapshot": true,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "gpu_prefix": true,
+            "continuous": false,
+            "refill_min": 1,
+            "pad_final_wave_effective": true,
+            "temperature": 0.699999988079071,
+            "top_p": 0.6000000238418579,
+            "top_k": 20,
+            "min_p": 0.0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 4096
+          },
+          "source_report_sha256": "206f9f95971730475576d2d3bff371f2c6bee84e5d5d801a8f35e749ae29bfce",
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992",
+          "metrics": {
+            "wall_s": 6.6558423,
+            "initialization_s": 0.9480851,
+            "process_wall_s_including_initialization": 8.031442999999854,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5005.226761457374,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "complete_output_tokens": 33314,
+            "complete_output_tokens_per_second": 5005.226761457374,
+            "complete_translations_per_second": 76.92489949769393,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 4928.3018619596805,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true
+          },
+          "independent_row_checks": {
+            "request_count": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "empty_outputs": 0,
+            "stopped_requests": 512,
+            "all_completion_counts_present_and_positive": true,
+            "completion_tokens_sum": 33314,
+            "seed_sequence_matches": true
+          },
+          "valid": true
+        }
+      ],
+      "summary": {
+        "upstream": {
+          "runs": 3,
+          "all_valid": true,
+          "completion_tps": {
+            "median": 714.6571255559983,
+            "min": 682.0688961606477,
+            "max": 745.7817038069117,
+            "values": [
+              682.0688961606477,
+              714.6571255559983,
+              745.7817038069117
+            ]
+          },
+          "wall_s": {
+            "median": 46.55659169999126,
+            "min": 44.54520649999904,
+            "max": 48.84697159999632,
+            "values": [
+              48.84697159999632,
+              46.55659169999126,
+              44.54520649999904
+            ]
+          }
+        },
+        "optimized": {
+          "runs": 3,
+          "all_valid": true,
+          "completion_tps": {
+            "median": 5026.122515153539,
+            "min": 5005.226761457374,
+            "max": 5374.953160350322,
+            "values": [
+              5026.122515153539,
+              5374.953160350322,
+              5005.226761457374
+            ]
+          },
+          "wall_s": {
+            "median": 6.6281711,
+            "min": 6.1980075,
+            "max": 6.6558423,
+            "values": [
+              6.6281711,
+              6.1980075,
+              6.6558423
+            ]
+          }
+        }
+      },
+      "all_valid": true,
+      "median_tps_ratio": 7.032914575983904,
+      "median_wall_ratio": 7.024047960981463
+    }
+  ],
+  "measurement_boundaries": {
+    "scope": "Complete deployed translation systems; untouched upstream HTTP versus optimized native JSONL. Quantization may differ.",
+    "upstream_wall": "HTTP client execution through completion, including request queue and first inference; excludes model startup and post-run JSONL write.",
+    "native_wall": "Input read, prompt processing, generation, sampling and JSONL write; includes first graph work, excludes model/context initialization.",
+    "upstream_loaded_process_wall": "Start to final HTTP response, before server termination and JSONL write; not directly equivalent to native subprocess start-to-exit time.",
+    "tokens": "Completion counts include actual EOG; native padding tokens excluded, padding work included in wall time.",
+    "order": "Upstream then optimized in each repetition; fixed order, not randomized.",
+    "hashes": "Output hashes identify artifacts, not cross-interface translation equality; HTTP JSONL includes timings.",
+    "limits": "Source revisions, compilers, interface and scheduling differ. Ratios are not isolated source-code or kernel speedups, nor a translation-quality score."
+  },
+  "optimized_artifacts_at_summary_time": {
+    "capture_boundary": "Files hashed when summarizing; not a per-run binary capture",
+    "binary_sha256": {
+      "ggml-base.dll": "e46db339c31dd22d6719a31f704f94d7d668e52c8c521c497b97c92230efcf55",
+      "ggml-cpu.dll": "f5efc893c0cd9f6e33d4d85ea626d6e0d93bc4f2e9e00a68e11f27a823fe3dc3",
+      "ggml-cuda.dll": "63b06a1268b39cb8906d47a3798c316bc049a16558c73dc75d8115ecada76590",
+      "ggml.dll": "0f5b4f07eaae4ae554fdd080b864cdfad22465452c5ed6487b705a602f003c19",
+      "hy-batch.exe": "44daabfd07ce3016a288afdf1e82ae81f8d05094741bfa10cb9759aa1597e764",
+      "llama-common.dll": "881886254caad4cfe6e34e4cc727ca5eee4228284a5e197cd03de15378d00d71",
+      "llama-server-impl.dll": "9664dda0000411533ead95b5b2fb98f513fe07a317a25ecbcc6a24adde52bf92",
+      "llama-server.exe": "bf8f339af7c046aa4bb64ba3029ab181a10fa99458b10c22e5b2cc4cea7b540f",
+      "llama.dll": "805616f4258d76289bc272b91af587aa870b7d1cfe550fb49ab197f5ee1ef71c",
+      "mtmd.dll": "c2bb9bb18e8e741cfddcd77f1635d8286b55ce62415eeedf3093eab587285a58"
+    },
+    "build": {
+      "platform": "windows-x86_64",
+      "cuda_toolkit": "13.0",
+      "architectures": [
+        "75",
+        "80",
+        "86",
+        "89",
+        "120a"
+      ],
+      "ptx_architectures": [],
+      "cpu_baseline": "x86-64/SSE2",
+      "ggml_native": false,
+      "cpu_avx": false,
+      "cpu_avx2": false,
+      "cpu_avx512": false,
+      "source_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+      "source_dirty": true,
+      "build_type": "Release"
+    }
+  },
+  "upstream_release": {
+    "upstream_repository": "https://github.com/ggml-org/llama.cpp",
+    "requested_tag": "b11030",
+    "requested_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+    "requested_release": {
+      "url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11030",
+      "workflow_url": "https://github.com/ggml-org/llama.cpp/actions/runs/35317699033",
+      "workflow_conclusion": "cancelled",
+      "windows_cuda_binary_available_at_check": false,
+      "checked_date": "2026-09-18"
+    },
+    "selected_release": {
+      "tag": "b11029",
+      "commit": "5c53396b89b05666c9d57445b7616a35f6198a16",
+      "release_url": "https://github.com/ggml-org/llama.cpp/releases/tag/b11029",
+      "published_utc": "2026-09-18T07:34:36Z"
+    },
+    "binary_asset": {
+      "filename": "llama-b11029-bin-win-cuda-13.4-x64.zip",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11029/llama-b11029-bin-win-cuda-13.4-x64.zip",
+      "size_bytes": 150102429,
+      "sha256": "2a12109be0fa8b80f715919de61fb6b5004faf21d2cee1a8b42762edf7f7c762",
+      "github_asset_digest_verified": true,
+      "extracted_files": 52,
+      "binaries_modified": false
+    },
+    "version_check": {
+      "executable": "llama-server.exe",
+      "arguments": [
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": [
+        "version: 0.4.1-dev (build 11029, commit 5c53396b8)",
+        "built with Clang 20.1.8 for Windows x86_64"
+      ],
+      "help_exit_code": 0
+    },
+    "build": {
+      "official_cuda_toolkit": "13.4",
+      "official_cpu_compiler_reported": "Clang 20.1.8",
+      "official_cpu_all_variants": true,
+      "official_workflow_url": "https://github.com/ggml-org/llama.cpp/blob/5c53396b89b05666c9d57445b7616a35f6198a16/.github/workflows/release.yml",
+      "custom_cuda_toolkit": "13.0",
+      "custom_cpu_compiler": "MSVC 14.43.34808",
+      "custom_cpu_baseline": "x86-64/SSE2"
+    },
+    "source_comparison": {
+      "selected_release_is_direct_parent": true,
+      "inference_source_identical": true,
+      "changed_paths": [
+        ".github/workflows/build-android.yml",
+        ".github/workflows/release.yml"
+      ],
+      "commit_evidence_url": "https://github.com/ggml-org/llama.cpp/commit/bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+      "comparison_url": "https://github.com/ggml-org/llama.cpp/compare/b11029...b11030"
+    },
+    "runtime_dependency_check": {
+      "ggml_cuda_load_succeeded": true,
+      "gpu_inference_run_by_this_check": false,
+      "dynamic_cudart_dll_observed": false,
+      "loaded_cuda_dependencies": [
+        {
+          "filename": "cublas64_13.dll",
+          "file_version": "6,14,11,1300",
+          "product_version": "6,14,11,1300",
+          "runtime_distribution": "CUDA 13.0"
+        },
+        {
+          "filename": "cublasLt64_13.dll",
+          "file_version": "6,14,11,1300",
+          "product_version": "6,14,11,1300",
+          "runtime_distribution": "CUDA 13.0"
+        }
+      ]
+    },
+    "metadata_sha256": "f6bb179163300611dbb7891e2edb758289c562c4157e77e803ef1e5efa3f7029"
+  },
+  "unpack_verification": [
+    {
+      "input_sha256": "79b8013e7f9ce6448fa18ea17ca4021ca69dc4dbc9ed047e72791d7b1a287bb0",
+      "output_sha256": "dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699",
+      "output_bytes": 1133080448,
+      "quantization_changed": false,
+      "all_tensor_slices_verified": true,
+      "metadata_verified_except_removed_key": "hunyuan-dense.hymt_packed_projections",
+      "tensor_order": "per-layer lexical; non-layer source order",
+      "packed_tensors": 274,
+      "output_tensors": 354,
+      "verified_tensor_bytes": 1127990304,
+      "expected_output_sha256": "dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699",
+      "whole_file_matches_expected": true,
+      "manifest_sha256": "b15cf8dab61fb367de6dbd9a4f19aaebd624f3ed8cc526cb8d668a89a80e0712"
+    },
+    {
+      "input_sha256": "e2f80bfbaca8084574e836d46224a5470d07931162c1f8e7a3a8689a5b2d17f3",
+      "output_sha256": "78a2db6f9e098c7608f0a2156c220af952ec4d73d85b1dde8aa02475f40a57cb",
+      "output_bytes": 1013059552,
+      "quantization_changed": false,
+      "all_tensor_slices_verified": true,
+      "metadata_verified_except_removed_key": "hunyuan-dense.hymt_packed_projections",
+      "tensor_order": "per-layer lexical; non-layer source order",
+      "packed_tensors": 258,
+      "output_tensors": 354,
+      "verified_tensor_bytes": 1007968512,
+      "manifest_sha256": "03d4605a140cb025277022dd337bc3de0cb62e9a376b152e36b57348f8a57390"
+    }
+  ]
+}
