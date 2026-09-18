@@ -123,7 +123,7 @@ def main():
     mode.add_argument('--status', action='store_true')
     mode.add_argument('--upload', action='store_true', help='Upload the verified models and allowlisted accompanying files')
     mode.add_argument('--update-card', action='store_true', help='Update only README.md and MODEL_CHANGES.md in an existing repository; verify remote model hashes before and after')
-    parser.add_argument('--private', action='store_true', help='Create a private repository (default: public)')
+    parser.add_argument('--private', action='store_true', help='Require a private repository; --upload also creates it if missing (default: public)')
     parser.add_argument('--repo', help='Default: models/manifest.json repo_id')
     args = parser.parse_args()
     from huggingface_hub import HfApi, CommitOperationAdd, get_token, login, set_client_factory
