@@ -1,0 +1,100 @@
+{
+  "retrieved_utc": "2026-09-18T11:01:55.270570+00:00",
+  "model_revision": "9a341cd1b679d3efd23b46e847b01745a71ed792",
+  "files": [
+    {
+      "file": "model-Hy-MT2.txt",
+      "source": "https://huggingface.co/tencent/Hy-MT2-1.8B/resolve/9a341cd1b679d3efd23b46e847b01745a71ed792/LICENSE.txt",
+      "sha256": "1af3c6dc0c697277cbb6b68720787c1caa43a79c5626bf9f19cd8c00de9c8cd4",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "openssl-LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/openssl/openssl/openssl-3.5.7/LICENSE.txt",
+      "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "libffi-LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/libffi/libffi/v3.4.6/LICENSE",
+      "sha256": "67894089811f93fca47a76f85e017da6f8582d4ba0905963c6e0f1ad6df7a195",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "msvc-runtime-license.html",
+      "source": "https://visualstudio.microsoft.com/license-terms/vs2022-cruntime/",
+      "sha256": "4e315865c9a14c50176a8502388fae4f6f486d9957140a8b9a3fba0da353b46b",
+      "included_in_runtime_package": false
+    },
+    {
+      "file": "msvc-redistribution.html",
+      "source": "https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution",
+      "sha256": "926942f2462074733720867dbcc0ad5d4570ca68b5c4917e46b6ff492dfcc2eb",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "python-3.12-license.html",
+      "source": "https://docs.python.org/3.12/license.html",
+      "sha256": "6ec2063458659f8d099e6bb7780180ddcae00109f04f0e67f9318007dcafb011",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "msvc-runtime-license.docx",
+      "source": "https://visualstudio.microsoft.com/wp-content/uploads/2021/09/Visual-C-Runtime-2015-2022-License-1.docx",
+      "sha256": "f1e3d56ceb2ad68aae0711b910375009e651ac5530fa0760f0dea6e81e54fae1",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "cccl-LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/NVIDIA/cccl/v3.0.0/LICENSE",
+      "sha256": "01b767dcd7d36f42efb608076741cf83f154a995e198028cb698aadc3a43b63b",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "stb-LICENSE.txt",
+      "source": "src/llama.cpp/vendor/stb/stb_image.h",
+      "sha256": "3632b9067290c92a64006dc2f1dc1127e8d43c4de32da98933bd623ce4fe91b6",
+      "extracted_notice": true,
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "subprocess-LICENSE.txt",
+      "source": "src/llama.cpp/vendor/sheredom/subprocess.h",
+      "sha256": "eefdb47861e5b54943a30d2f34bdf659257ea6e437d15ef7968f2a1451e74ebe",
+      "extracted_notice": true,
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "sha1-NOTICE.txt",
+      "source": "src/llama.cpp/vendor/hash/sha1/sha1.c",
+      "sha256": "af11c2841595e2052e9da6ffd0cf0bbc9adced8a42c1a5d20ed9c27842de77d3",
+      "extracted_notice": true,
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "msvc-runtime-license.txt",
+      "source": "msvc-runtime-license.docx",
+      "extracted_notice": true,
+      "sha256": "2dd434a15fb5f9d28c33211a5af471eb719acba5db65e5103e0db95e7869a2fb",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "sqlite-PUBLIC-DOMAIN.html",
+      "source": "https://www.sqlite.org/copyright.html",
+      "sha256": "44ca9f793055c8e32fc65f65a4f5bcf813a33f5bdaaa084067dd617a4ed3cc70",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "xz-COPYING.txt",
+      "source": "https://raw.githubusercontent.com/tukaani-project/xz/v5.8.1/COPYING",
+      "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8",
+      "included_in_runtime_package": true
+    },
+    {
+      "file": "xz-0BSD.txt",
+      "source": "https://raw.githubusercontent.com/tukaani-project/xz/v5.8.1/COPYING.0BSD",
+      "sha256": "0b01625d853911cd0e2e088dcfb743261034a091bb379246cb25a14cc4c74bf1",
+      "included_in_runtime_package": true
+    }
+  ]
+}

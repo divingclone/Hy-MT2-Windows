@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-18T11:36:51.162427+00:00",
+  "source_repository": "src/llama.cpp",
+  "base_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+  "upstream_repository": "https://github.com/ggml-org/llama.cpp.git",
+  "patch": "patches/hy-mt2.patch",
+  "patch_bytes": 191157,
+  "patch_sha256": "ad38fb9f932201fe88b2397395526eb6ca451bece1f0370df7c78ece8b3b93bb",
+  "binary_patch": true,
+  "changed_files": [
+    {
+      "path": "common/sampling.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 38868,
+      "sha256": "5163208d787803c6f790e24c1f05bb8b538051b5bf618e82f777919484c73f09",
+      "sha256_lf": "2b3996bed61f0d03366227b52be905188b8582152d3c2532d062f2b8d1c9bf9d"
+    },
+    {
+      "path": "common/sampling.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 6747,
+      "sha256": "5f2d2ef61991ff8f6f8e6405252d6e1fc390f4c4632e894a585482b06587129c",
+      "sha256_lf": "79c14c0be8a7274eec59c44b1971d8f4dcdd7a27f386180ccad75f49c996d7d6"
+    },
+    {
+      "path": "ggml/include/ggml-rpc.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 1217,
+      "sha256": "6892e3453ff14ddac3a8b50623bff0415917e71c734e0af4facf0cb4583924f7",
+      "sha256_lf": "f30c8212c33360ebcb2779a5842739de332cb25535eb4750b45e36e398276ad9"
+    },
+    {
+      "path": "ggml/include/ggml.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 120044,
+      "sha256": "e33c16699cdc01ee7d33e6e62e3e7caacc41e815d37148a4f91a3cf60150a0f0",
+      "sha256_lf": "743f6ee313f70dc8214249da7db3be2381a0b8cb357ade3044c728655c6ce638"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/ggml-cpu.c",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 136187,
+      "sha256": "c1d84c6b3ebcc7e6daf4bc26c66fcf4d82cf2df9bac11c39d5e6b0e6350189ad",
+      "sha256_lf": "006de8c0e5b48c830be0ff84bb4b99cda7625a7ada38a2297388cfb684082766"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/ops.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 432316,
+      "sha256": "a9a3c18da517061bcf2a1a6460f6337b29199935fc9333a79286f3bf0442ca0e",
+      "sha256_lf": "22fe81860d58fc9d42b00373e5d3e2e73b31a1eb1bb2e7f7a5861fb007f4d9b7"
+    },
+    {
+      "path": "ggml/src/ggml-cpu/ops.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 10482,
+      "sha256": "daf07c7371c45286980ecb482a7ac4c5dcd6b9b4ece0eda5556b3f4719335e5a",
+      "sha256_lf": "813e5d51c3ec3366b6871ac659a7005e91bccc328e55be1a24b4588e93c5c7bd"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/CMakeLists.txt",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 11331,
+      "sha256": "0b68c5d65e864ab962886a8528aa31b9dad16a8a91072c083089277ad73b0143",
+      "sha256_lf": "5c2aa1da625236d7f98eff42099b76d2dfc06a00ca39cc2ce6e34ad925b5c3d5"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/common.cuh",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 67046,
+      "sha256": "f7e3295efda0004eb91c629f41bf9669464e85361d860c1810a606ed9662ce62",
+      "sha256_lf": "8a073c721699c3e25e3094367fe1e98c1f1de1f8efe391b65f1c3bfe714a8331"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/getrows.cu",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 25168,
+      "sha256": "921615884bcb7fc3b19fe399ee39135c9b3fcf3898e2ecb33e2bb8389cafde00",
+      "sha256_lf": "5771b4dd5eb4cc4b04a1e511d9ccfc431d2bd88c4056c9ea5da1f13c954bfa52"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/ggml-cuda.cu",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 248251,
+      "sha256": "8b181ab0f1a7577ec79cb958391748592f3a763a709159dd91f13ba08425ff6d",
+      "sha256_lf": "dee047a889a380cc145a2220790ed48143203f024467256f506a9f0230efa475"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/hymt-penalties.cu",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 2877,
+      "sha256": "e792601f3be8249a8a29e57500b1b61d48ba02575ef82a5f258929ad96173100",
+      "sha256_lf": "e792601f3be8249a8a29e57500b1b61d48ba02575ef82a5f258929ad96173100"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/hymt-penalties.cuh",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 109,
+      "sha256": "e6ec16aeb6e0fdbfd287df41ee4b4237136bffa60e8c96c4dbf801093c83d9f2",
+      "sha256_lf": "e6ec16aeb6e0fdbfd287df41ee4b4237136bffa60e8c96c4dbf801093c83d9f2"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/rope.cu",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 51714,
+      "sha256": "044dcbf732cb3778552dc02b20ba7eeb92c1c003b3380ab6b2f2d3411255ded9",
+      "sha256_lf": "49b84633426a3fc72b6d63c85ab753a85dbf8a7efc6d321fc594cce61f178017"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/rope.cuh",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 657,
+      "sha256": "e0d624b9b1a3b93dbb933b2bf56e1c7c0e55649e22bb5673bc26a0665093a03d",
+      "sha256_lf": "d7870660a0ec73df37f839a7ce244d6d02d830864ea76c08fe0348b2dfd35dd8"
+    },
+    {
+      "path": "ggml/src/ggml-cuda/top-k.cu",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 14083,
+      "sha256": "c05cdeb2b6d0b7dfe2dac265998dfbbb25006f9a76e513775c1c4a7a2a268157",
+      "sha256_lf": "910a89b070667f184d8ce21305661a7269b4981b2b65c1c2a94f57c8ddaa9bdb"
+    },
+    {
+      "path": "ggml/src/ggml.c",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 270254,
+      "sha256": "795e3a4222fb193fd6484130290fb2554730a6da2801a2471579f9407abdf680",
+      "sha256_lf": "92990932ebc29acc8468bfebcd60c03df28c2bbaae9f081d6dc75a938a55442f"
+    },
+    {
+      "path": "include/llama.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 89552,
+      "sha256": "f2a4c58db6b2ba553fd973d97428c1b90d96361b83810278f601f2557849a960",
+      "sha256_lf": "07170d6be7c1020a2f2ee4d7bb2f228a8cb9381c966a65c6c08f61fe8b71fd41"
+    },
+    {
+      "path": "src/llama-context.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 166302,
+      "sha256": "f42e70151c6ed729483bbe4259f11c304cb50b5fdcb6c483e0b004931d6b2441",
+      "sha256_lf": "a3cee124a8b2ab8a0a20ce9df57d67f44e04b5de614accb5c235d63b1698bd1e"
+    },
+    {
+      "path": "src/llama-context.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 14033,
+      "sha256": "bc71753a7a476cc0f5a20dbde8f7c81c95fd7480f9c567ce01a7ff8cdc877b6a",
+      "sha256_lf": "7beec511d21ff431567fc11cf22c69c2aaad10038e558633b6bb1ec590c175b8"
+    },
+    {
+      "path": "src/llama-graph.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 146981,
+      "sha256": "a91e35ceb7ae27c54f87eada0d1734b1a8a8489bf351ec9124f26143c0b16aed",
+      "sha256_lf": "b843e792513f90cbe8f868382a438f8adc0b38d27abb0716c3bd6cc3b2efb080"
+    },
+    {
+      "path": "src/llama-graph.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 50795,
+      "sha256": "e93a9ce0f90f436b67581d0827cb3c635fa1515f1b2be99350ade0f0c5394ae6",
+      "sha256_lf": "616b9ff1156a59d008ff81947219858a9e901559d00a4e841bf133702cbf7fae"
+    },
+    {
+      "path": "src/llama-sampler.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 165364,
+      "sha256": "e6bd6a4c1a3d5d41b89af2ca5ea54c44f10bf9d47ecceebd08b8104b6cdcc7bb",
+      "sha256_lf": "056584a1c6c9a67f2701cd0e9954ab49cf90d3a83479d84ef49278cc23bcd5ef"
+    },
+    {
+      "path": "src/llama-sampler.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 2273,
+      "sha256": "26509f05f857d11776a355088735baebe97ff0cabea03a9694767062885097df",
+      "sha256_lf": "954739b7d61441cec0d86b6125ed523a83e207092bb9071c6e29732747a9cb6b"
+    },
+    {
+      "path": "src/models/hunyuan-vl.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 11177,
+      "sha256": "7d361c57d5449fe508c88e4878c12dbe2b2b026f8b8dc6739a3cddbb77904eae",
+      "sha256_lf": "b8de6d7b3fd0d163cdca936605f6b481075508697c158be42fb0b50272e14396"
+    },
+    {
+      "path": "src/models/models.h",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 107495,
+      "sha256": "4d20d3b3db83f416c78d240ab91e4cf8258baeda4adc7d5cf65709ad87a6b60b",
+      "sha256_lf": "9681ea0dcedde64f371530b5f3ed9054e688746e23e967233da193e136918079"
+    },
+    {
+      "path": "tests/CMakeLists.txt",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 16364,
+      "sha256": "f9dbbeee045eb30e7d4f563a8982d2bb6e89816c0acb4af69526a66406223428",
+      "sha256_lf": "56528f4f3fa5b21d8102d408993251fcd6b0fa120e481f4de22e093e5e4866f9"
+    },
+    {
+      "path": "tests/test-backend-ops.cpp",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 544865,
+      "sha256": "9fd2213e541c0895af7504d186ab6e7b93b248ab3a69afae85e9a993b46c2e19",
+      "sha256_lf": "126bfd4169fa381341a5741e42a62b01a514e6637117bd5f863ad38b2b03f9ef"
+    },
+    {
+      "path": "tests/test-hymt-prefix.cpp",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 12573,
+      "sha256": "974e614e05f0a13499ed109194a1154f8762461624f4e4f050e8cff5a0f2612a",
+      "sha256_lf": "974e614e05f0a13499ed109194a1154f8762461624f4e4f050e8cff5a0f2612a"
+    },
+    {
+      "path": "tools/CMakeLists.txt",
+      "tracked": true,
+      "kind": "file",
+      "bytes": 1122,
+      "sha256": "332383ea7e95b4eda9edb34d343c0961c36ad70f3b42d339b299ac89428faf2d",
+      "sha256_lf": "5af4ff7fbbf04509f064c47bd18bf29d72be6a9ae3f2e243a6c03beb3a7a3fef"
+    },
+    {
+      "path": "tools/hy-batch/CMakeLists.txt",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 343,
+      "sha256": "b52f08d70a46ce34dabcf0fb6d49f1a07facccc1df7460f52035a606e0905933",
+      "sha256_lf": "b52f08d70a46ce34dabcf0fb6d49f1a07facccc1df7460f52035a606e0905933"
+    },
+    {
+      "path": "tools/hy-batch/README.md",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 5637,
+      "sha256": "05aea2bcc37ce6ddc53f1cc53cd30f68faec006b757f8bac8c461b802cb525fc",
+      "sha256_lf": "05aea2bcc37ce6ddc53f1cc53cd30f68faec006b757f8bac8c461b802cb525fc"
+    },
+    {
+      "path": "tools/hy-batch/hy-batch.cpp",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 41057,
+      "sha256": "15ac75c2508294c3d9f2330ae8d0b54251446152df9b3c1a803193d754ab0861",
+      "sha256_lf": "15ac75c2508294c3d9f2330ae8d0b54251446152df9b3c1a803193d754ab0861"
+    },
+    {
+      "path": "tools/hy-logits/CMakeLists.txt",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 345,
+      "sha256": "a2e52e33dece51b0b2c628c430132d445292787cbbed864a3e8d3c48c4432f20",
+      "sha256_lf": "a2e52e33dece51b0b2c628c430132d445292787cbbed864a3e8d3c48c4432f20"
+    },
+    {
+      "path": "tools/hy-logits/hy-logits.cpp",
+      "tracked": false,
+      "kind": "file",
+      "bytes": 17903,
+      "sha256": "8ba5033533ec0e816e9b8e210cc5264ccdc5b5db725b1f4fd58156e412b8ade8",
+      "sha256_lf": "8ba5033533ec0e816e9b8e210cc5264ccdc5b5db725b1f4fd58156e412b8ade8"
+    }
+  ],
+  "tracked_files": 27,
+  "added_untracked_files": 8,
+  "extra_source_directories": [
+    "tools/hy-batch",
+    "tools/hy-logits"
+  ],
+  "extra_source_files": [
+    "ggml/src/ggml-cuda/hymt-penalties.cu",
+    "ggml/src/ggml-cuda/hymt-penalties.cuh",
+    "tests/test-hymt-prefix.cpp"
+  ],
+  "source_index_sha256": "fd7952871f6a5a19713d3fe18e94a9729446d66d33ea060a25c05ab42e6f4312",
+  "git_state_unchanged": true,
+  "apply_check": {
+    "passed": true,
+    "checkout": "src/llama-baseline",
+    "base_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+    "command": [
+      "git",
+      "apply",
+      "--check",
+      "--whitespace=nowarn",
+      "-"
+    ],
+    "patch_sent_via_stdin": true,
+    "applied": false
+  },
+  "notes": [
+    "Tracked changes are exported relative to HEAD, including staged and unstaged edits; nothing is staged or committed.",
+    "Untracked files are restricted to the explicit private-source directories and file allowlist.",
+    "Per-file SHA256 values describe raw working-tree bytes; Git text conversion can normalize line endings in the patch.",
+    "sha256_lf records text with CRLF normalized to LF for clean cross-machine source preparation.",
+    "Validation uses git apply --check on the distinct pristine baseline; the patch is never applied to either checkout."
+  ]
+}

@@ -1,0 +1,42 @@
+# Local runtimes, generated sources, build products and experiments
+/.local/
+/.venv/
+/bin/
+/build/
+/runtime/
+/src/
+/dist/
+/results/
+/cache/
+/downloads/
+/models/*
+!/models/manifest.json
+!/models/README.md
+
+# Model/binary files never belong in the source repository
+*.gguf
+*.safetensors
+*.exe
+*.dll
+*.pdb
+*.obj
+*.lib
+*.zip
+*.7z
+*.log
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*token*
+!scripts/*
+/examples/*output*
+/examples/*.translated.*
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

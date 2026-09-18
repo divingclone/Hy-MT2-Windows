@@ -1,0 +1,58 @@
+# 发布到 GitHub 与 Hugging Face
+
+Git 保存代码、补丁和文档；GitHub Releases 保存 Windows 运行环境 ZIP；Hugging Face 保存两个 GGUF。不要把模型、DLL、SDK、个人 Token 或测试历史加入 Git。
+
+## 维护者环境
+
+执行 `setup-dev.cmd`（需要 CPython 3.12；已有本地开发环境可直接使用）。运行用户无需这个步骤。开发依赖保存在 `.venv`，发布环境不包含 pip 或 Hugging Face SDK。
+
+## 上传模型
+
+公开模型仓库为 [`divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF`](https://huggingface.co/divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF)。
+
+1. 在 [Hugging Face 设置](https://huggingface.co/settings/tokens) 创建有目标仓库写权限的 Token。
+2. 双击 `huggingface-login.cmd`，在本机隐藏输入框粘贴 Token。不要在聊天、命令参数或 Git 文件中写 Token。
+3. 执行上传：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/publish_models.py --status
+.\.venv\Scripts\python.exe scripts/publish_models.py --upload
+```
+
+脚本只上传 `models/manifest.json` 指定的两个模型以及模型卡、改动说明、许可证、校验清单和来源记录；上传前检查本地哈希，上传后检查 Hub 上的大小与 LFS SHA-256。登录与上传结果保存在被 Git 忽略的 `.local/huggingface` 和 `.local/huggingface-upload.json`。不会上传整个工作目录。
+
+用户首次下载由 `setup-model.cmd` 完成，使用标准库 HTTPS、断点续传、文件大小和 SHA-256 检查。模型清单可将 `revision` 固定到上传后的 commit ID；即使使用 `main`，文件仍必须匹配记录的 SHA-256。
+
+## 打包运行环境
+
+构建产物通常位于 `build/portable/bin`；已整理的本机运行目录也可使用 `bin`：
+
+```powershell
+.\scripts\run-python.cmd scripts/package_windows.py --bin-dir bin --dry-run
+.\scripts\run-python.cmd scripts/package_windows.py --bin-dir bin
+```
+
+默认产生 `dist/HyMT-Windows-NVIDIA-runtime.zip`，包含 Windows x64 程序、独立 Python、CUDA/MSVC 运行库、模型下载清单与启动脚本，不包含模型。脚本白名单复制、审计 DLL 依赖、校验 SHA-256 并检查 ZIP，拒绝覆盖已有输出。重新打包请传新的 `--output dist/名称`。
+
+需要离线大包时加 `--include-models`；该包可能超过 GitHub 单附件限制，仅适合其他分发渠道。GitHub 要求每个 Release 附件小于 2 GiB，默认运行包会强制检查这一点。[GitHub 官方说明](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
+
+完成后验证真实下载、搬迁和 GPU 推理：
+
+```powershell
+.\scripts\run-python.cmd scripts/validate_portable.py
+```
+
+验证器将 ZIP 解压到新的中文/空格目录，清除开发环境 PATH，下载两种模型并核对哈希，再检查批量翻译和独立端口 API 的启动、调用、停止。`--model-directory models` 可用本地模型做离线验证，但不能据此声称 Hub 下载链路已验证。结果保存在 `.local/portable-validation.json`；迁移目录不允许覆盖。
+
+## 上传 GitHub
+
+先在 GitHub 创建空仓库，然后在项目根目录执行（替换为自己的 URL）：
+
+```powershell
+git remote add origin https://github.com/YOUR_NAME/YOUR_REPOSITORY.git
+git push -u origin main
+```
+
+在 GitHub 的 Releases 页面创建版本，例如 `v0.1.0`，附加 `HyMT-Windows-NVIDIA-runtime.zip` 和对应 `.sha256` 文件。运行用户下载这个环境包，不能把 GitHub 自动生成的 Source code ZIP 当作运行环境。
+
+上传代码前确认 `git status` 不包含模型、二进制或 `.local`，并使用自己的提交署名。CI 在 Windows 上运行无 GPU 单元测试及固定源码补丁复现；真实 GPU 测试仍需本地进行。

@@ -1,0 +1,8 @@
+# Development tools only. Runtime translation uses Python's standard library.
+# Versions used for this project's validation; install in a separate dev venv.
+cmake==4.4.3
+ninja==1.13.2
+numpy==2.5.3
+PyYAML==6.0.3
+tqdm==4.70.1
+huggingface-hub==1.32.0

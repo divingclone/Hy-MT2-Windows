@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "repo_id": "divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF",
+  "revision": "main",
+  "base_model": "tencent/Hy-MT2-1.8B",
+  "license": "apache-2.0",
+  "files": {
+    "fast": {
+      "filename": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+      "size_bytes": 1013053856,
+      "sha256": "e2f80bfbaca8084574e836d46224a5470d07931162c1f8e7a3a8689a5b2d17f3",
+      "quantization": "NVFP4",
+      "layout": "hy-mt2-fused-projections"
+    },
+    "official": {
+      "filename": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",
+      "size_bytes": 1133075680,
+      "sha256": "79b8013e7f9ce6448fa18ea17ca4021ca69dc4dbc9ed047e72791d7b1a287bb0",
+      "quantization": "Q4_K_M",
+      "layout": "hy-mt2-fused-projections"
+    }
+  }
+}

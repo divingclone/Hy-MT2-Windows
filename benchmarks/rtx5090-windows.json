@@ -1,0 +1,1201 @@
+{
+  "schema_version": 1,
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "vram_gb": 32,
+    "cpu": "AMD Ryzen 7 9800X3D",
+    "os": "Windows 11 x64",
+    "nvidia_driver": "596.36",
+    "cuda_toolkit": "13.0",
+    "msvc": "14.43"
+  },
+  "source_baseline_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+  "workload": {
+    "dataset_file": "scripts/benchmark_cases.json",
+    "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+    "unique_cases": 64,
+    "rounds": 8,
+    "requests": 512,
+    "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.6,
+      "top_k": 20,
+      "repeat_penalty": 1.05,
+      "max_tokens": 512,
+      "seed": 42,
+      "greedy": false
+    },
+    "repeat_last_n": 4096,
+    "min_p": 0,
+    "request_seed_rule": "42 + zero-based global request index",
+    "prompt_cache": false
+  },
+  "metric_definitions": {
+    "completion_tps": "Real generated completion tokens including EOG / native or HTTP wall time. Dummy decode tokens excluded from numerator; dummy work included in time.",
+    "native_wall": "Includes input read, tokenization, prompt prefill, sampling, decode, output write and first graph preparation. Excludes model/context initialization.",
+    "process_wall": "Native subprocess start through exit, including initialization.",
+    "http_wall": "Includes request queue and HTTP/server work; excludes separate warmup. Not the same boundary as native wall.",
+    "quality": "Complete/error/truncation checks are throughput validity checks, not a translation quality benchmark."
+  },
+  "groups": [
+    {
+      "id": "phase1_nvfp4",
+      "note": "Historical phase 1 optimized native build, three repeats.",
+      "runs": [
+        {
+          "source_report": "delivery-NVFP4-r1.json",
+          "source_report_sha256": "f9d8741f425754f3734c9860e0d780ce3e844bc362227257d08a773d89636958",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 8.5463642,
+            "process_wall_s_including_initialization": 9.712532400008058,
+            "initialization_s": 0.8021035,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3898.0318671652212,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3838.12335074604,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "delivery-NVFP4-r2.json",
+          "source_report_sha256": "34bcdf0bda30014b8d321e58861cb01e6aa295dd20a9e56640690096161657ba",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 8.5239284,
+            "process_wall_s_including_initialization": 9.67553679998673,
+            "initialization_s": 0.7876009,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3908.2918622357265,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3848.2256608349735,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "delivery-NVFP4-r3.json",
+          "source_report_sha256": "ded743d52b18c607ea1f8a13c766ca1f7d0ac9aca776fa78de3ae54e0607cf6e",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 8.6368093,
+            "process_wall_s_including_initialization": 9.8025401999912,
+            "initialization_s": 0.8015245,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3857.2114820226493,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3797.930330590951,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 3898.0318671652212,
+      "completion_tps_range": [
+        3857.2114820226493,
+        3908.2918622357265
+      ],
+      "median_wall_s": 8.5463642
+    },
+    {
+      "id": "phase1_q4_k_m",
+      "note": "Historical phase 1 optimized native build, three repeats.",
+      "runs": [
+        {
+          "source_report": "delivery-Q4_K_M-r1.json",
+          "source_report_sha256": "6ede2d76edd193ec0a53547232fce22c634640d7a39f099b65f0f9a24fb88cf7",
+          "model_file": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 9.5838313,
+            "process_wall_s_including_initialization": 10.803508400000283,
+            "initialization_s": 0.8488021,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33526,
+            "output_tokens_per_second": 3498.1834456956685,
+            "text_tokens_without_eog": 33014,
+            "text_tokens_without_eog_per_second": 3444.760134707296,
+            "dummy_decode_tokens": 11025,
+            "graphs_reused": 174,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "f1fa7b2fb62468525f7e5444b7e3ae3d006ae25eeb3d4ba658c245e0a3162315"
+        },
+        {
+          "source_report": "delivery-Q4_K_M-r2.json",
+          "source_report_sha256": "85aebf27e4b442ef6a49fddaa14f100cbac9a58a58f2b0521bd8a553b06603b7",
+          "model_file": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 9.6747596,
+            "process_wall_s_including_initialization": 10.934203999990132,
+            "initialization_s": 0.8386569,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33526,
+            "output_tokens_per_second": 3465.305742584033,
+            "text_tokens_without_eog": 33014,
+            "text_tokens_without_eog_per_second": 3412.3845309810076,
+            "dummy_decode_tokens": 11025,
+            "graphs_reused": 174,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "f1fa7b2fb62468525f7e5444b7e3ae3d006ae25eeb3d4ba658c245e0a3162315"
+        },
+        {
+          "source_report": "delivery-Q4_K_M-r3.json",
+          "source_report_sha256": "6d70dbe45bd1be8f22a01b1105c12a99a6711388eacd954812109c2057dfc7a2",
+          "model_file": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 9.6446788,
+            "process_wall_s_including_initialization": 10.874475300006452,
+            "initialization_s": 0.8521308,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33526,
+            "output_tokens_per_second": 3476.1136887212874,
+            "text_tokens_without_eog": 33014,
+            "text_tokens_without_eog_per_second": 3423.027421089441,
+            "dummy_decode_tokens": 11025,
+            "graphs_reused": 174,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "f1fa7b2fb62468525f7e5444b7e3ae3d006ae25eeb3d4ba658c245e0a3162315"
+        }
+      ],
+      "median_completion_tps": 3476.1136887212874,
+      "completion_tps_range": [
+        3465.305742584033,
+        3498.1834456956685
+      ],
+      "median_wall_s": 9.6446788
+    },
+    {
+      "id": "phase1_stock_http",
+      "note": "Unmodified upstream HTTP baseline; interface, concurrency and quantization differ from phase 2 native.",
+      "runs": [
+        {
+          "source_report": "final-baseline-p64-screen.json",
+          "source_report_sha256": "3109c67215e34940852d7505c89322804d75654e55d65e6c4278d9747a8e1cbb",
+          "configuration": {
+            "parallel": 64,
+            "interface": "HTTP",
+            "quantization": "Q4_K_M"
+          },
+          "metrics": {
+            "wall_s": 42.989535099986824,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33572,
+            "output_tokens_per_second": 780.9342418315729,
+            "valid_throughput_run": true
+          },
+          "model_alias": "hy-mt2"
+        },
+        {
+          "source_report": "final-baseline-p64-r2.json",
+          "source_report_sha256": "b6f86558db16f722531a228e97987d57c606d3bc791429df0dd49b58d45099d1",
+          "configuration": {
+            "parallel": 64,
+            "interface": "HTTP",
+            "quantization": "Q4_K_M"
+          },
+          "metrics": {
+            "wall_s": 43.71968150000612,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33569,
+            "output_tokens_per_second": 767.823525887198,
+            "valid_throughput_run": true
+          },
+          "model_alias": "hy-mt2"
+        },
+        {
+          "source_report": "final-baseline-p64-r3.json",
+          "source_report_sha256": "675a32e3e34fa70de321404bc6fd9655f4a09e53c3cdef92fda6d104e4c3788a",
+          "configuration": {
+            "parallel": 64,
+            "interface": "HTTP",
+            "quantization": "Q4_K_M"
+          },
+          "metrics": {
+            "wall_s": 43.45507909999287,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33532,
+            "output_tokens_per_second": 771.6474275156825,
+            "valid_throughput_run": true
+          },
+          "model_alias": "hy-mt2"
+        }
+      ],
+      "median_completion_tps": 771.6474275156825,
+      "completion_tps_range": [
+        767.823525887198,
+        780.9342418315729
+      ],
+      "median_wall_s": 43.45507909999287
+    },
+    {
+      "id": "phase2_cpu",
+      "note": "Same-session phase 2 native comparison, three repeats.",
+      "runs": [
+        {
+          "source_report": "stage2-newcpu.json",
+          "source_report_sha256": "69235759431eaeb7f0a1eb2f15ec9ed2f675b265123310f064013eb3a941bf19",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": false,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 8.8355711,
+            "process_wall_s_including_initialization": 10.04250779999711,
+            "initialization_s": 0.8295785,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3770.4410527577556,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3712.4934685885787,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-cpu-r2.json",
+          "source_report_sha256": "8955cff3a0a9ebc9e82c61ed08b60884f26dc3f0799266287704684bba248788",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": false,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 8.8637423,
+            "process_wall_s_including_initialization": 10.072115000002668,
+            "initialization_s": 0.8271438,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3758.4576437877713,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3700.6942316001223,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-cpu-r3.json",
+          "source_report_sha256": "e33dff2852428908d6aaa564c2ba622c76e9b15b0994400ef3321778a67f3fde",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": false,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 9.1518273,
+            "process_wall_s_including_initialization": 10.379592899989802,
+            "initialization_s": 0.836458,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3640.147361609413,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3584.2022499703417,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 3758.4576437877713,
+      "completion_tps_range": [
+        3640.147361609413,
+        3770.4410527577556
+      ],
+      "median_wall_s": 8.8637423
+    },
+    {
+      "id": "phase2_gpu_prefix_1_thread",
+      "note": "Same-session phase 2 native comparison, three repeats.",
+      "runs": [
+        {
+          "source_report": "stage2-prefix-t1.json",
+          "source_report_sha256": "16b0e973b5a030331896c144ba86d06ab7ce727360db6a429b966bb8dd61bb9d",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.4943052,
+            "process_wall_s_including_initialization": 7.781500400000368,
+            "initialization_s": 0.8702333,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5129.725039716334,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5050.886736890653,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-prefix-t1-r2.json",
+          "source_report_sha256": "582209c055e9f3db4bba2815f96277f4cf1c0cbb50aa7ef59d92e3ec22f30d66",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.2090177,
+            "process_wall_s_including_initialization": 7.474769099993864,
+            "initialization_s": 0.8673746,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5365.42197326962,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5282.961264549141,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-prefix-t1-r3.json",
+          "source_report_sha256": "d995bf21f59d196ea07a6fc769ec2d4518646c626e569ebc020a7014f332f8b0",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.2628364,
+            "process_wall_s_including_initialization": 7.484738600003766,
+            "initialization_s": 0.8413231,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5319.315063059926,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5237.562967475887,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 5319.315063059926,
+      "completion_tps_range": [
+        5129.725039716334,
+        5365.42197326962
+      ],
+      "median_wall_s": 6.2628364
+    },
+    {
+      "id": "phase2_gpu_prefix_4_threads",
+      "note": "Same-session phase 2 native comparison, three repeats.",
+      "runs": [
+        {
+          "source_report": "stage2-prefix-t4.json",
+          "source_report_sha256": "1cbd9db164217429406a5eb2b61793f11965fc164cfbd7ceab72fcc933b42c8b",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.4044088,
+            "process_wall_s_including_initialization": 7.679944899995462,
+            "initialization_s": 0.8666427,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5201.729158825714,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5121.784230887947,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-prefix-t4-r2.json",
+          "source_report_sha256": "8bb02add73607db42b8f1d1f8ed56e9d390376cb1055d5772a900c0653f1bfdb",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.3167152,
+            "process_wall_s_including_initialization": 7.56021700000565,
+            "initialization_s": 0.8511058,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5273.943647166489,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5192.888860970018,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-prefix-t4-r3.json",
+          "source_report_sha256": "47513d2a2d4c98e0681202f0ed321ee818f239b1c7bce0fba5b6b86f54f639dd",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.2998576,
+            "process_wall_s_including_initialization": 7.53689669999585,
+            "initialization_s": 0.8594237,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5288.056034790374,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5206.7843565225985,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 5273.943647166489,
+      "completion_tps_range": [
+        5201.729158825714,
+        5288.056034790374
+      ],
+      "median_wall_s": 6.3167152
+    },
+    {
+      "id": "later_final_binary",
+      "note": "Later validation session; retain this lower throughput rather than selecting only earlier results.",
+      "runs": [
+        {
+          "source_report": "stage2-delivery-check.json",
+          "source_report_sha256": "eff761f3da002450016f8776c0af4f5499d845a7eaa4c0f00a5c005c83e8d474",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 7.2750696,
+            "process_wall_s_including_initialization": 8.66057949999231,
+            "initialization_s": 0.9189575,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 4579.200176998994,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 4508.822843426818,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-delivery-check-r2.json",
+          "source_report_sha256": "57d057e6777716ee8a6a07b0da4cc9fee78045d4602eb7c51cb1ffca6ce3f2bb",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 7.447967,
+            "process_wall_s_including_initialization": 8.950348700003815,
+            "initialization_s": 1.0485368,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 4472.8984432933175,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 4404.154851921337,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        },
+        {
+          "source_report": "stage2-delivery-check-r3.json",
+          "source_report_sha256": "558152a93a7dcf47c7380ad04639214aa92a6cca0126734bafd4bc39a58a7e0f",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 7.4527787,
+            "process_wall_s_including_initialization": 8.934851500001969,
+            "initialization_s": 0.9657557,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 4470.01062838482,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 4401.311419591729,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 4472.8984432933175,
+      "completion_tps_range": [
+        4470.01062838482,
+        4579.200176998994
+      ],
+      "median_wall_s": 7.447967
+    },
+    {
+      "id": "stage2-current-phase1",
+      "note": "One run in a later session; not a repeated benchmark.",
+      "runs": [
+        {
+          "source_report": "stage2-current-phase1.json",
+          "source_report_sha256": "a8faaba6b81e98f2658fc0bbd0f8d8d5fe54729b7723faa6ed68e351bdd4c4a4",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 10.091509,
+            "process_wall_s_including_initialization": 11.675688200004515,
+            "initialization_s": 1.0567123,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3301.1911300876804,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3250.455407610497,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 3301.1911300876804,
+      "completion_tps_range": [
+        3301.1911300876804,
+        3301.1911300876804
+      ],
+      "median_wall_s": 10.091509
+    },
+    {
+      "id": "stage2-current-cpu",
+      "note": "One run in a later session; not a repeated benchmark.",
+      "runs": [
+        {
+          "source_report": "stage2-current-cpu.json",
+          "source_report_sha256": "f6b0fca6df8fa8b8de9f95133ef7a4f53c163821b05d2df2cd8223bfd9df994a",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 4,
+            "gpu_prefix": false,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 9.6337167,
+            "process_wall_s_including_initialization": 11.00395290000597,
+            "initialization_s": 0.9375783,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3458.063075489857,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3404.916401579465,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 4,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 3458.063075489857,
+      "completion_tps_range": [
+        3458.063075489857,
+        3458.063075489857
+      ],
+      "median_wall_s": 9.6337167
+    },
+    {
+      "id": "stage2-current-prefix",
+      "note": "One run in a later session; not a repeated benchmark.",
+      "runs": [
+        {
+          "source_report": "stage2-current-prefix.json",
+          "source_report_sha256": "4c8bf056c791a746520082efdd70755125be02a9e14cf5fbe13ea555217c7532",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 8.0305138,
+            "process_wall_s_including_initialization": 9.428960799996275,
+            "initialization_s": 0.9327493,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 4148.426966155018,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 4084.6701490009273,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 4148.426966155018,
+      "completion_tps_range": [
+        4148.426966155018,
+        4148.426966155018
+      ],
+      "median_wall_s": 8.0305138
+    },
+    {
+      "id": "portable_validation",
+      "note": "Single portable fatbin/SSE2 run; not a paired speedup versus the earlier machine-specific build.",
+      "runs": [
+        {
+          "source_report": "portable-prefix-ctx1024-512.json",
+          "source_report_sha256": "3054a487652442f394a2c5aa871286614ba8b1aee57bd11809f2711c9e68ce43",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "gpu_prefix": true,
+            "continuous": false,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": true
+          },
+          "metrics": {
+            "wall_s": 6.2186152,
+            "process_wall_s_including_initialization": 7.640658700009226,
+            "initialization_s": 0.9203269,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 5357.1412490677985,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 5274.807806085188,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 5357.1412490677985,
+      "completion_tps_range": [
+        5357.1412490677985,
+        5357.1412490677985
+      ],
+      "median_wall_s": 6.2186152
+    },
+    {
+      "id": "source_ablation_off",
+      "note": "Single run; both sides share the custom fixed-wave scheduler. Same NVFP4 payload, packed layout only when enabled.",
+      "runs": [
+        {
+          "source_report": "ablation-native-core-off.json",
+          "source_report_sha256": "2dd97a25f7b4d669eab5a7928714d15174e5565d425df8b821c4d09243db0e94",
+          "model_file": "Hy-MT2-1.8B-NVFP4.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": false,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 23.7638366,
+            "process_wall_s_including_initialization": 24.960895800002618,
+            "initialization_s": 0.8342319,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33316,
+            "output_tokens_per_second": 1401.9621730608937,
+            "text_tokens_without_eog": 32804,
+            "text_tokens_without_eog_per_second": 1380.4168305045491,
+            "dummy_decode_tokens": 10974,
+            "graphs_reused": 173,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "c0b27a100f4e34065f717ff7f3c280a491b854fb7a70867f7d18fc93cdaddce7"
+        }
+      ],
+      "median_completion_tps": 1401.9621730608937,
+      "completion_tps_range": [
+        1401.9621730608937,
+        1401.9621730608937
+      ],
+      "median_wall_s": 23.7638366
+    },
+    {
+      "id": "source_ablation_on",
+      "note": "Single run; both sides share the custom fixed-wave scheduler. Same NVFP4 payload, packed layout only when enabled.",
+      "runs": [
+        {
+          "source_report": "ablation-native-core-on-t1.json",
+          "source_report_sha256": "431024f1fa7256358e716f9b025a4d3a97201634a360709eb3e53cabd82e6891",
+          "model_file": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+          "configuration": {
+            "parallel": 256,
+            "context_per_sequence": 1024,
+            "max_tokens": 512,
+            "batch": 2048,
+            "ubatch": 2048,
+            "sampling_threads": 1,
+            "backend_sampling": false,
+            "kv_unified": false,
+            "batch_snapshot": true,
+            "pad_final_wave_effective": false
+          },
+          "metrics": {
+            "wall_s": 9.8467329,
+            "process_wall_s_including_initialization": 11.009371399995871,
+            "initialization_s": 0.7997899,
+            "successful_requests": 512,
+            "errors": 0,
+            "truncated_requests": 0,
+            "complete_translations": 512,
+            "output_tokens": 33314,
+            "output_tokens_per_second": 3383.254155294494,
+            "text_tokens_without_eog": 32802,
+            "text_tokens_without_eog_per_second": 3331.2572132427804,
+            "dummy_decode_tokens": 12001,
+            "graphs_reused": 177,
+            "sampling_threads": 1,
+            "valid_throughput_run": true,
+            "prompt_tokens": 41768,
+            "empty_outputs": 0
+          },
+          "output_jsonl_sha256": "30ba1cb6866957c0ff31f5790ce5760415a84cb33dcae3b0bed326875e551992"
+        }
+      ],
+      "median_completion_tps": 3383.254155294494,
+      "completion_tps_range": [
+        3383.254155294494,
+        3383.254155294494
+      ],
+      "median_wall_s": 9.8467329
+    }
+  ],
+  "comparisons": {
+    "phase2_prefix_vs_same_phase_cpu_ratio": 1.4152920073083817,
+    "phase2_prefix_vs_historical_phase1_ratio": 1.3646155917468958,
+    "source_ablation_on_vs_off_ratio": 2.413227846160685,
+    "historical_comparison_caveat": "Separate sessions, not interleaved paired trials; absolute rates varied in later validation.",
+    "ablation_caveat": "One run per side, custom native scheduler on both sides, and projection layout can change floating-point results. Not an unmodified-upstream binary comparison."
+  },
+  "representative_prefix_transfer": {
+    "rows": 45824,
+    "fallback_rows": 39,
+    "candidate_bytes": 7698432,
+    "raw_logits_bytes": 18847608,
+    "equivalent_full_logits_bytes": 22145456128,
+    "actual_logits_and_ids_bytes": 26546040,
+    "full_vs_actual_ratio": 834.2282362265709,
+    "excludes_history_H2D": true
+  },
+  "limitations": [
+    "Only RTX 5090 measured; other supported cubins are build coverage.",
+    "The 64 source cases repeat across eight rounds and do not cover every length/language distribution.",
+    "Later final-binary validation median was lower; desktop/system state varied but cause was not established.",
+    "One and four CPU tail sampling threads were close; no universal ordering is claimed.",
+    "GPU prefix acceleration is currently a native batch path, not the HTTP server path."
+  ],
+  "summary_date": "2026-09-18"
+}

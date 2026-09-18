@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+# Preserve patch and upstream legal material byte-for-byte.
+*.patch -text -whitespace
+licenses/** -text -whitespace

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "hardware": "RTX 5090 32 GB / Windows WDDM",
+  "model": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+  "kv_cache": "FP16",
+  "kv_bytes_per_token_per_sequence": 65536,
+  "observations": [
+    {
+      "mode": "batch",
+      "parallel": 8,
+      "context_per_sequence": 1024,
+      "ubatch": 2048,
+      "requests": 512,
+      "observed_max_dedicated_bytes": 2354847744,
+      "observed_max_shared_bytes": 136314880
+    },
+    {
+      "mode": "batch",
+      "parallel": 32,
+      "context_per_sequence": 1024,
+      "ubatch": 2048,
+      "requests": 512,
+      "observed_max_dedicated_bytes": 3959271424,
+      "observed_max_shared_bytes": 182452224
+    },
+    {
+      "mode": "batch",
+      "parallel": 256,
+      "context_per_sequence": 1024,
+      "ubatch": 2048,
+      "requests": 512,
+      "observed_max_dedicated_bytes": 19015708672,
+      "observed_max_shared_bytes": 622854144
+    },
+    {
+      "mode": "server_loaded",
+      "build": "portable",
+      "parallel": 128,
+      "context_per_sequence": 1024,
+      "dedicated_bytes": 10189901824,
+      "shared_bytes": 153092096
+    }
+  ],
+  "method": "Process WDDM GPU memory counters. Batch values are polling maxima, not guaranteed absolute peaks; server value is a loaded-state sample. Excludes other applications.",
+  "limitations": "Only this RTX 5090 was measured. CPU compilation was running during batch memory observation, so these are not throughput results. Estimates for other GPUs are conservative recommendations, not measurements.",
+  "sources": [
+    {
+      "report": "vram-batch-measurement.json",
+      "sha256": "25c0140e26f650002ebdbe1cb24c19ab6992e458aa908dc0d20429ed7a5f6810"
+    },
+    {
+      "report": "vram-portable-service.json",
+      "sha256": "441d7a014152a807608e0e28f020ff3b4396216b27ffbf0361bb768a90fcb830"
+    }
+  ]
+}

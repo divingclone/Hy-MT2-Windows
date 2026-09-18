@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "base_model": "tencent/Hy-MT2-1.8B",
+  "model_license": "Apache-2.0",
+  "source_llama_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+  "official_q4_source": {
+    "repository": "tencent/Hy-MT2-1.8B-GGUF",
+    "revision": "a0c709d9fac510f2c807aa3af52872340dc37a4a",
+    "filename": "Hy-MT2-1.8B-Q4_K_M.gguf",
+    "size": 1133080448,
+    "sha256": "dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699",
+    "verified": true,
+    "url": "https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/resolve/a0c709d9fac510f2c807aa3af52872340dc37a4a/Hy-MT2-1.8B-Q4_K_M.gguf?download=true"
+  },
+  "nvfp4_bf16_source": {
+    "repository": "unsloth/Hy-MT2-1.8B-GGUF",
+    "revision": "0378cc2780f462f0fd397d0cdd244d2f769de40e",
+    "filename": "Hy-MT2-1.8B-BF16.gguf",
+    "size": 3587534560,
+    "sha256": "3782e25037d6e85aff19505a412de061084aaa1d012fc2088e215a1029f7677d",
+    "verified": true,
+    "url": "https://huggingface.co/unsloth/Hy-MT2-1.8B-GGUF/resolve/0378cc2780f462f0fd397d0cdd244d2f769de40e/Hy-MT2-1.8B-BF16.gguf?download=true"
+  },
+  "nvfp4_quantization": "llama.cpp reference NVFP4 tensor-type overrides from BF16; no calibration; quantization data is 4 bits plus block scales",
+  "output_manifest": {
+    "schema_version": 1,
+    "repo_id": "divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF",
+    "revision": "main",
+    "base_model": "tencent/Hy-MT2-1.8B",
+    "license": "apache-2.0",
+    "files": {
+      "fast": {
+        "filename": "Hy-MT2-1.8B-NVFP4-fused.gguf",
+        "size_bytes": 1013053856,
+        "sha256": "e2f80bfbaca8084574e836d46224a5470d07931162c1f8e7a3a8689a5b2d17f3",
+        "quantization": "NVFP4",
+        "layout": "hy-mt2-fused-projections"
+      },
+      "official": {
+        "filename": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",
+        "size_bytes": 1133075680,
+        "sha256": "79b8013e7f9ce6448fa18ea17ca4021ca69dc4dbc9ed047e72791d7b1a287bb0",
+        "quantization": "Q4_K_M",
+        "layout": "hy-mt2-fused-projections"
+      }
+    }
+  },
+  "packing_verification": {
+    "fast": {
+      "modes": {
+        "qkv": 32,
+        "qk": 0,
+        "separate_qkv": 0,
+        "gate_up": 32,
+        "separate_ffn": 0
+      },
+      "quantization_changed_during_repacking": false,
+      "packed_tensors": 258,
+      "verified_source_tensor_bytes": 1007968512,
+      "source_tensors": 354
+    },
+    "official": {
+      "modes": {
+        "qkv": 16,
+        "qk": 16,
+        "separate_qkv": 0,
+        "gate_up": 32,
+        "separate_ffn": 0
+      },
+      "quantization_changed_during_repacking": false,
+      "packed_tensors": 274,
+      "verified_source_tensor_bytes": 1127990304,
+      "source_tensors": 354
+    }
+  },
+  "tensor_types": {
+    "fast": {
+      "F32": 129,
+      "NVFP4": 129
+    },
+    "official": {
+      "Q6_K": 33,
+      "Q4_K": 112,
+      "F32": 129
+    }
+  }
+}
