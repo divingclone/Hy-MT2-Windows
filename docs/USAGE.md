@@ -16,7 +16,7 @@
 | --- | --- |
 | `auto`，默认 | 支持的 CC 12.0 显卡优先 NVFP4，其他支持架构使用 Q4_K_M |
 | `official` | 腾讯 Q4_K_M 量化权重，经本工程无损布局重排 |
-| `fast` | 从 BF16 量化的 NVFP4，仅用于本包支持的 CC 12.0 显卡 |
+| `fast` | 从 BF16 经 OPUS 中英校准与局部 MSE 尺度搜索量化的 NVFP4，用于本包支持的 CC 12.0 显卡 |
 
 切换配置前先下载对应模型：
 
@@ -24,6 +24,8 @@
 .\setup-model.cmd --profile official
 .\translate-batch.cmd examples\input.jsonl output.jsonl --profile official
 ```
+
+启动器统一使用 `bin` 中的当前程序，并根据 `models/manifest.json` 选择模型；每次启动都会读取完整模型文件，校验大小和 SHA-256，不符时要求重新安装。显式 `--model` 路径保留用户自选；默认配置不会自动选择历史构建或另一种模型。
 
 ## 硬件范围
 
@@ -68,9 +70,18 @@
 
 ## 显存与长文本
 
-**优先保留自动配置。** 自动并发使用启动时可用显存计算，而不是显卡标称容量；文件模式最高 256，服务最高 128。模型文件大小、FP16 KV cache、工作区和安全余量都会计入估计。小于 6 GiB 可用显存时自动采用较小物理批量。
+**优先保留自动配置。** 自动并发使用启动时可用显存计算，而不是显卡标称容量；文件模式最高 256，服务最高 128。模型文件大小、所选 KV cache 精度、工作区和安全余量都会计入估计。小于 6 GiB 可用显存时自动采用较小物理批量。
 
 本模型每条 1024 token 上下文的 FP16 KV 约占 **64 MiB**；128 条约 8 GiB，256 条约 16 GiB，另加模型和工作区。4 位模型不等于 4 位 KV cache。
+
+默认 K/V 均为 F16。Q8_0 每条 1024 token 的 KV 约占 **34 MiB**（已包含分块尺度），可降低显存占用，但吞吐和译文会变化。两种接口使用相同选项：
+
+```powershell
+.\translate-batch.cmd input.jsonl output.jsonl --cache-type-k q8_0 --cache-type-v q8_0
+.\start-server.cmd -CacheTypeK q8_0 -CacheTypeV q8_0
+```
+
+建议 K/V 选择相同类型。Q8 写入融合默认启用；改变 attention 累加顺序的实验 subwarp 不在默认运行路径中。具体实测见 [性能报告](PERFORMANCE.md)。
 
 以下是手动尝试时的保守起点，假设 GPU 基本空闲、上下文 1024、最大生成 512。**除 RTX 5090 外未逐卡实测**，不是保证可用或最优的配置；其他程序占用较多时应降低并发。
 
@@ -93,9 +104,9 @@
 
 上下文包含翻译指令、原文和生成译文，单位为 token，不是字符。程序检查提示和输出预算；超限时应分段，或同时增大 `--context` 与所需的 `--max-tokens`。显式设置超过保守显存预算会报错，不会静默降低用户指定的并发。
 
-本机 RTX 5090 / NVFP4 / 上下文 1024 的进程独占显存观测：批处理并发 8 / 32 / 256 分别约 **2.19 / 3.69 / 17.71 GiB**，已加载的 API 并发 128 约 **9.49 GiB**。批处理值是轮询得到的最大值，不是峰值上界，也不包含其他程序，见 [显存证据](../benchmarks/rtx5090-vram.json)。
+当前程序的速度和显存以 [性能报告](PERFORMANCE.md) 的同期实测为准；并发、上下文及 K/V 类型共同决定占用。历史设备观测保留在 [显存证据](../benchmarks/rtx5090-vram.json)，不作为新配置的容量保证。
 
-大文件尽量按相近长度组织任务。默认固定波次会等待该波全部结束；GPU 前缀路径最后不足一波仍保留填充槽位，实际请求很少时程序会降低初始并发。长短相差很大时吞吐可能下降。
+请求可以按实际业务顺序随机长短混合输入。默认文件批处理按波次执行，会等待该波全部结束；GPU 前缀路径最后不足一波仍保留填充槽位，实际请求很少时程序会降低初始并发。长短相差很大时吞吐可能下降；保留完整原文和所需生成预算，不能使用固定长度跑分决定生产预算。
 
 ## 本地网页与 API
 
@@ -117,6 +128,8 @@
 接入其他客户端时，通过 `/v1/chat/completions` 发送一条 user 消息，例如 `Translate the following text into Chinese. Note that you should only output the translated result without any additional explanation:\nPlease keep your ticket.`，不要额外添加通用聊天 system prompt。可按上面的官方采样值配置客户端。
 
 API 用于应用接入；最高吞吐数字来自文件批处理，GPU 批量前缀目前未接入 HTTP 服务。测量文件吞吐前先停止服务及其他 GPU 工作负载。
+
+服务关闭 context shift，避免生成过程中静默丢弃前文。客户端应为完整提示与所需输出保留上下文，并检查 HTTP 错误和 `finish_reason`；超出上下文的输入需要明确处理。
 
 ## 常见问题
 

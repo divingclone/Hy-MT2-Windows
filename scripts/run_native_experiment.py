@@ -21,6 +21,7 @@ import sys
 import time
 
 from translate import translation_prompt
+from gpu_config import CACHE_TYPE_BYTES, cache_type_args, cache_type_warnings, ensure_cache_type_support
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--context", type=int, default=1024)
     parser.add_argument("--batch", type=int, default=2048)
     parser.add_argument("--ubatch", type=int, default=512)
+    parser.add_argument("--cache-type-k", choices=CACHE_TYPE_BYTES, default="f16")
+    parser.add_argument("--cache-type-v", choices=CACHE_TYPE_BYTES, default="f16")
     parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--sampling-threads", type=int, choices=(1, 2, 4, 8), default=1)
@@ -143,6 +146,7 @@ def run(args: argparse.Namespace) -> int:
         "--max-tokens", str(args.max_tokens), "--threads", str(args.threads), "--seed", str(args.seed),
         "--sampling-threads", str(args.sampling_threads),
     ]
+    command += cache_type_args(args.cache_type_k, args.cache_type_v)
     if args.continuous:
         command += ["--refill-min", str(args.refill_min)]
     for name in ("greedy", "backend_sampling", "kv_unified", "pad_final_wave", "gpu_prefix", "continuous"):
@@ -155,6 +159,9 @@ def run(args: argparse.Namespace) -> int:
         "dataset_path": str(dataset_path), "dataset_sha256": dataset_sha256,
         "input_jsonl_sha256": input_sha256, "requests": len(requests),
         "seed_rule": "base seed plus zero-based global request index, unchanged across wave sizes",
+        "cache_type_k": args.cache_type_k, "cache_type_v": args.cache_type_v,
+        "cache_cli_support_checked": False,
+        "warnings": cache_type_warnings(args.cache_type_k, args.cache_type_v),
         "paths": {name: str(path) for name, path in paths.items()},
     }
     if args.dry_run:
@@ -163,6 +170,10 @@ def run(args: argparse.Namespace) -> int:
     for key in ("binary", "model"):
         if not resolve(getattr(args, key)).is_file():
             raise FileNotFoundError(resolve(getattr(args, key)))
+    ensure_cache_type_support(resolve(args.binary), args.cache_type_k, args.cache_type_v, env=env, cwd=ROOT)
+    config["cache_cli_support_checked"] = bool(cache_type_args(args.cache_type_k, args.cache_type_v))
+    for warning in config["warnings"]:
+        print(warning, file=sys.stderr)
     for path in paths.values():
         if path.exists():
             raise FileExistsError(f"Choose a new label; experiment artifact already exists: {path}")
@@ -228,6 +239,7 @@ def run(args: argparse.Namespace) -> int:
         "dataset_name": dataset.get("name"), "dataset_path": str(dataset_path), "dataset_sha256": dataset_sha256,
         "input_jsonl_sha256": input_sha256, "cases": len(requests), "unique_source_cases": args.cases,
         "rounds": args.rounds, "concurrency": args.parallel, "cache_prompt": False,
+        "cache_type_k": args.cache_type_k, "cache_type_v": args.cache_type_v,
         "sampling": {"temperature": 0.0 if args.greedy else 0.7, "top_p": 1.0 if args.greedy else 0.6,
                      "top_k": 1 if args.greedy else 20, "repeat_penalty": 1.05, "max_tokens": args.max_tokens,
                      "seed": args.seed, "greedy": args.greedy},

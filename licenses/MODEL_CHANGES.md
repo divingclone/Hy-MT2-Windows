@@ -16,7 +16,9 @@ This package contains modified model files, not Tencent's unmodified download:
   QKV/QK and gate/up projection tensors used by this modified inference build.
   The repacking preserves the source quantized tensor block bytes.
 - `Hy-MT2-1.8B-NVFP4-fused.gguf` was quantized locally from the model's BF16 GGUF
-  to the NVFP4 format and similarly repacked for joined projections.
+  to the NVFP4 format using fixed OPUS-100 English/Chinese translation calibration
+  and local imatrix-weighted MSE scale search, then repacked for joined projections.
+  The calibration and evaluation inputs use disjoint validation/test splits.
 - Quantization and tensor layout changes were performed in this project.
   Tencent does not endorse this package or guarantee its modifications.
 

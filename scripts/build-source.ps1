@@ -82,6 +82,7 @@ try {
         '-DCMAKE_CUDA_FLAGS:STRING=-D_WINDOWS -Xcompiler=/EHsc -Xcompiler=/utf-8 --use-local-env',
         '-DGGML_CUDA=ON', '-DGGML_CUDA_GRAPHS=ON', '-DGGML_CUDA_COMPRESSION_MODE=size',
         '-DGGML_CUDA_CUB_3DOT2=OFF', '-DGGML_NATIVE=OFF', '-DGGML_CPU_ALL_VARIANTS=OFF',
+        '-DGGML_CUDA_FA_QUANTS:STRING=q4_0-q4_0;q8_0-q8_0;f16-f16;bf16-bf16',
         '-DGGML_SSE42=OFF', '-DGGML_AVX=OFF', '-DGGML_AVX2=OFF', '-DGGML_BMI2=OFF',
         '-DGGML_AVX_VNNI=OFF', '-DGGML_AVX512=OFF', '-DGGML_AVX512_VBMI=OFF',
         '-DGGML_AVX512_VNNI=OFF', '-DGGML_AVX512_BF16=OFF', '-DLLAMA_OPENSSL=OFF',
@@ -100,6 +101,7 @@ try {
         compute_capabilities = @('7.5','8.0','8.6','8.9','12.0'); minimum_driver = '580.88'
         minimum_driver_policy = 'Conservative Windows package floor; CUDA 13.x requires R580 or newer.'
         nvfp4_compute_capabilities = @('12.0'); cpu_baseline = 'x86-64/SSE2'
+        cuda_fa_quants = @('q4_0-q4_0','q8_0-q8_0','f16-f16','bf16-bf16')
         ggml_native = $false; cpu_avx = $false; cpu_avx2 = $false; cpu_avx512 = $false
         source_commit = $commit; source_dirty = $dirty; distributed_patch_sha256 = $manifest.patch_sha256
         build_type = 'Release'; built_at_utc = [DateTime]::UtcNow.ToString('o'); validated_devices = @()

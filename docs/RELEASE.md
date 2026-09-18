@@ -37,7 +37,7 @@ Git 保存代码、补丁和文档；GitHub Releases 保存 Windows 运行环境
 
 ## 打包运行环境
 
-构建产物通常位于 `build/portable/bin`；已整理的本机运行目录也可使用 `bin`：
+源码构建完成并通过 GPU 回归后，将程序、项目 DLL 和 `build-info.json` 一起更新到 `bin`。启动器与打包器均使用这个目录；模型以 `models/manifest.json` 为准，NVFP4 为 OPUS 局部校准权重。构建目录只用于编译，不是另一套用户运行入口。
 
 ```powershell
 .\scripts\run-python.cmd scripts/package_windows.py --bin-dir bin --dry-run
@@ -54,11 +54,11 @@ Git 保存代码、补丁和文档；GitHub Releases 保存 Windows 运行环境
 .\scripts\run-python.cmd scripts/validate_portable.py
 ```
 
-验证器将 ZIP 解压到新的中文/空格目录，清除开发环境 PATH，下载两种模型并核对哈希，再检查批量翻译和独立端口 API 的启动、调用、停止。`--model-directory models` 可用本地模型做离线验证，但不能据此声称 Hub 下载链路已验证。结果保存在 `.local/portable-validation.json`；迁移目录不允许覆盖。
+验证器将 ZIP 解压到新的中文/空格目录，隔离开发环境，校验模型并检查批量翻译与 API 启停。`--model-directory models` 可使用本机模型，但不能据此声称 Hub 下载链路已验证。详细跑分、评分和持续负载工具仅保留在本机 `.local/validation-tools/`，不随源码和运行包分发；公开结果保留在 `benchmarks` 的精简摘要中。
 
 ## 上传 GitHub
 
-公开代码仓库为 [`divingclone/Hy-MT2-Windows`](https://github.com/divingclone/Hy-MT2-Windows)，运行环境发布到 [`v0.1.0` Release](https://github.com/divingclone/Hy-MT2-Windows/releases/tag/v0.1.0)。维护者在项目根目录确认 `origin` 指向该仓库后推送：
+公开代码仓库为 [`divingclone/Hy-MT2-Windows`](https://github.com/divingclone/Hy-MT2-Windows)，当前运行环境发布到 [`v0.2.0` Release](https://github.com/divingclone/Hy-MT2-Windows/releases/tag/v0.2.0)。维护者在项目根目录确认 `origin` 指向该仓库后推送：
 
 ```powershell
 git remote get-url origin
@@ -66,6 +66,6 @@ git remote get-url origin
 git push -u origin main
 ```
 
-在该仓库的 [Releases 页面](https://github.com/divingclone/Hy-MT2-Windows/releases) 创建 `v0.1.0`，附加 `HyMT-Windows-NVIDIA-runtime.zip` 和对应 `.sha256` 文件。代码推送与 Release 附件完成后，再执行上面的 `--update-card` 同步 Hugging Face 说明。运行用户下载运行环境包，不能把 GitHub 自动生成的 Source code ZIP 当作运行环境。
+在该仓库的 [Releases 页面](https://github.com/divingclone/Hy-MT2-Windows/releases) 为对应源码提交创建版本标签和 Release，附加 `HyMT-Windows-NVIDIA-runtime.zip` 和对应 `.sha256` 文件。本次版本为 `v0.2.0`。权重变更时执行上面的 `--upload`，仅说明变更时执行 `--update-card`，同步 Hugging Face。运行用户下载运行环境包，不能把 GitHub 自动生成的 Source code ZIP 当作运行环境。
 
 上传代码前确认 `git status` 不包含模型、二进制或 `.local`，并使用自己的提交署名。CI 在 Windows 上运行无 GPU 单元测试及固定源码补丁复现；真实 GPU 测试仍需本地进行。

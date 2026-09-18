@@ -411,7 +411,7 @@ def create_package(entries: list[Entry], imports: dict, output: Path, root: Path
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--bin-dir", type=Path, default=Path("build/portable/bin"))
+    parser.add_argument("--bin-dir", type=Path, default=Path("bin"))
     parser.add_argument("--python-dir", type=Path, help="Default: detect the bundled Python layout")
     parser.add_argument("--output", type=Path, help="Default: dist/HyMT-Windows-NVIDIA-runtime or -offline")
     model_options = parser.add_mutually_exclusive_group()

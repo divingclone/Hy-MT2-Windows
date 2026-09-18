@@ -1,8 +1,9 @@
 """Probe NVIDIA GPUs and resolve a relocatable Hy-MT Windows configuration.
 
-Only nvidia-smi is executed; this module never loads a model or runs inference.
-Binary compatibility comes from BIN/build-info.json. The sole metadata-free
-fallback is this project's known CUDA 13 / sm_120a optimized build.
+Configuration resolution only executes nvidia-smi and never loads a model.
+Launchers can separately probe executable --help for quantized-cache support.
+Binary compatibility comes from BIN/build-info.json. The installed bin directory
+and models/manifest.json define the current project version.
 
 Memory recommendations are estimates, not an OOM guarantee. Other GPUs have not
 been performance/memory validated here. Explicit settings are never reduced.
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import io
 import json
 import math
@@ -28,20 +30,47 @@ INT32_MAX = 2**31 - 1
 PARALLEL_STEPS = (1, 2, 4, 8, 16, 32, 64, 128, 256)
 MODE_EXECUTABLES = {"batch": "hy-batch.exe", "server": "llama-server.exe"}
 MODEL_FILES = {
-    "fast": ("Hy-MT2-1.8B-NVFP4-fused.gguf", "Hy-MT2-1.8B-NVFP4.gguf"),
-    "official": ("Hy-MT2-1.8B-Q4_K_M-fused.gguf", "Hy-MT2-1.8B-Q4_K_M.gguf"),
+    "fast": ("Hy-MT2-1.8B-NVFP4-fused.gguf",),
+    "official": ("Hy-MT2-1.8B-Q4_K_M-fused.gguf",),
 }
-# This fallback describes the existing local build, not unknown portable files.
-# Portable builds must carry their own metadata; 120a has no forward promise.
-LEGACY_OPTIMIZED_INFO = {
-    "architectures": ["120a"], "ptx_architectures": [],
-    "minimum_driver": "580.88", "nvfp4_compute_capabilities": ["12.0"],
-    "cuda_toolkit": "13.0", "metadata_source": "known-local-optimized-fallback",
-}
+CACHE_TYPE_BYTES = {"f16": 2.0, "q8_0": 34 / 32, "q4_0": 18 / 32}
+# Hy-MT2-1.8B: 32 layers, 4 KV heads, 128 elements per head, for each of K and V.
+KV_ELEMENTS_PER_TOKEN = 32 * 4 * 128
 
 
 class ConfigError(ValueError):
     """An actionable configuration or device error, suitable for CLI display."""
+
+
+def cache_type_args(cache_type_k: str = "f16", cache_type_v: str = "f16") -> list[str]:
+    for label, value in (("cache-type-k", cache_type_k), ("cache-type-v", cache_type_v)):
+        if value not in CACHE_TYPE_BYTES:
+            raise ConfigError(f"{label}必须为f16、q8_0或q4_0。")
+    return ["--cache-type-k", cache_type_k, "--cache-type-v", cache_type_v]
+
+
+def cache_type_warnings(cache_type_k: str, cache_type_v: str) -> list[str]:
+    if cache_type_k != cache_type_v:
+        return ["混合K/V类型在默认构建中没有专用FlashAttention向量内核，会临时转换为f16；"
+                "可能增加工作区显存并降低速度。请编译对应GGML_CUDA_FA_QUANTS组合并实测，或选择相同K/V类型。"]
+    return []
+
+
+def ensure_cache_type_support(executable: str | Path, cache_type_k: str, cache_type_v: str,
+                              *, env: dict | None = None, cwd: str | Path | None = None) -> None:
+    """Check CLI support before creating outputs; --help does not load a model."""
+    cache_type_args(cache_type_k, cache_type_v)
+    rebuild = ("请用当前源码运行scripts/build-source.ps1重建，选择新生成的程序目录，"
+               "并确保GGML_CUDA_FA_QUANTS包含所选K/V组合。")
+    try:
+        result = subprocess.run([str(executable), "--help"], capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", timeout=15, env=env, cwd=cwd,
+                                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ConfigError(f"无法检查{executable}的量化KV支持：{error}。{rebuild}") from error
+    help_text = result.stdout + result.stderr
+    if result.returncode != 0 or any(flag not in help_text for flag in ("--cache-type-k", "--cache-type-v")):
+        raise ConfigError(f"{executable}未声明所需的量化KV参数支持。{rebuild}")
 
 
 def _positive_int(value: object, label: str, maximum: int = INT32_MAX) -> int:
@@ -156,7 +185,7 @@ def _binary_candidates(root: Path, binary_dir: str | Path | None) -> list[Path]:
     if binary_dir is not None:
         path = Path(binary_dir)
         return [(path if path.is_absolute() else root / path).resolve()]
-    return [root / "build/portable/bin", root / "bin", root / "build/optimized/bin"]
+    return [root / "bin"]
 
 
 def choose_binary(root: Path, mode: str, gpu: dict, binary_dir: str | Path | None = None) -> tuple[Path, dict, dict]:
@@ -175,8 +204,6 @@ def choose_binary(root: Path, mode: str, gpu: dict, binary_dir: str | Path | Non
             if not isinstance(metadata, dict):
                 raise ConfigError(f"{metadata_path}必须是JSON对象。")
             metadata = dict(metadata, metadata_source=str(metadata_path))
-        elif directory.resolve() == (root / "build/optimized/bin").resolve():
-            metadata = dict(LEGACY_OPTIMIZED_INFO)
         else:
             failures.append(f"{directory}缺少build-info.json，不能确认GPU兼容性")
             continue
@@ -202,33 +229,47 @@ def choose_model(root: Path, profile: str, gpu: dict, metadata: dict,
     fast_allowed = gpu["compute_capability"] in supported
     if profile == "fast" and not fast_allowed:
         raise ConfigError(f"此构建未为计算能力{gpu['compute_capability']}声明NVFP4支持；请改用--profile official或auto。")
-    profiles = (["fast", "official"] if fast_allowed and gpu["compute_capability"] == "12.0" else ["official"]) if profile == "auto" else [profile]
+    chosen = ("fast" if fast_allowed and gpu["compute_capability"] == "12.0" else "official") if profile == "auto" else profile
     if model_override is not None:
         requested = Path(model_override)
         path = (requested if requested.is_absolute() else root / requested).resolve()
         if not path.is_file() or path.stat().st_size <= 0:
             raise ConfigError(f"指定模型不存在或为空：{path}。请提供已有GGUF文件路径；不会自动下载或替换模型。")
-        return profiles[0], path, ["使用显式模型路径；profile仅表示GPU配置档，不用于推断指定模型的量化类型。"]
-    missing = []
-    for chosen in profiles:
-        for number, filename in enumerate(MODEL_FILES[chosen]):
-            path = root / "models" / filename
-            if path.is_file() and path.stat().st_size > 0:
-                warnings = []
-                if chosen != profiles[0]:
-                    warnings.append("未找到优先选择的NVFP4模型，已使用可用的官方Q4_K_M。")
-                if number:
-                    warnings.append("未找到重排模型，已使用同量化的原始GGUF；投影合并优化不会生效。")
-                return chosen, path.resolve(), warnings
-            missing.append(str(path))
-    raise ConfigError("没有找到适用于此配置的模型。请先运行setup-model.cmd（指定模型可加--profile official或fast），或把对应GGUF放入models目录：" + "、".join(missing))
+        return chosen, path, ["使用显式模型路径；profile仅表示GPU配置档，不用于推断指定模型的量化类型。"]
+    try:
+        manifest = json.loads((root / "models/manifest.json").read_text(encoding="utf-8-sig"))
+        item = manifest["files"][chosen]
+        filename, size, expected_hash = item["filename"], item["size_bytes"], item["sha256"]
+        if (not isinstance(filename, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*\.gguf", filename)
+                or type(size) is not int or size <= 0):
+            raise ValueError("invalid filename or size")
+        if not isinstance(expected_hash, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", expected_hash):
+            raise ValueError("invalid SHA-256")
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise ConfigError(f"无法读取当前models/manifest.json模型配置：{error}") from error
+    path = root / "models" / filename
+    if not path.is_file() or path.stat().st_size != size:
+        raise ConfigError(f"当前模型缺失或大小与清单不符：{path}。请运行setup-model.cmd --profile {chosen}安装并校验当前模型。")
+    try:
+        # Always read the complete file. Same-size historical GGUFs, including
+        # replacements that preserve modification time, must not pass via a
+        # filename/stat cache. Explicit model_override remains user-selected.
+        with path.open("rb") as stream:
+            actual_hash = hashlib.file_digest(stream, "sha256").hexdigest()
+    except OSError as error:
+        raise ConfigError(f"无法读取当前模型进行SHA-256校验：{path}：{error}") from error
+    if actual_hash != expected_hash.lower():
+        raise ConfigError(f"当前模型SHA-256与清单不符：{path}。请运行setup-model.cmd --profile {chosen}安装并校验当前模型。")
+    return chosen, path.resolve(), []
 
 
 def memory_plan(*, mode: str, free_mib: float, model_bytes: int, context: int = 1024,
-                parallel: int | None = None, ubatch: int | None = None) -> dict:
+                parallel: int | None = None, ubatch: int | None = None,
+                cache_type_k: str = "f16", cache_type_v: str = "f16") -> dict:
     """Pure conservative sizing, with every input explicit; no device or file IO."""
     if mode not in MODE_EXECUTABLES:
         raise ConfigError("mode必须为batch或server。")
+    cache_type_args(cache_type_k, cache_type_v)
     context = _positive_int(context, "context")
     limit = 256 if mode == "batch" else 128
     if parallel is not None:
@@ -238,7 +279,9 @@ def memory_plan(*, mode: str, free_mib: float, model_bytes: int, context: int = 
     if not math.isfinite(free_mib) or free_mib < 0 or type(model_bytes) is not int or model_bytes <= 0:
         raise ConfigError("空闲显存或模型文件大小无效。")
     aligned_context = ((context + 255) // 256) * 256
-    kv_per_slot = aligned_context / 16.0  # F16 K+V: 64 MiB per 1024 tokens.
+    k_per_slot = aligned_context * KV_ELEMENTS_PER_TOKEN * CACHE_TYPE_BYTES[cache_type_k] / MIB
+    v_per_slot = aligned_context * KV_ELEMENTS_PER_TOKEN * CACHE_TYPE_BYTES[cache_type_v] / MIB
+    kv_per_slot = k_per_slot + v_per_slot
     model_reserve = math.ceil(model_bytes / MIB * 1.10)
     small_gpu = free_mib < 6144
     workspace_base = 1024 if small_gpu else 2048
@@ -269,23 +312,29 @@ def memory_plan(*, mode: str, free_mib: float, model_bytes: int, context: int = 
         raise ConfigError("ubatch不能小于parallel；请增大--ubatch或降低--parallel。")
     kv_total = selected * kv_per_slot
     return {"parallel": selected, "context": context, "ubatch": microbatch, "batch": max(2048, microbatch),
+            "cache_type_k": cache_type_k, "cache_type_v": cache_type_v,
             "budget": {"is_estimate": True, "free_memory_mib": free_mib,
                        "model_file_bytes": model_bytes, "model_reserve_mib": model_reserve,
                        "workspace_reserve_mib": workspace, "safety_margin_mib": safety,
                        "kv_context_tokens_rounded": aligned_context, "kv_per_slot_mib": kv_per_slot,
+                       "k_per_slot_mib": k_per_slot, "v_per_slot_mib": v_per_slot,
+                       "k_total_mib": selected * k_per_slot, "v_total_mib": selected * v_per_slot,
+                       "kv_elements_per_token_per_cache": KV_ELEMENTS_PER_TOKEN,
                        "kv_total_mib": kv_total, "estimated_total_mib": fixed + kv_total,
                        "remaining_after_estimate_mib": free_mib - fixed - kv_total,
                        "parallel_was_explicit": parallel is not None, "ubatch_was_explicit": ubatch is not None,
-                       "note": "按查询时空闲显存估算，不保证不会OOM；小显存档和其他GPU的性能/显存占用未经本机实测验证。"}}
+                       "note": "按Hy-MT2-1.8B结构及查询时空闲显存估算，不保证不会OOM；量化KV包含块缩放开销，实际性能/质量须实测。"}}
 
 
 def resolve_config(root: str | Path, mode: str = "batch", profile: str = "auto",
                    parallel: int | None = None, context: int = 1024, ubatch: int | None = None,
                    gpu: str | int | None = None, binary_dir: str | Path | None = None,
-                   model_override: str | Path | None = None) -> dict:
+                   model_override: str | Path | None = None,
+                   cache_type_k: str = "f16", cache_type_v: str = "f16") -> dict:
     root = Path(root).expanduser().resolve()
     if mode not in MODE_EXECUTABLES or profile not in ("auto", "fast", "official"):
         raise ConfigError("mode必须为batch/server，profile必须为auto/fast/official。")
+    cache_type_args(cache_type_k, cache_type_v)
     _positive_int(context, "context")
     if parallel is not None:
         _positive_int(parallel, "parallel", 256 if mode == "batch" else 128)
@@ -305,8 +354,10 @@ def resolve_config(root: str | Path, mode: str = "batch", profile: str = "auto",
                 raise ConfigError("此CUDA 13安装包要求计算能力至少7.5（GTX16/RTX20及支持清单内更新显卡）。")
             directory, metadata, match = choose_binary(root, mode, selected, binary_dir)
             chosen_profile, model, warnings = choose_model(root, profile, selected, metadata, model_override)
+            warnings += cache_type_warnings(cache_type_k, cache_type_v)
             plan = memory_plan(mode=mode, free_mib=selected["free_memory_mib"], model_bytes=model.stat().st_size,
-                               context=context, parallel=parallel, ubatch=ubatch)
+                               context=context, parallel=parallel, ubatch=ubatch,
+                               cache_type_k=cache_type_k, cache_type_v=cache_type_v)
             return {"ok": True, "root": str(root), "mode": mode, "profile_requested": profile,
                     "profile": chosen_profile, "model": str(model), "binary_dir": str(directory),
                     "model_override": str(model) if model_override is not None else None,
@@ -329,6 +380,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--parallel", type=int)
     parser.add_argument("--context", type=int, default=1024)
     parser.add_argument("--ubatch", type=int)
+    parser.add_argument("--cache-type-k", choices=CACHE_TYPE_BYTES, default="f16")
+    parser.add_argument("--cache-type-v", choices=CACHE_TYPE_BYTES, default="f16")
     parser.add_argument("--gpu", help="nvidia-smi设备编号或完整GPU UUID")
     parser.add_argument("--binary-dir", type=Path)
     parser.add_argument("--model", type=Path, help="仅使用指定现存GGUF，按实际文件大小估算显存")
@@ -337,7 +390,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         config = resolve_config(args.root, mode=args.mode, profile=args.profile, parallel=args.parallel,
                                 context=args.context, ubatch=args.ubatch, gpu=args.gpu, binary_dir=args.binary_dir,
-                                model_override=args.model)
+                                model_override=args.model, cache_type_k=args.cache_type_k, cache_type_v=args.cache_type_v)
     except (ConfigError, OSError) as error:
         if args.json:
             print(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=True))
@@ -351,6 +404,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"GPU {device['index']}: {device['name']}，计算能力{device['compute_capability']}，空闲显存{device['free_memory_mib']:.0f}MiB")
         print(f"模型：{config['model']}\n程序：{config['executable']}")
         print(f"并发{config['parallel']}，每条上下文{config['context']}，ubatch={config['ubatch']}，GPU前缀={config['gpu_prefix']}")
+        print(f"KV缓存：K={config['cache_type_k']}，V={config['cache_type_v']}，估算{config['budget']['kv_total_mib']:.1f}MiB")
         print(config["budget"]["note"])
         for warning in config["warnings"]:
             print(warning)

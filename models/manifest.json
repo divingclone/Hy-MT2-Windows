@@ -7,10 +7,11 @@
   "files": {
     "fast": {
       "filename": "Hy-MT2-1.8B-NVFP4-fused.gguf",
-      "size_bytes": 1013053856,
-      "sha256": "e2f80bfbaca8084574e836d46224a5470d07931162c1f8e7a3a8689a5b2d17f3",
+      "size_bytes": 1013054240,
+      "sha256": "2203f9b20b56e6039d1f5728db2705cbc25a8c75e9cb17a652d37c8786af3560",
       "quantization": "NVFP4",
-      "layout": "hy-mt2-fused-projections"
+      "layout": "hy-mt2-fused-projections",
+      "quantization_method": "NVFP4 local weighted MSE scale search with OPUS-100 translation calibration"
     },
     "official": {
       "filename": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",

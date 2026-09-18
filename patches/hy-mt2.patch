@@ -367,6 +367,53 @@ index 2e78ae4facb9d2fffdfe0e3352d68baf7dc4a847..fc4a649df7daf3ebfa44e8ec6b31e4af
      uint64_t uid = 0;
      int64_t last_used_time = 0;
      struct node_properties {
+diff --git a/ggml/src/ggml-cuda/fattn-vec.cuh b/ggml/src/ggml-cuda/fattn-vec.cuh
+index 57a285565913d18ded0a015c4b145a92009189f9..fefb4807a93ed586ad0eb3432476b88933ea0df7 100644
+--- a/ggml/src/ggml-cuda/fattn-vec.cuh
++++ b/ggml/src/ggml-cuda/fattn-vec.cuh
+@@ -16,7 +16,7 @@ static constexpr __device__ int ggml_cuda_fattn_vec_get_nthreads_device() {
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wpass-failed"
+ #endif // __clang__
+-template<int D, int ncols, ggml_type type_K, ggml_type type_V, bool use_logit_softcap> // D == head size
++template<int D, int ncols, ggml_type type_K, ggml_type type_V, bool use_logit_softcap, bool q8_kq_subwarp = false> // D == head size
+ __launch_bounds__(ggml_cuda_fattn_vec_get_nthreads_device(), 1)
+ static __global__ void flash_attn_ext_vec(
+         const char * Q_ptr,
+@@ -84,11 +84,13 @@ static __global__ void flash_attn_ext_vec(
+ #endif // GGML_USE_HIP
+ 
+     constexpr int nthreads    = ggml_cuda_fattn_vec_get_nthreads_device();
+-    constexpr int nthreads_KQ = (type_K == GGML_TYPE_F16 || type_K == GGML_TYPE_BF16) ? 128 / cpy_nb : nthreads_KQ_q;
++    constexpr int nthreads_KQ = (type_K == GGML_TYPE_F16 || type_K == GGML_TYPE_BF16) ? 128 / cpy_nb :
++        (q8_kq_subwarp ? 8 : nthreads_KQ_q);
+     constexpr int nthreads_V  = (type_V == GGML_TYPE_F16 || type_V == GGML_TYPE_BF16) ? 128 / cpy_nb : nthreads_V_q;
+ 
+     static_assert(WARP_SIZE % nthreads_KQ == 0, "bad nthreads_K");
+     static_assert(WARP_SIZE % nthreads_V  == 0, "bad nthreads_V");
++    static_assert(!q8_kq_subwarp || type_K == GGML_TYPE_Q8_0, "subwarp requires Q8_0 K");
+ 
+     constexpr int V_rows_per_thread = (type_V == GGML_TYPE_F16 || type_V == GGML_TYPE_BF16) ? 2*cpy_ne : 4;
+     constexpr int V_cols_per_iter   = WARP_SIZE / nthreads_V;
+@@ -535,6 +537,18 @@ void ggml_cuda_flash_attn_ext_vec_case_impl(ggml_backend_cuda_context & ctx, ggm
+     const int nthreads = ggml_cuda_fattn_vec_get_nthreads_host(cc);
+     const int nwarps   = nthreads / WARP_SIZE;
+     fattn_kernel_t fattn_kernel = flash_attn_ext_vec<D, cols_per_block, type_K, type_V, use_logit_softcap>;
++#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
++    if constexpr (type_K == GGML_TYPE_Q8_0 && type_V == GGML_TYPE_Q8_0) {
++        static const bool q8_kq_subwarp = []() {
++            const char * env = getenv("GGML_CUDA_Q8_KV_SUBWARP");
++            return env != nullptr && std::atoi(env) != 0;
++        }();
++        if (q8_kq_subwarp) {
++            // Four K rows per warp trade fewer reductions for more registers.
++            fattn_kernel = flash_attn_ext_vec<D, cols_per_block, type_K, type_V, use_logit_softcap, true>;
++        }
++    }
++#endif
+     const bool need_f16_K = type_K == GGML_TYPE_F16;
+     const bool need_f16_V = type_V == GGML_TYPE_F16;
+     constexpr size_t nbytes_shared = 0;
 diff --git a/ggml/src/ggml-cuda/getrows.cu b/ggml/src/ggml-cuda/getrows.cu
 index 6b36b8fbc18c8f257b1b1c208951fa1c38e985ca..97d0495776ef7c66b9d9584677ec8eb423264cbd 100644
 --- a/ggml/src/ggml-cuda/getrows.cu
@@ -415,7 +462,7 @@ index 6b36b8fbc18c8f257b1b1c208951fa1c38e985ca..97d0495776ef7c66b9d9584677ec8eb4
          ne00, nb01, nb02, nb03, ne10, ne11, ne12, nb10, nb11, nb12, nb1, nb2, nb3, stream);
  }
 diff --git a/ggml/src/ggml-cuda/ggml-cuda.cu b/ggml/src/ggml-cuda/ggml-cuda.cu
-index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a33d68a619 100644
+index a9038f1f4dcfebb879a4b28577acac839d9087ce..5b82c03d2f002bc10f4db81ee0f7c4f2aacfc806 100644
 --- a/ggml/src/ggml-cuda/ggml-cuda.cu
 +++ b/ggml/src/ggml-cuda/ggml-cuda.cu
 @@ -27,6 +27,7 @@
@@ -452,7 +499,30 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
          cgraph->uid == graph->uid) {
          GGML_LOG_DEBUG("CUDA Graph id %zu reused\n", cgraph->uid);
          GGML_ASSERT((int)graph->node_props.size() == cgraph->n_nodes);
-@@ -2697,6 +2701,29 @@ static bool ggml_cuda_should_fuse_rope_set_rows(const ggml_tensor * rope,
+@@ -2665,7 +2669,8 @@ static void ggml_cuda_graph_update_executable(ggml_backend_cuda_context * cuda_c
+ 
+ static bool ggml_cuda_should_fuse_rope_set_rows(const ggml_tensor * rope,
+                                                 const ggml_tensor * view,
+-                                                const ggml_tensor * set_rows) {
++                                                const ggml_tensor * set_rows,
++                                                const bool allow_q8 = false) {
+ 
+     if (rope->op != GGML_OP_ROPE || view->op != GGML_OP_VIEW || set_rows->op != GGML_OP_SET_ROWS) {
+         return false;
+@@ -2675,7 +2680,11 @@ static bool ggml_cuda_should_fuse_rope_set_rows(const ggml_tensor * rope,
+         return false;
+     }
+ 
+-    if (set_rows->type != GGML_TYPE_F32 && set_rows->type != GGML_TYPE_F16) {
++    if (set_rows->type != GGML_TYPE_F32 && set_rows->type != GGML_TYPE_F16 &&
++        !(allow_q8 && set_rows->type == GGML_TYPE_Q8_0)) {
++        return false;
++    }
++    if (set_rows->type == GGML_TYPE_Q8_0 && set_rows->nb[1] % sizeof(block_q8_0) != 0) {
+         return false;
+     }
+ 
+@@ -2697,6 +2706,29 @@ static bool ggml_cuda_should_fuse_rope_set_rows(const ggml_tensor * rope,
      return true;
  }
  
@@ -482,12 +552,16 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
  static bool ggml_cuda_should_fuse_rms_norm_mul_rope(const ggml_tensor * rms_norm,
                                                      const ggml_tensor * mul,
                                                      const ggml_tensor * rope) {
-@@ -3438,6 +3465,40 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
+@@ -3438,6 +3470,45 @@ static int ggml_cuda_try_fuse(ggml_backend_cuda_context * cuda_ctx, ggml_cgraph
  
      ggml_tensor * node = cgraph->nodes[i];
  
 +    static const bool disable_hymt_rope_norm = []() {
 +        const char * env = getenv("GGML_CUDA_HYMT_DISABLE_ROPE_NORM");
++        return env != nullptr && std::atoi(env) != 0;
++    }();
++    static const bool disable_hymt_q8_kv_fusion = []() {
++        const char * env = getenv("GGML_CUDA_HYMT_DISABLE_Q8_KV_FUSION");
 +        return env != nullptr && std::atoi(env) != 0;
 +    }();
 +    if (!disable_hymt_rope_norm && node->op == GGML_OP_ROPE &&
@@ -503,7 +577,8 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
 +            cgraph->nodes[i + 3]->ne[2] == 1 && cgraph->nodes[i + 3]->ne[3] == 1 &&
 +            ggml_is_contiguous(cgraph->nodes[i + 4]->src[1]) &&
 +            ggml_nelements(cgraph->nodes[i + 4]->src[1]) == node->src[0]->ne[2] &&
-+            ggml_cuda_should_fuse_rope_set_rows(node, cgraph->nodes[i + 3], cgraph->nodes[i + 4])) {
++            ggml_cuda_should_fuse_rope_set_rows(node, cgraph->nodes[i + 3], cgraph->nodes[i + 4],
++                !disable_hymt_q8_kv_fusion)) {
 +            const int out_node = i + 4;
 +            if (ggml_cuda_check_fusion_memory_ranges(cgraph, i, 5, &out_node, 1)) {
 +                ggml_cuda_op_hymt_rope_norm_fused(*cuda_ctx, node, cgraph->nodes[i + 1],
@@ -523,7 +598,7 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
      if (node->op == GGML_OP_MUL) {
          ggml_cuda_moe_weighted_reduction_match match;
          if (ggml_cuda_match_moe_weighted_reduction(cgraph, i, match)) {
-@@ -4415,6 +4476,30 @@ static bool ggml_cuda_graph_set_enabled(ggml_backend_cuda_context * cuda_ctx, co
+@@ -4415,6 +4486,30 @@ static bool ggml_cuda_graph_set_enabled(ggml_backend_cuda_context * cuda_ctx, co
  
      return graph->is_enabled();
  }
@@ -554,7 +629,7 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
  #endif // USE_CUDA_GRAPH
  
  static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
-@@ -4435,9 +4520,19 @@ static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend,
+@@ -4435,9 +4530,19 @@ static enum ggml_status ggml_backend_cuda_graph_compute(ggml_backend_t backend,
      if (graph->is_enabled()) {
          const bool graph_compatible = ggml_cuda_graph_check_compability(cgraph);
          if (graph_compatible) {
@@ -576,7 +651,7 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
                  // Warmup: need at least 2 calls with no property change on the 2nd call
                  if (!properties_changed) {
                      graph->warmup_complete = true;
-@@ -5453,6 +5548,20 @@ static bool ggml_backend_cuda_device_supports_op(ggml_backend_dev_t dev, const g
+@@ -5453,6 +5558,20 @@ static bool ggml_backend_cuda_device_supports_op(ggml_backend_dev_t dev, const g
              return ggml_is_contiguous(op->src[0]) && ggml_is_contiguous(op->src[1]);
          case GGML_OP_SUM:
              return ggml_is_contiguous_rows(op->src[0]);
@@ -597,11 +672,81 @@ index a9038f1f4dcfebb879a4b28577acac839d9087ce..f1ee58e7af954fc2fe4d9fea3f2d49a3
          case GGML_OP_TOP_K:
  #if defined(GGML_USE_HIP) || defined(GGML_CUDA_USE_CUB)
              return true;
+diff --git a/ggml/src/ggml-cuda/hymt-penalties.cu b/ggml/src/ggml-cuda/hymt-penalties.cu
+new file mode 100644
+index 0000000000000000000000000000000000000000..11dccb78e89d3c421fff9fcef6936f9fc5ca4282
+--- /dev/null
++++ b/ggml/src/ggml-cuda/hymt-penalties.cu
+@@ -0,0 +1,55 @@
++#include "hymt-penalties.cuh"
++
++#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
++static __global__ void hymt_penalties_f32(
++        float * output, const int32_t * ids, const int32_t * counts,
++        const int64_t vocab, const int64_t history, const int64_t entries,
++        const float repeat, const float frequency, const float presence) {
++    const int64_t stride = int64_t(blockDim.x)*gridDim.x;
++    for (int64_t i = int64_t(blockIdx.x)*blockDim.x + threadIdx.x; i < entries; i += stride) {
++        const int32_t count = counts[i];
++        const int32_t id = ids[i];
++        if (count <= 0 || id < 0 || id >= vocab) {
++            continue;
++        }
++        const int64_t pos = (i/history)*vocab + id;
++        const float value = output[pos];
++        // The CPU sampler divides positive logits, rather than multiplying by
++        // a rounded reciprocal. Explicit operations also prevent FMA changes.
++        const float repeated = value <= 0.0f ? __fmul_rn(value, repeat) : __fdiv_rn(value, repeat);
++        const float penalty = __fadd_rn(__fmul_rn(__int2float_rn(count), frequency),
++                                       __fmul_rn(1.0f, presence));
++        output[pos] = __fsub_rn(repeated, penalty);
++    }
++}
++#endif
++
++void ggml_cuda_op_hymt_penalties(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
++#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
++    const ggml_tensor * logits = dst->src[0];
++    const ggml_tensor * ids = dst->src[1];
++    const ggml_tensor * counts = dst->src[2];
++    GGML_ASSERT(logits->type == GGML_TYPE_F32 && dst->type == GGML_TYPE_F32);
++    GGML_ASSERT(ids->type == GGML_TYPE_I32 && counts->type == GGML_TYPE_I32);
++    GGML_ASSERT(ggml_is_contiguous(logits) && ggml_is_contiguous(ids) &&
++                ggml_is_contiguous(counts) && ggml_is_contiguous(dst));
++    GGML_ASSERT(ggml_is_matrix(logits) && ggml_is_matrix(ids) && ggml_are_same_shape(ids, counts));
++    GGML_ASSERT(logits->ne[1] == ids->ne[1] && ggml_are_same_shape(logits, dst));
++
++    float penalties[3];
++    memcpy(penalties, dst->op_params, sizeof(penalties));
++    const int64_t entries = ggml_nelements(ids);
++    const int blocks = (int) std::min<int64_t>((entries + 255)/256, 65535);
++    // Preserve raw model logits for unsupported or exceptional-row fallback.
++    // The following sparse updates are ordered after this copy on one stream.
++    CUDA_CHECK(cudaMemcpyAsync(dst->data, logits->data, ggml_nbytes(logits), cudaMemcpyDeviceToDevice, ctx.stream()));
++    hymt_penalties_f32<<<blocks, 256, 0, ctx.stream()>>>(
++        (float *) dst->data, (const int32_t *) ids->data, (const int32_t *) counts->data,
++        logits->ne[0], ids->ne[0], entries, penalties[0], penalties[1], penalties[2]);
++    CUDA_CHECK(cudaGetLastError());
++#else
++    GGML_UNUSED(ctx);
++    GGML_UNUSED(dst);
++    GGML_ABORT("HYMT_PENALTIES strict GPU implementation requires CUDA");
++#endif
++}
+diff --git a/ggml/src/ggml-cuda/hymt-penalties.cuh b/ggml/src/ggml-cuda/hymt-penalties.cuh
+new file mode 100644
+index 0000000000000000000000000000000000000000..3288b1f4d7aa17c89844e7c58d418b34cc10a5bc
+--- /dev/null
++++ b/ggml/src/ggml-cuda/hymt-penalties.cuh
+@@ -0,0 +1,3 @@
++#include "common.cuh"
++
++void ggml_cuda_op_hymt_penalties(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
 diff --git a/ggml/src/ggml-cuda/rope.cu b/ggml/src/ggml-cuda/rope.cu
-index e546fb6553ce9495cc2aed3a77f583423b320d89..302ab1056e6fbb5f0b2a65a7e2d210fc1a3d796f 100644
+index e546fb6553ce9495cc2aed3a77f583423b320d89..13e677fb3d834624e814c922aeb11ea64f5a0f79 100644
 --- a/ggml/src/ggml-cuda/rope.cu
 +++ b/ggml/src/ggml-cuda/rope.cu
-@@ -705,6 +705,141 @@ void ggml_cuda_op_rope_fused(ggml_backend_cuda_context & ctx, ggml_tensor * rope
+@@ -705,6 +705,164 @@ void ggml_cuda_op_rope_fused(ggml_backend_cuda_context & ctx, ggml_tensor * rope
      ggml_cuda_op_rope_impl<true>(ctx, rope, set_rows);
  }
  
@@ -662,13 +807,29 @@ index e546fb6553ce9495cc2aed3a77f583423b320d89..302ab1056e6fbb5f0b2a65a7e2d210fc
 +        sum = warp_reduce_sum<32>(partial);
 +    }
 +    const float scale = rsqrtf(sum * (1.0f / 128.0f) + eps);
-+    const int64_t dst_row = row_indices == nullptr ? int64_t(row) * 128 :
-+        row_indices[token] * set_rows_stride + head * 128;
-+    dst += dst_row;
++    if constexpr (std::is_same_v<D, block_q8_0>) {
++        dst += row_indices[token] * set_rows_stride + head * (128 / QK8_0);
 +#pragma unroll
-+    for (int i = 0; i < 4; ++i) {
-+        const int col = lane + 32 * i;
-+        dst[col] = ggml_cuda_cast<D>(scale * rotated[i] * weight[col]);
++        for (int i = 0; i < 4; ++i) {
++            const float value = scale * rotated[i] * weight[lane + 32 * i];
++            const float amax = warp_reduce_max<32>(fmaxf(0.0f, fabsf(value)));
++            // Match quantize_f32_q8_0_block, including round-to-nearest-away.
++            const float d = amax / 127.0f;
++            const float id = d ? 1.0f / d : 0.0f;
++            if (lane == 0) {
++                dst[i].d = d;
++            }
++            dst[i].qs[lane] = roundf(value * id);
++        }
++    } else {
++        const int64_t dst_row = row_indices == nullptr ? int64_t(row) * 128 :
++            row_indices[token] * set_rows_stride + head * 128;
++        dst += dst_row;
++#pragma unroll
++        for (int i = 0; i < 4; ++i) {
++            const int col = lane + 32 * i;
++            dst[col] = ggml_cuda_cast<D>(scale * rotated[i] * weight[col]);
++        }
 +    }
 +}
 +
@@ -721,6 +882,13 @@ index e546fb6553ce9495cc2aed3a77f583423b320d89..302ab1056e6fbb5f0b2a65a7e2d210fc
 +        if (dst->type == GGML_TYPE_F32) {
 +            ggml_cuda_kernel_launch(hymt_rope_norm_128_f32<float, strict>, launch_params,
 +                (const float *) x->data, (float *) dst->data, (const float *) weight->data,
++                (const int32_t *) rope->src[1]->data, nheads, ntokens,
++                x->nb[1] / sizeof(float), x->nb[2] / sizeof(float), eps, theta_scale,
++                freq_scale, ext_factor, attn_factor, corr_dims, row_indices, set_rows_stride);
++        } else if (dst->type == GGML_TYPE_Q8_0) {
++            GGML_ASSERT(row_indices != nullptr);
++            ggml_cuda_kernel_launch(hymt_rope_norm_128_f32<block_q8_0, strict>, launch_params,
++                (const float *) x->data, (block_q8_0 *) dst->data, (const float *) weight->data,
 +                (const int32_t *) rope->src[1]->data, nheads, ntokens,
 +                x->nb[1] / sizeof(float), x->nb[2] / sizeof(float), eps, theta_scale,
 +                freq_scale, ext_factor, attn_factor, corr_dims, row_indices, set_rows_stride);
@@ -855,6 +1023,145 @@ index c7a0c831788df8547ffd86c8a68e6d53aff61130..b57725ac33037a6f94fe41d883d599c4
  #ifdef CUB_TOP_K_AVAILABLE
      // TODO: Switch to `DeviceSegmentedTopK` for multi-row TopK once implemented
      // https://github.com/NVIDIA/cccl/issues/6391
+diff --git a/ggml/src/ggml-quants.c b/ggml/src/ggml-quants.c
+index 1ebc50a763f16db909de37090da38cc8c0fdde94..1e8c69716bf8e02f16f3846d73560024a1d64b78 100644
+--- a/ggml/src/ggml-quants.c
++++ b/ggml/src/ggml-quants.c
+@@ -2305,10 +2305,132 @@ size_t quantize_mxfp4(const float * GGML_RESTRICT src, void * GGML_RESTRICT dst,
+     return nrow * ggml_row_size(GGML_TYPE_MXFP4, n_per_row);
+ }
+ 
++static uint8_t nvfp4_nearest_code(float x, float d) {
++    const float a = fabsf(x);
++    const int q = a <= 3.5f*d ? (a <= 1.5f*d ? (a <= 0.5f*d ? 0 : 1) : (a <= 2.5f*d ? 2 : 3))
++                            : (a <= 7.0f*d ? (a <= 5.0f*d ? 4 : 5) : (a <= 10.0f*d ? 6 : 7));
++    return (uint8_t) (q && x < 0.0f ? q + 8 : q);
++}
++
++static void nvfp4_try_scale(const float * x, const float * weights, int scale, float d,
++                            double * best_loss, uint8_t * best_scale, uint8_t * packed) {
++    uint8_t codes[QK_NVFP4_SUB];
++    double loss = 0.0;
++    for (int j = 0; j < QK_NVFP4_SUB; ++j) {
++        codes[j] = d == 0.0f ? 0 : nvfp4_nearest_code(x[j], d);
++        const double error = (double) x[j] - kvalues_mxfp4[codes[j]]*d;
++        loss += (weights ? weights[j] : 1.0f)*error*error;
++        if (loss >= *best_loss) {
++            return;
++        }
++    }
++    *best_loss = loss;
++    *best_scale = (uint8_t) scale;
++    for (int j = 0; j < QK_NVFP4_SUB/2; ++j) {
++        packed[j] = codes[j] | (codes[j + QK_NVFP4_SUB/2] << 4);
++    }
++}
++
+ size_t quantize_nvfp4(const float * GGML_RESTRICT src, void * GGML_RESTRICT dst, int64_t nrow, int64_t n_per_row, const float * quant_weights) {
+-    GGML_UNUSED(quant_weights);
+     quantize_row_nvfp4_ref(src, dst, (int64_t)nrow*n_per_row);
+-    return nrow * ggml_row_size(GGML_TYPE_NVFP4, n_per_row);
++    const size_t size = nrow * ggml_row_size(GGML_TYPE_NVFP4, n_per_row);
++    const char * mse = getenv("GGML_NVFP4_QUANTIZE_MSE");
++    if (!mse || atoi(mse) == 0) {
++        return size;
++    }
++    const bool full_search = atoi(mse) == 2;
++    float scales[127];
++    for (int scale = 0; scale <= 126; ++scale) {
++        scales[scale] = ggml_ue4m3_to_fp32(scale);
++    }
++
++    GGML_ASSERT(n_per_row % QK_NVFP4 == 0);
++    if (quant_weights) {
++        for (int64_t j = 0; j < n_per_row; ++j) {
++            GGML_ASSERT(isfinite(quant_weights[j]) && quant_weights[j] >= 0.0f);
++        }
++    }
++
++    block_nvfp4 * blocks = (block_nvfp4 *) dst;
++    for (int64_t row = 0; row < nrow; ++row) {
++        for (int64_t col = 0; col < n_per_row; col += QK_NVFP4_SUB) {
++            block_nvfp4 * block = blocks + (row*n_per_row + col)/QK_NVFP4;
++            const int sub = col % QK_NVFP4 / QK_NVFP4_SUB;
++            uint8_t * packed = block->qs + sub*(QK_NVFP4_SUB/2);
++            const float * x = src + row*n_per_row + col;
++            const float * weights = quant_weights ? quant_weights + col : NULL;
++            const int original_scale = block->d[sub];
++            const float original_d = scales[original_scale];
++            double best_loss = 0.0;
++            for (int j = 0; j < QK_NVFP4_SUB; ++j) {
++                const int q = (packed[j % (QK_NVFP4_SUB/2)] >> (j / (QK_NVFP4_SUB/2)*4)) & 15;
++                const double error = (double) x[j] - kvalues_mxfp4[q]*original_d;
++                best_loss += (quant_weights ? quant_weights[col + j] : 1.0f)*error*error;
++            }
++            if (best_loss == 0.0) {
++                continue;
++            }
++
++            // Always visit v1 candidates first, preserving its result on equal loss.
++            const int local_begin = MAX(1, original_scale - 4);
++            const int local_end = MIN(126, original_scale + 4);
++            for (int scale = local_begin; scale <= local_end; ++scale) {
++                if (scale == original_scale) {
++                    continue;
++                }
++                nvfp4_try_scale(x, weights, scale, scales[scale], &best_loss, block->d + sub, packed);
++            }
++            if (full_search && best_loss > 0.0) {
++                // Reference codes minimize float32 absolute error. For extreme
++                // saturated inputs that comparison can round every code to a
++                // tie, so also refit codes at the original scale for v2's
++                // float64 loss. Keep v1's candidates and behavior unchanged.
++                nvfp4_try_scale(x, weights, original_scale, scales[original_scale],
++                                &best_loss, block->d + sub, packed);
++                nvfp4_try_scale(x, weights, 0, scales[0], &best_loss, block->d + sub, packed);
++                if (best_loss == 0.0) {
++                    continue;
++                }
++
++                // Any improving scale d must satisfy every individual weighted
++                // squared-error budget. Since |q*d| <= 12*d, d >= (|x|-r)/12,
++                // where r = sqrt(best_loss/weight). If zero alone exceeds that
++                // budget, q must be nonzero and |q*d| >= d, hence d <= |x|+r.
++                // At d >= 2*max|x| every nearest code is zero (already tested).
++                // Outward slack keeps floating-point rounding conservative.
++                double lower = 0.0, upper = DBL_MAX, maximum = 0.0;
++                for (int j = 0; j < QK_NVFP4_SUB; ++j) {
++                    const double weight = weights ? weights[j] : 1.0;
++                    if (weight == 0.0) {
++                        continue;
++                    }
++                    const double magnitude = fabs((double) x[j]);
++                    const double radius = sqrt(best_loss/weight);
++                    const double slack = 8.0*DBL_EPSILON*MAX(1.0, magnitude + radius);
++                    maximum = MAX(maximum, magnitude);
++                    lower = MAX(lower, (magnitude - radius - slack)/12.0);
++                    if (weight*magnitude*magnitude > best_loss) {
++                        upper = MIN(upper, magnitude + radius + slack);
++                    }
++                }
++                upper = MIN(upper, 2.0*maximum + 8.0*DBL_EPSILON*MAX(1.0, maximum));
++                for (int scale = 1; scale <= 126; ++scale) {
++                    if (scale >= local_begin && scale <= local_end) {
++                        continue;
++                    }
++                    const double d = scales[scale];
++                    if (d < lower) {
++                        continue;
++                    }
++                    if (d > upper) {
++                        break;
++                    }
++                    nvfp4_try_scale(x, weights, scale, scales[scale], &best_loss, block->d + sub, packed);
++                }
++            }
++        }
++    }
++    return size;
+ }
+ 
+ // ====================== Ternary (de)-quantization (BitNet b1.58 and TriLMs)
 diff --git a/ggml/src/ggml.c b/ggml/src/ggml.c
 index 1752814093b5cf973a820794e0dbe53fb8c6fe5b..fc09d7b378fe5164ba93965e45b797c31ea389cd 100644
 --- a/ggml/src/ggml.c
@@ -1807,10 +2114,27 @@ index a398344c89c559e34f67a75f76b4955f94036cda..871d693cade469fa805db19061570cab
  if (NOT WIN32 OR NOT BUILD_SHARED_LIBS)
      # these tests are disabled on Windows because they use internal functions not exported with LLAMA_API (when building with shared libraries)
 diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
-index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f90d5e0283 100644
+index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..aff9a6f96b59e63c5d756c47d78c9cfb76cb4da2 100644
 --- a/tests/test-backend-ops.cpp
 +++ b/tests/test-backend-ops.cpp
-@@ -1602,7 +1602,10 @@ struct test_case {
+@@ -42,6 +42,7 @@
+ #include <string>
+ #include <string_view>
+ #include <thread>
++#include <utility>
+ #include <vector>
+ #include <unordered_map>
+ 
+@@ -1338,7 +1339,7 @@ struct test_case {
+         }
+     }
+ 
+-    test_status_t eval(ggml_backend_t backend1,
++    virtual test_status_t eval(ggml_backend_t backend1,
+                        ggml_backend_t backend2,
+                        const char *   op_names_filter,
+                        printer *      output_printer) {
+@@ -1602,7 +1603,10 @@ struct test_case {
          // determine number of runs
          int n_runs;
          bool is_cpu = ggml_backend_dev_type(ggml_backend_get_device(backend)) == GGML_BACKEND_DEVICE_TYPE_CPU;
@@ -1822,7 +2146,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
              // based on flops
              const uint64_t GFLOP = 1000 * 1000 * 1000;
              const uint64_t target_flops_cpu =   8ULL * GFLOP;
-@@ -2400,6 +2403,30 @@ struct test_get_rows : public test_case {
+@@ -2400,6 +2404,30 @@ struct test_get_rows : public test_case {
      }
  };
  
@@ -1853,7 +2177,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
  // GGML_OP_GET_ROWS_BACK
  struct test_get_rows_back : public test_case {
      const ggml_type type;
-@@ -2693,27 +2720,34 @@ struct test_rms_norm_mul_rope : public test_case {
+@@ -2693,27 +2721,135 @@ struct test_rms_norm_mul_rope : public test_case {
      const bool set_rows;
      const bool broadcast; // multiply by a 1D [ne0] weight, as model norm weights are
      const ggml_type set_rows_type;
@@ -1870,6 +2194,107 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
  
      bool run_whole_graph() override { return true; }
  
++    test_status_t eval(ggml_backend_t backend1, ggml_backend_t backend2,
++                       const char * op_names_filter, printer * output_printer) override {
++        if (!set_rows || set_rows_type != GGML_TYPE_Q8_0) {
++            return test_case::eval(backend1, backend2, op_names_filter, output_printer);
++        }
++
++        test_case::mode = MODE_TEST;
++        ggml_init_params params = {ggml_tensor_overhead()*128 + ggml_graph_overhead(), nullptr, true};
++        ggml_context_ptr ctx(ggml_init(params));
++        add_sentinel(ctx.get());
++        ggml_tensor * out = build_graph(ctx.get());
++        current_op_name = op_desc(out);
++        if (!matches_filter(out, op_names_filter)) {
++            return test_status_t::SKIPPED;
++        }
++        for (ggml_backend_t backend : {backend1, backend2}) {
++            for (ggml_tensor * t = ggml_get_first_tensor(ctx.get()); t; t = ggml_get_next_tensor(ctx.get(), t)) {
++                if (!ggml_backend_supports_op(backend, t)) {
++                    print_test_result_locked(output_printer, test_result(ggml_backend_name(backend), current_op_name,
++                        vars(), "test", false, false, "not supported"));
++                    return test_status_t::NOT_SUPPORTED;
++                }
++            }
++        }
++        add_sentinel(ctx.get());
++        check_for_f16_tensor(ctx.get());
++        ggml_backend_buffer_ptr buf(ggml_backend_alloc_ctx_tensors(ctx.get(), backend1));
++        GGML_ASSERT(buf);
++        initialize_tensors(ctx.get());
++        gf = ggml_new_graph(ctx.get());
++        ggml_build_forward_expand(gf, out);
++        const int out_index = ggml_graph_n_nodes(gf) - 1;
++        const int sentinel_begin = ggml_graph_n_nodes(gf);
++        std::vector<std::vector<uint8_t>> sentinel_data;
++        for (ggml_tensor * sentinel : sentinels) {
++            ggml_graph_add_node(gf, sentinel);
++            sentinel_data.emplace_back(ggml_nbytes(sentinel));
++            ggml_backend_tensor_get(sentinel, sentinel_data.back().data(), 0, sentinel_data.back().size());
++        }
++
++        auto reference = ggml_backend_graph_copy(backend1, gf);
++        GGML_ASSERT(reference.buffer);
++        int mul_index = -1;
++        for (int j = 0; j < ggml_graph_n_nodes(reference.graph); ++j) {
++            ggml_tensor * node = ggml_graph_node(reference.graph, j);
++            if (node->op == GGML_OP_ROPE || node->op == GGML_OP_RMS_NORM || node->op == GGML_OP_MUL) {
++                ggml_set_output(node);
++            }
++            if (node->op == GGML_OP_MUL) {
++                mul_index = j;
++            }
++        }
++        GGML_ASSERT(mul_index >= 0);
++        auto cpu_reference = ggml_backend_graph_copy(backend2, reference.graph);
++        GGML_ASSERT(cpu_reference.buffer);
++        ggml_tensor * ref_out = ggml_graph_node(reference.graph, out_index);
++        bool ok = true;
++        for (const auto & execution : {std::make_pair(backend1, gf), std::make_pair(backend1, reference.graph),
++                                      std::make_pair(backend2, cpu_reference.graph)}) {
++            const ggml_status status = ggml_backend_graph_compute(execution.first, execution.second);
++            if (status != GGML_STATUS_SUCCESS) {
++                printf("[Q8 fusion] %s compute failed: %s ", ggml_backend_name(execution.first), ggml_status_to_string(status));
++                ok = false;
++            }
++        }
++        if (ok) {
++            std::vector<uint8_t> actual(ggml_nbytes(out)), expected(ggml_nbytes(ref_out));
++            ggml_backend_tensor_get(out, actual.data(), 0, actual.size());
++            ggml_backend_tensor_get(ref_out, expected.data(), 0, expected.size());
++            ok = actual == expected;
++            if (!ok) {
++                printf("[Q8 fusion] cache bytes differ from unfused backend ");
++            }
++
++            // Check floating-point math before Q8 rounding can amplify small differences.
++            const auto fa = tensor_to_float(ggml_graph_node(reference.graph, mul_index));
++            const auto fb = tensor_to_float(ggml_graph_node(cpu_reference.graph, mul_index));
++            const double error = nmse(fa.data(), fb.data(), fa.size());
++            if (!std::isfinite(error) || error > test_case::max_nmse_err(backend1)) {
++                printf("[Q8 fusion] pre-quantization math error: %.9g ", error);
++                ok = false;
++            }
++        }
++        for (ggml_cgraph * graph : {gf, reference.graph, cpu_reference.graph}) {
++            for (size_t j = 0; j < sentinels.size(); ++j) {
++                ggml_tensor * sentinel = ggml_graph_node(graph, sentinel_begin + int(j));
++                std::vector<uint8_t> actual(ggml_nbytes(sentinel));
++                ggml_backend_tensor_get(sentinel, actual.data(), 0, actual.size());
++                if (actual != sentinel_data[j]) {
++                    printf("[Q8 fusion] sentinel mismatch: %s ", sentinel->name);
++                    ok = false;
++                }
++            }
++        }
++        ggml_backend_graph_copy_free(cpu_reference);
++        ggml_backend_graph_copy_free(reference);
++        print_test_result_locked(output_printer, test_result(ggml_backend_name(backend1), current_op_name,
++            vars(), "test", true, ok, ok ? "" : "Q8 fusion computation, math, or sentinel mismatch"));
++        return ok ? test_status_t::OK : test_status_t::FAIL;
++    }
++
      std::string vars() override {
 -        return VARS_TO_STR9(ne, eps, multi_add, mul, rope, set_rows, broadcast, mode, set_rows_type);
 +        return VARS_TO_STR12(ne, eps, multi_add, mul, rope, set_rows, broadcast, mode, set_rows_type, rope_first, strided, kv_layout);
@@ -1893,7 +2318,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
  
          ggml_tensor * b = nullptr;
          ggml_tensor * c = nullptr;
-@@ -2733,10 +2767,11 @@ struct test_rms_norm_mul_rope : public test_case {
+@@ -2733,10 +2869,11 @@ struct test_rms_norm_mul_rope : public test_case {
              a = ggml_add(ctx, ggml_add(ctx, a, b), c);
          }
  
@@ -1909,7 +2334,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
          }
  
          if (rope) {
-@@ -2752,13 +2787,26 @@ struct test_rms_norm_mul_rope : public test_case {
+@@ -2752,13 +2889,26 @@ struct test_rms_norm_mul_rope : public test_case {
              }
          }
  
@@ -1938,7 +2363,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
              ggml_set_name(row_idxs, "row_idxs");
  
              a = ggml_set_rows(ctx, dst, view, row_idxs);
-@@ -2771,7 +2819,15 @@ struct test_rms_norm_mul_rope : public test_case {
+@@ -2771,7 +2921,15 @@ struct test_rms_norm_mul_rope : public test_case {
      void initialize_tensors(ggml_context * ctx) override {
          for (ggml_tensor * t = ggml_get_first_tensor(ctx); t != NULL; t = ggml_get_next_tensor(ctx, t)) {
              if (t->type == GGML_TYPE_I64) {
@@ -1955,7 +2380,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
              } else if (t->type == GGML_TYPE_I32) {
                  std::vector<int32_t> data(ggml_nelements(t));
                  for (int32_t & value : data) {
-@@ -6492,6 +6548,106 @@ struct test_argsort : public test_case {
+@@ -6492,6 +6650,106 @@ struct test_argsort : public test_case {
      }
  };
  
@@ -2062,7 +2487,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
  // GGML_OP_TOP_K
  struct test_top_k : public test_case {
      const ggml_type type;
-@@ -6613,6 +6769,50 @@ struct test_top_k : public test_case {
+@@ -6613,6 +6871,50 @@ struct test_top_k : public test_case {
      }
  };
  
@@ -2113,7 +2538,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
  // qwen4exp QSA indexer top-k fusion: expand per-block scores to cells, add the f16 mask, top-k.
  struct test_topk_qsa : public test_case {
      const int64_t n_blocks;
-@@ -9027,6 +9227,14 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+@@ -9027,6 +9329,14 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
      }
  
      test_cases.emplace_back(new test_get_rows(GGML_TYPE_F32, 1, 8, 2, 1, 1, false));
@@ -2128,7 +2553,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
      for (ggml_type type : all_types) {
          for (int b : {1, 7}) {
              for (bool v : {false, true}) {
-@@ -9714,6 +9922,24 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+@@ -9714,6 +10024,26 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
      test_cases.emplace_back(new test_rms_norm_mul_rope({128, 4, 7, 2}));
      test_cases.emplace_back(new test_rms_norm_mul_rope({128, 4, 7, 2}, 1e-6f, false, true));
  
@@ -2137,7 +2562,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
 +            for (bool strided : {false, true}) {
 +                test_cases.emplace_back(new test_rms_norm_mul_rope({128, heads, tokens, 1}, 1e-6f,
 +                    false, false, true, GGML_ROPE_TYPE_NEOX, true, true, GGML_TYPE_F32, true, strided));
-+                for (ggml_type type : {GGML_TYPE_F32, GGML_TYPE_F16}) {
++                for (ggml_type type : {GGML_TYPE_F32, GGML_TYPE_F16, GGML_TYPE_Q8_0}) {
 +                    test_cases.emplace_back(new test_rms_norm_mul_rope({128, heads, tokens, 1}, 1e-6f,
 +                        false, true, true, GGML_ROPE_TYPE_NEOX, true, true, type, true, strided));
 +                }
@@ -2146,14 +2571,16 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
 +    }
 +
 +    for (int kv_layout : {1, 2, 3}) {
-+        test_cases.emplace_back(new test_rms_norm_mul_rope({128, 4, 7, 1}, 1e-6f,
-+            false, true, true, GGML_ROPE_TYPE_NEOX, true, true, GGML_TYPE_F16, true, false, kv_layout));
++        for (ggml_type type : {GGML_TYPE_F16, GGML_TYPE_Q8_0}) {
++            test_cases.emplace_back(new test_rms_norm_mul_rope({128, 4, 7, 1}, 1e-6f,
++                false, true, true, GGML_ROPE_TYPE_NEOX, true, true, type, true, false, kv_layout));
++        }
 +    }
 +
      for (auto multi_add : {false, true}) {
          for (auto set_rows : {false, true}) {
              for (auto broadcast : {false, true}) {
-@@ -10441,6 +10667,18 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+@@ -10441,6 +10771,18 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
          test_cases.emplace_back(new test_argsort(GGML_TYPE_F32, {2048, 512, 1, 1}, order)); // test CUDA dispatching to radix sort for nrows > = 1 in graph mode
      }
  
@@ -2172,7 +2599,7 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
      for (int n = 1; n < 5; ++n) {
          for (int k = 1; k <= n; ++k) {
              test_cases.emplace_back(new test_top_k(GGML_TYPE_F32, {n, 2, 1, 3}, k, true));
-@@ -10455,6 +10693,16 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+@@ -10455,6 +10797,16 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
              }
          }
      }
@@ -2189,7 +2616,24 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
      for (int k : {4, 8, 16, 32}) {
          for (int nrows : {1, 8, 16}) {
              test_cases.emplace_back(new test_top_k(GGML_TYPE_F32, {202048, nrows, 1, 1}, k));
-@@ -10992,6 +11240,24 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+@@ -10726,6 +11078,16 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+     test_cases.emplace_back(new test_flash_attn_ext(128, 64, 4, {1, 1}, 64, 2, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q2_0, GGML_TYPE_F16));
+ 
+     // q8_0 KV cases: decode and prompt batches, KV pad, permuted KV, feature flags, and long context
++    for (int64_t kv : {128, 384, 1536}) {
++        for (int64_t nb : {1, 2}) {
++            test_cases.emplace_back(new test_flash_attn_ext(128, 128, 4, {4, 3}, kv, nb,
++                true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
++        }
++    }
++    test_cases.emplace_back(new test_flash_attn_ext(128, 128, 4, {4, 3}, 384, 2,
++        true, true, 8, 10, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0, {0, 2, 1, 3}));
++    test_cases.emplace_back(new test_flash_attn_ext(128, 128, 4, {4, 3}, 513, 2,
++        true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {16, 1},   113,   1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {16, 1},  1024,   1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
+     test_cases.emplace_back(new test_flash_attn_ext(256, 256, 2, {16, 1},  1024,   1, true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0, {0, 2, 1, 3}));
+@@ -10992,6 +11354,24 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
  static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
      std::vector<std::unique_ptr<test_case>> test_cases;
  
@@ -2214,89 +2658,20 @@ index 260ffef66db3dfe04b69e5f5ba0b61c067a7e2dc..e6dd6dcde12e60610a4a3b9bb98786f9
      // SWIGLU at a 27B-class FFN width, fused [gate|up] vs split operands
      // note: same bytes either way, so a backend that indexes them differently shows it here
      for (ggml_type type : {GGML_TYPE_F16, GGML_TYPE_F32}) {
-diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
-index c8ad1db436237c0477a26d2f35778bed83449af2..f912165bb7ed0adcf69dfc6ede4ec1f4701edea3 100644
---- a/tools/CMakeLists.txt
-+++ b/tools/CMakeLists.txt
-@@ -15,6 +15,8 @@ llama_add_compile_flags()
- if (EMSCRIPTEN)
- else()
-     add_subdirectory(batched-bench)
-+    add_subdirectory(hy-batch)
-+    add_subdirectory(hy-logits)
-     add_subdirectory(gguf-split)
-     add_subdirectory(imatrix)
-     add_subdirectory(llama-bench)
-diff --git a/ggml/src/ggml-cuda/hymt-penalties.cu b/ggml/src/ggml-cuda/hymt-penalties.cu
-new file mode 100644
-index 0000000000000000000000000000000000000000..11dccb78e89d3c421fff9fcef6936f9fc5ca4282
---- /dev/null
-+++ b/ggml/src/ggml-cuda/hymt-penalties.cu
-@@ -0,0 +1,55 @@
-+#include "hymt-penalties.cuh"
-+
-+#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
-+static __global__ void hymt_penalties_f32(
-+        float * output, const int32_t * ids, const int32_t * counts,
-+        const int64_t vocab, const int64_t history, const int64_t entries,
-+        const float repeat, const float frequency, const float presence) {
-+    const int64_t stride = int64_t(blockDim.x)*gridDim.x;
-+    for (int64_t i = int64_t(blockIdx.x)*blockDim.x + threadIdx.x; i < entries; i += stride) {
-+        const int32_t count = counts[i];
-+        const int32_t id = ids[i];
-+        if (count <= 0 || id < 0 || id >= vocab) {
-+            continue;
+@@ -11223,6 +11603,13 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     // Qwen3-VL-8B https://github.com/ggml-org/llama.cpp/issues/17012
+     test_cases.emplace_back(new test_flash_attn_ext(72, 72, 16, {1, 1}, 5776, 5776, false, false, 0, 0, GGML_PREC_F32, GGML_TYPE_F16, GGML_TYPE_F16));
+ 
++    for (int64_t kv : {128, 512, 2048}) {
++        for (int64_t sequences : {1, 17, 64}) {
++            test_cases.emplace_back(new test_flash_attn_ext(128, 128, 4, {4, sequences}, kv, 1,
++                true, false, 0, 0, GGML_PREC_F32, GGML_TYPE_Q8_0, GGML_TYPE_Q8_0));
 +        }
-+        const int64_t pos = (i/history)*vocab + id;
-+        const float value = output[pos];
-+        // The CPU sampler divides positive logits, rather than multiplying by
-+        // a rounded reciprocal. Explicit operations also prevent FMA changes.
-+        const float repeated = value <= 0.0f ? __fmul_rn(value, repeat) : __fdiv_rn(value, repeat);
-+        const float penalty = __fadd_rn(__fmul_rn(__int2float_rn(count), frequency),
-+                                       __fmul_rn(1.0f, presence));
-+        output[pos] = __fsub_rn(repeated, penalty);
 +    }
-+}
-+#endif
 +
-+void ggml_cuda_op_hymt_penalties(ggml_backend_cuda_context & ctx, ggml_tensor * dst) {
-+#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA)
-+    const ggml_tensor * logits = dst->src[0];
-+    const ggml_tensor * ids = dst->src[1];
-+    const ggml_tensor * counts = dst->src[2];
-+    GGML_ASSERT(logits->type == GGML_TYPE_F32 && dst->type == GGML_TYPE_F32);
-+    GGML_ASSERT(ids->type == GGML_TYPE_I32 && counts->type == GGML_TYPE_I32);
-+    GGML_ASSERT(ggml_is_contiguous(logits) && ggml_is_contiguous(ids) &&
-+                ggml_is_contiguous(counts) && ggml_is_contiguous(dst));
-+    GGML_ASSERT(ggml_is_matrix(logits) && ggml_is_matrix(ids) && ggml_are_same_shape(ids, counts));
-+    GGML_ASSERT(logits->ne[1] == ids->ne[1] && ggml_are_same_shape(logits, dst));
-+
-+    float penalties[3];
-+    memcpy(penalties, dst->op_params, sizeof(penalties));
-+    const int64_t entries = ggml_nelements(ids);
-+    const int blocks = (int) std::min<int64_t>((entries + 255)/256, 65535);
-+    // Preserve raw model logits for unsupported or exceptional-row fallback.
-+    // The following sparse updates are ordered after this copy on one stream.
-+    CUDA_CHECK(cudaMemcpyAsync(dst->data, logits->data, ggml_nbytes(logits), cudaMemcpyDeviceToDevice, ctx.stream()));
-+    hymt_penalties_f32<<<blocks, 256, 0, ctx.stream()>>>(
-+        (float *) dst->data, (const int32_t *) ids->data, (const int32_t *) counts->data,
-+        logits->ne[0], ids->ne[0], entries, penalties[0], penalties[1], penalties[2]);
-+    CUDA_CHECK(cudaGetLastError());
-+#else
-+    GGML_UNUSED(ctx);
-+    GGML_UNUSED(dst);
-+    GGML_ABORT("HYMT_PENALTIES strict GPU implementation requires CUDA");
-+#endif
-+}
-diff --git a/ggml/src/ggml-cuda/hymt-penalties.cuh b/ggml/src/ggml-cuda/hymt-penalties.cuh
-new file mode 100644
-index 0000000000000000000000000000000000000000..3288b1f4d7aa17c89844e7c58d418b34cc10a5bc
---- /dev/null
-+++ b/ggml/src/ggml-cuda/hymt-penalties.cuh
-@@ -0,0 +1,3 @@
-+#include "common.cuh"
-+
-+void ggml_cuda_op_hymt_penalties(ggml_backend_cuda_context & ctx, ggml_tensor * dst);
+     // Sparse flash attention (n_kv_max hint) decode across KV depths.
+     // Shapes: 576/512 DeepSeek MLA, 512/512 DeepSeek-V4/GLM-5.2, 256/256 gqa12 Qwen QSA.
+     for (int64_t kv : {4096, 16384, 32768}) {
 diff --git a/tests/test-hymt-prefix.cpp b/tests/test-hymt-prefix.cpp
 new file mode 100644
 index 0000000000000000000000000000000000000000..3ac34d90f333e1e3bd8b43bd786eec0eb57ea5a1
@@ -2572,6 +2947,172 @@ index 0000000000000000000000000000000000000000..3ac34d90f333e1e3bd8b43bd786eec0e
 +        return 1;
 +    }
 +}
+diff --git a/tests/test-quantize-fns.cpp b/tests/test-quantize-fns.cpp
+index 570fca89a876209994dd4c668e3ef4c45d6f77b5..cee324ac98cb8e6ef429d58d80201ef7889e078a 100644
+--- a/tests/test-quantize-fns.cpp
++++ b/tests/test-quantize-fns.cpp
+@@ -7,6 +7,7 @@
+ #include <assert.h>
+ #include <algorithm>
+ #include <cmath>
++#include <cstdlib>
+ #include <math.h>
+ #include <stdio.h>
+ #include <string>
+@@ -155,6 +156,132 @@ static int test_vec_dot_f32(bool verbose) {
+     return num_failed;
+ }
+ 
++static void set_nvfp4_mse(const char * value) {
++#ifdef _WIN32
++    _putenv_s("GGML_NVFP4_QUANTIZE_MSE", value);
++#else
++    if (*value) {
++        setenv("GGML_NVFP4_QUANTIZE_MSE", value, 1);
++    } else {
++        unsetenv("GGML_NVFP4_QUANTIZE_MSE");
++    }
++#endif
++}
++
++// Independent oracle: enumerate valid unsigned E4M3 encodings and every E2M1
++// magnitude, without using the quantizer's nearest-code routine or bounds.
++static double nvfp4_exhaustive_loss(const float * input, const float * weights) {
++    double best = INFINITY;
++    const double magnitudes[] = {0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0};
++    for (int scale = 0; scale <= 126; ++scale) {
++        const int exponent = scale >> 3;
++        const int mantissa = scale & 7;
++        const double d = exponent == 0 ? std::ldexp((double) mantissa, -9)
++                                      : std::ldexp(1.0 + mantissa/8.0, exponent - 7);
++        double loss = 0.0;
++        for (int j = 0; j < 16; ++j) {
++            double error = INFINITY;
++            for (double magnitude : magnitudes) {
++                error = std::min(error, std::fabs(std::fabs((double) input[j]) - magnitude*d));
++            }
++            loss += (weights ? weights[j] : 1.0)*error*error;
++        }
++        best = std::min(best, loss);
++    }
++    return best;
++}
++
++static int test_nvfp4_offline_mse(bool verbose) {
++    const char * previous = getenv("GGML_NVFP4_QUANTIZE_MSE");
++    const std::string saved = previous ? previous : "";
++    const auto * traits = ggml_get_type_traits(GGML_TYPE_NVFP4);
++    constexpr int columns = 256;
++    constexpr int rows = 3;
++    constexpr int count = columns*rows;
++    const size_t row_bytes = ggml_row_size(GGML_TYPE_NVFP4, columns);
++    std::vector<float> input(count), weights(columns), original(count), restored(count), full_restored(count);
++    std::vector<uint8_t> reference(row_bytes*rows), result(reference.size()), individual(reference.size()), unweighted(reference.size()), full(reference.size());
++    int failed = 0;
++    int improved[2] = {0, 0};
++    int full_improved[2] = {0, 0};
++    bool weights_used = false;
++
++    for (float amplitude : {0.0f, 0.00000001f, 0.0001f, 0.0039f, 0.03f, 1.0f, 80.0f, 1000.0f, 1e11f, 1e12f}) {
++        for (int j = 0; j < count; ++j) {
++            if (amplitude >= 1e11f) {
++                // Float32 reference errors tie at these magnitudes, selecting
++                // code zero at scale 126. Full search must refit that same
++                // scale, including constant positive and negative 64-value rows.
++                input[j] = j % 128 < 64 ? amplitude : -amplitude;
++                continue;
++            }
++            input[j] = amplitude*(sinf(j*0.73f) + 0.2f*cosf(j*0.13f));
++            if (j % 31 == 0) {
++                input[j] *= 7.0f;
++            }
++        }
++        for (int j = 0; j < columns; ++j) {
++            weights[j] = j % 64 < 16 ? 0.0f : (j % 7 == 0 ? 100.0f : 0.01f);
++        }
++        traits->from_float_ref(input.data(), reference.data(), count);
++        traits->to_float(reference.data(), original.data(), count);
++        set_nvfp4_mse("0");
++        ggml_quantize_chunk(GGML_TYPE_NVFP4, input.data(), result.data(), 0, rows, columns, weights.data());
++        failed += result != reference;
++        for (int weighted = 0; weighted < 2; ++weighted) {
++            set_nvfp4_mse("1");
++            const float * importance = weighted ? weights.data() : nullptr;
++            const size_t size = ggml_quantize_chunk(GGML_TYPE_NVFP4, input.data(), result.data(), 0, rows, columns, importance);
++            failed += size != result.size();
++            for (int row = 0; row < rows; ++row) {
++                ggml_quantize_chunk(GGML_TYPE_NVFP4, input.data() + row*columns,
++                                    individual.data() + row*row_bytes, 0, 1, columns, importance);
++            }
++            failed += individual != result;
++            traits->to_float(result.data(), restored.data(), count);
++            set_nvfp4_mse("2");
++            failed += ggml_quantize_chunk(GGML_TYPE_NVFP4, input.data(), full.data(), 0, rows, columns, importance) != full.size();
++            traits->to_float(full.data(), full_restored.data(), count);
++            for (int row = 0; row < rows; ++row) {
++                ggml_quantize_chunk(GGML_TYPE_NVFP4, input.data() + row*columns,
++                                    individual.data() + row*row_bytes, 0, 1, columns, importance);
++            }
++            failed += individual != full;
++            for (int block = 0; block < count; block += 16) {
++                double old_loss = 0.0, new_loss = 0.0, full_loss = 0.0;
++                for (int j = block; j < block + 16; ++j) {
++                    const double weight = importance ? importance[j % columns] : 1.0;
++                    const double before = (double) input[j] - original[j];
++                    const double after = (double) input[j] - restored[j];
++                    const double after_full = (double) input[j] - full_restored[j];
++                    old_loss += weight*before*before;
++                    new_loss += weight*after*after;
++                    full_loss += weight*after_full*after_full;
++                }
++                failed += !(std::isfinite(new_loss) && new_loss <= old_loss + 1e-12*std::max(1.0, old_loss));
++                improved[weighted] += new_loss < old_loss;
++                const double optimal = nvfp4_exhaustive_loss(input.data() + block, importance ? importance + block % columns : nullptr);
++                failed += !(std::isfinite(full_loss) && full_loss <= new_loss);
++                failed += std::fabs(full_loss - optimal) > 1e-12*std::max(1e-30, optimal);
++                full_improved[weighted] += full_loss < new_loss;
++            }
++            if (!weighted) {
++                unweighted = result;
++            } else {
++                weights_used |= result != unweighted;
++            }
++        }
++    }
++    failed += improved[0] == 0 || improved[1] == 0 || !weights_used;
++    failed += full_improved[0] == 0 || full_improved[1] == 0;
++    set_nvfp4_mse(saved.c_str());
++    if (failed || verbose) {
++        printf("NVFP4 offline scale search: %s (local improved %d/%d, full improved %d/%d unweighted/weighted blocks; exhaustive oracle checked)\n",
++               RESULT_STR[failed != 0], improved[0], improved[1], full_improved[0], full_improved[1]);
++    }
++    return failed;
++}
++
+ static int test_vec_dot_q(bool verbose) {
+     int num_failed = 0;
+ 
+@@ -264,6 +391,7 @@ int main(int argc, char * argv[]) {
+ 
+     num_failed += test_vec_dot_f32(verbose);
+     num_failed += test_vec_dot_q(verbose);
++    num_failed += test_nvfp4_offline_mse(verbose);
+ 
+     if (num_failed || verbose) {
+         printf("%d tests failed\n", num_failed);
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index c8ad1db436237c0477a26d2f35778bed83449af2..f912165bb7ed0adcf69dfc6ede4ec1f4701edea3 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -15,6 +15,8 @@ llama_add_compile_flags()
+ if (EMSCRIPTEN)
+ else()
+     add_subdirectory(batched-bench)
++    add_subdirectory(hy-batch)
++    add_subdirectory(hy-logits)
+     add_subdirectory(gguf-split)
+     add_subdirectory(imatrix)
+     add_subdirectory(llama-bench)
 diff --git a/tools/hy-batch/CMakeLists.txt b/tools/hy-batch/CMakeLists.txt
 new file mode 100644
 index 0000000000000000000000000000000000000000..4ebcabb0aefb7595910c21514dfcf10289d35da8
@@ -2635,10 +3176,10 @@ index 0000000000000000000000000000000000000000..95cf21d781052115a7bb34c4702c0bd2
 +Use `--dry-run` to inspect that wrapper's command without loading a model. A new label is required for each run to prevent mixing stale results with a failed run. The HTTP harness uses separate warm-up requests, while native runs include first-use warm-up; retain that distinction when reporting performance.
 diff --git a/tools/hy-batch/hy-batch.cpp b/tools/hy-batch/hy-batch.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d10417e480c72
+index 0000000000000000000000000000000000000000..51ade17bd16921ab2be4ea88660d95fd7004f404
 --- /dev/null
 +++ b/tools/hy-batch/hy-batch.cpp
-@@ -0,0 +1,817 @@
+@@ -0,0 +1,844 @@
 +#if defined(_WIN32)
 +#ifndef NOMINMAX
 +#define NOMINMAX
@@ -2654,10 +3195,12 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +#include "json.h"
 +#include "llama-cpp.h"
 +#include "llama.h"
++#include "log.h"
 +#include "sampling.h"
 +
 +#include <algorithm>
 +#include <atomic>
++#include <cerrno>
 +#include <chrono>
 +#include <climits>
 +#include <clocale>
@@ -2693,6 +3236,8 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +    int max_tokens = 512;
 +    int threads = 8;
 +    int sampling_threads = 1;
++    ggml_type cache_type_k = GGML_TYPE_F16;
++    ggml_type cache_type_v = GGML_TYPE_F16;
 +    uint32_t seed = 42;
 +    bool greedy = false;
 +    bool backend_sampling = false;
@@ -2854,6 +3399,8 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +        "JSONL: {\"id\":\"1\",\"text\":\"Hello.\",\"target_lang\":\"Chinese\"}\n"
 +        "  --parallel N          Fixed wave width, 1..256 (default 32)\n"
 +        "  --context N           Context tokens per sequence (2048)\n"
++        "  --cache-type-k TYPE   K cache: f16, q8_0, q4_0 (f16)\n"
++        "  --cache-type-v TYPE   V cache: f16, q8_0, q4_0 (f16)\n"
 +        "  --max-tokens N        Maximum sampled tokens per request (512)\n"
 +        "  --batch-size N        Logical prefill batch size (2048)\n"
 +        "  --ubatch-size N       Physical batch size (512; at least wave width)\n"
@@ -2873,6 +3420,13 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +        "and output writing are included. Dummy tokens are never counted as output.\n";
 +}
 +
++static ggml_type cache_type(const std::string & value) {
++    if (value == "f16") return GGML_TYPE_F16;
++    if (value == "q8_0") return GGML_TYPE_Q8_0;
++    if (value == "q4_0") return GGML_TYPE_Q4_0;
++    throw std::runtime_error("cache type must be f16, q8_0, or q4_0");
++}
++
 +static options parse(int argc, char ** argv) {
 +    options result;
 +    for (int i = 1; i < argc; ++i) {
@@ -2889,6 +3443,8 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +        else if (flag == "--summary") result.summary = value();
 +        else if (flag == "--parallel" || flag == "-np") result.parallel = positive_integer(value(), flag);
 +        else if (flag == "--context") result.context = positive_integer(value(), flag);
++        else if (flag == "--cache-type-k") result.cache_type_k = cache_type(value());
++        else if (flag == "--cache-type-v") result.cache_type_v = cache_type(value());
 +        else if (flag == "--batch-size" || flag == "-b") result.batch = positive_integer(value(), flag);
 +        else if (flag == "--ubatch-size" || flag == "-ub") result.ubatch = positive_integer(value(), flag);
 +        else if (flag == "--max-tokens" || flag == "-n") result.max_tokens = positive_integer(value(), flag);
@@ -2961,6 +3517,15 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +                                (!batch_snapshot_env || std::string(batch_snapshot_env) != "0");
 +    const bool prepared_snapshots = batch_snapshot || opt.sampling_threads > 1;
 +    common_init();
++    if (const char * value = std::getenv("LLAMA_ARG_LOG_VERBOSITY")) {
++        char * end = nullptr;
++        errno = 0;
++        const long verbosity = std::strtol(value, &end, 10);
++        if (errno == ERANGE || end == value || *end != '\0' || verbosity < INT_MIN || verbosity > INT_MAX) {
++            throw std::runtime_error("LLAMA_ARG_LOG_VERBOSITY must be a base-10 integer in the int range");
++        }
++        common_log_set_verbosity_thold(static_cast<int>(verbosity));
++    }
 +    llama_backend_init();
 +    struct backend_guard { ~backend_guard() { llama_backend_free(); } } guard;
 +    const auto init_start = clock_type::now();
@@ -3016,6 +3581,8 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +    context_params.n_threads = opt.threads;
 +    context_params.n_threads_batch = opt.threads;
 +    context_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED;
++    context_params.type_k = opt.cache_type_k;
++    context_params.type_v = opt.cache_type_v;
 +    context_params.kv_unified = opt.kv_unified;
 +    context_params.no_perf = false;
 +    if (opt.backend_sampling || opt.gpu_prefix) {
@@ -3362,6 +3929,7 @@ index 0000000000000000000000000000000000000000..4481ee150719bceda3619419bd8d1041
 +        {"wave_widths", wave_widths}, {"final_wave_width", wave_widths.empty() ? 0 : wave_widths.back()},
 +        {"pad_final_wave", opt.pad_final_wave}, {"pad_final_wave_effective", opt.pad_final_wave || opt.backend_sampling || opt.gpu_prefix},
 +        {"context_per_sequence", opt.context}, {"max_tokens", opt.max_tokens},
++        {"cache_type_k", ggml_type_name(opt.cache_type_k)}, {"cache_type_v", ggml_type_name(opt.cache_type_v)},
 +        {"batch", opt.batch}, {"ubatch", opt.ubatch}, {"seed", opt.seed}, {"greedy", opt.greedy},
 +        {"sampling_threads", opt.sampling_threads},
 +        {"batch_snapshot", batch_snapshot},
@@ -3474,10 +4042,10 @@ index 0000000000000000000000000000000000000000..41d35b1688dc8364cb7bb763c2ce4295
 +endif()
 diff --git a/tools/hy-logits/hy-logits.cpp b/tools/hy-logits/hy-logits.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be66a97aba9
+index 0000000000000000000000000000000000000000..62a8a269a98965f9ec0c09b944d385fc01061a06
 --- /dev/null
 +++ b/tools/hy-logits/hy-logits.cpp
-@@ -0,0 +1,354 @@
+@@ -0,0 +1,371 @@
 +#if defined(_WIN32)
 +#ifndef NOMINMAX
 +#define NOMINMAX
@@ -3510,6 +4078,7 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +struct options {
 +    std::string model, text_file, tokens_file, output, reference, candidate;
 +    int limit = 96, batch = 1, parallel = 1, context = 2048, threads = 8, gpu_layers = 99;
++    ggml_type cache_type_k = GGML_TYPE_F16, cache_type_v = GGML_TYPE_F16;
 +    bool last_only = false, flash_attn = true;
 +};
 +
@@ -3548,6 +4117,13 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +    return static_cast<int>(result);
 +}
 +
++static ggml_type cache_type(const std::string & value) {
++    if (value == "f16") return GGML_TYPE_F16;
++    if (value == "q8_0") return GGML_TYPE_Q8_0;
++    if (value == "q4_0") return GGML_TYPE_Q4_0;
++    throw std::runtime_error("cache type must be f16, q8_0, or q4_0");
++}
++
 +static options parse(int argc, char ** argv) {
 +    options opt;
 +    for (int i = 1; i < argc; ++i) {
@@ -3564,6 +4140,8 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +        else if (arg == "--batch") { opt.batch = positive(next(), arg); }
 +        else if (arg == "--parallel") { opt.parallel = positive(next(), arg); }
 +        else if (arg == "--context") { opt.context = positive(next(), arg); }
++        else if (arg == "--cache-type-k") { opt.cache_type_k = cache_type(next()); }
++        else if (arg == "--cache-type-v") { opt.cache_type_v = cache_type(next()); }
 +        else if (arg == "--threads") { opt.threads = positive(next(), arg); }
 +        else if (arg == "--gpu-layers") {
 +            const auto value = next();
@@ -3577,6 +4155,7 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +                "hy-logits -m MODEL -o PREFIX [--text-file UTF8 | --tokens JSON] [--limit 96]\n"
 +                "          [--batch 1] [--parallel 1] [--context 2048] [--threads 8]\n"
 +                "          [--gpu-layers 99] [--last-only] [--no-flash-attn]\n"
++                "          [--cache-type-k f16|q8_0|q4_0] [--cache-type-v f16|q8_0|q4_0]\n"
 +                "hy-logits --compare REFERENCE_PREFIX CANDIDATE_PREFIX [-o REPORT.json]\n"
 +                "Writes PREFIX.json and PREFIX.f32 (native little-endian float32).\n"
 +                "--tokens accepts an integer array or a prior dump JSON with tokens.\n"
@@ -3590,6 +4169,9 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +        throw std::runtime_error("dump mode requires --model and --output");
 +    }
 +    if (!opt.text_file.empty() && !opt.tokens_file.empty()) { throw std::runtime_error("choose --text-file or --tokens"); }
++    if (!opt.flash_attn && opt.cache_type_v != GGML_TYPE_F16) {
++        throw std::runtime_error("quantized V cache requires FlashAttention; remove --no-flash-attn");
++    }
 +    if (opt.context < opt.limit || int64_t(opt.context) * opt.parallel > std::numeric_limits<int32_t>::max() ||
 +        int64_t(opt.batch) * opt.parallel > std::numeric_limits<int32_t>::max()) {
 +        throw std::runtime_error("invalid context/limit/batch/parallel product");
@@ -3650,6 +4232,8 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +    cp.n_seq_max = opt.parallel;
 +    cp.n_threads = cp.n_threads_batch = opt.threads;
 +    cp.flash_attn_type = opt.flash_attn ? LLAMA_FLASH_ATTN_TYPE_ENABLED : LLAMA_FLASH_ATTN_TYPE_DISABLED;
++    cp.type_k = opt.cache_type_k;
++    cp.type_v = opt.cache_type_v;
 +    cp.no_perf = true;
 +    cp.kv_unified = false;
 +    llama_context_ptr ctx(llama_init_from_model(model.get(), cp));
@@ -3698,6 +4282,7 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +        {"teacher_forced", true}, {"sampled_tokens_used", false}, {"recorded_sequence", 0},
 +        {"batch_per_sequence", opt.batch}, {"parallel", opt.parallel}, {"context_per_sequence", opt.context},
 +        {"threads", opt.threads}, {"gpu_layers", opt.gpu_layers}, {"flash_attn", opt.flash_attn},
++        {"cache_type_k", ggml_type_name(opt.cache_type_k)}, {"cache_type_v", ggml_type_name(opt.cache_type_v)},
 +        {"environment", environment()}
 +    };
 +    write_json(out + ".json", metadata);
@@ -3832,3 +4417,55 @@ index 0000000000000000000000000000000000000000..ee5a40a63583e72129ee114300439be6
 +    return main_utf8(argc, argv);
 +}
 +#endif
+diff --git a/tools/quantize/quantize.cpp b/tools/quantize/quantize.cpp
+index 38950036cd820e41f49fe28714a03ea261ce9df3..db2bb9aca5f21c2a29f8fc1e84ac19e9e1e98151 100644
+--- a/tools/quantize/quantize.cpp
++++ b/tools/quantize/quantize.cpp
+@@ -11,6 +11,7 @@
+ #include <clocale>
+ #include <cmath>
+ #include <cstdio>
++#include <cstdlib>
+ #include <cstring>
+ #include <vector>
+ #include <string>
+@@ -122,7 +123,7 @@ static bool try_parse_ftype(const std::string & ftype_str_in, llama_ftype & ftyp
+ static void usage(const char * executable) {
+     printf("usage: %s [--help] [--allow-requantize] [--leave-output-tensor] [--pure] [--imatrix] [--include-weights]\n", executable);
+     printf("       [--exclude-weights] [--output-tensor-type] [--token-embedding-type] [--tensor-type] [--tensor-type-file]\n");
+-    printf("       [--prune-layers] [--keep-split] [--override-kv] [--dry-run] [--max-buffer-size]\n");
++    printf("       [--prune-layers] [--keep-split] [--override-kv] [--dry-run] [--max-buffer-size] [--nvfp4-mse|--nvfp4-mse-full]\n");
+     printf("       model-f32.gguf [model-quant.gguf] type [nthreads]\n\n");
+     printf("  --allow-requantize\n");
+     printf("                                      allow requantizing tensors that have already been quantized\n");
+@@ -135,6 +136,12 @@ static void usage(const char * executable) {
+     printf("                                      disable k-quant mixtures and quantize all tensors to the same type\n");
+     printf("  --imatrix file_name\n");
+     printf("                                      use data in file_name as importance matrix for quant optimizations\n");
++    printf("  --nvfp4-mse\n");
++    printf("                                      optimize NVFP4 block scales offline using MSE (weighted when --imatrix is provided)\n");
++    printf("                                      keeps the existing tensor format and inference kernels\n");
++    printf("  --nvfp4-mse-full\n");
++    printf("                                      search all legal NVFP4 scales with exact MSE bounds (v2, slower offline)\n");
++    printf("                                      includes all v1 candidates; weighted when --imatrix is provided\n");
+     printf("  --include-weights tensor_name\n");
+     printf("                                      use importance matrix for this/these tensor(s)\n");
+     printf("  --exclude-weights tensor_name\n");
+@@ -450,6 +457,17 @@ int llama_quantize(int argc, char ** argv) {
+             params.allow_requantize = true;
+         } else if (strcmp(argv[arg_idx], "--pure") == 0) {
+             params.pure = true;
++        } else if (strcmp(argv[arg_idx], "--nvfp4-mse") == 0 || strcmp(argv[arg_idx], "--nvfp4-mse-full") == 0) {
++            const char * mode = strcmp(argv[arg_idx], "--nvfp4-mse-full") == 0 ? "2" : "1";
++#ifdef _WIN32
++            const int error = _putenv_s("GGML_NVFP4_QUANTIZE_MSE", mode);
++#else
++            const int error = setenv("GGML_NVFP4_QUANTIZE_MSE", mode, 1);
++#endif
++            if (error) {
++                fprintf(stderr, "%s: could not enable NVFP4 MSE quantization\n", __func__);
++                return 1;
++            }
+         } else if (strcmp(argv[arg_idx], "--imatrix") == 0) {
+             if (arg_idx < argc-1) {
+                 imatrix_file = argv[++arg_idx];

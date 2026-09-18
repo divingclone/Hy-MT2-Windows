@@ -1,0 +1,100 @@
+{
+  "schema_version": 2,
+  "summary_of_schema_version": 1,
+  "created_utc": "2026-09-18T13:15:46.238333+00:00",
+  "detailed_report_sha256": "98edd64739109818a5e2b09c4749b70780f1df31d521fd3582e3f8a20af2b08d",
+  "detail_storage": "Full original report retained locally under ignored results/public-evidence-detailed; repeated run/request records omitted here.",
+  "source_reproducibility": {
+    "base_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+    "patch_sha256": "a6bcaaa690841ad8383c40f433e2796fd70256a652192e3aafd47cae58ff5673",
+    "changed_files_verified": 38,
+    "patched_tree": "94450ee558e06e36bfedf679090be12df11651c7"
+  },
+  "build": {
+    "platform": "windows-x86_64",
+    "cuda_toolkit": "13.0",
+    "architectures": ["120a"],
+    "ptx_architectures": [],
+    "cpu_baseline": "x86-64/SSE2",
+    "source_commit": "bdcbaaf6e7520b68c8c60ff724c67409970d70e1",
+    "distributed_patch_sha256": "a6bcaaa690841ad8383c40f433e2796fd70256a652192e3aafd47cae58ff5673",
+    "build_purpose": "Local RTX5090 evaluation only",
+    "cuda_fa_quants": ["f16-f16","bf16-bf16","q8_0-q8_0","q4_0-q4_0"]
+  },
+  "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+  "measurement": {
+    "device": "NVIDIA GeForce RTX 5090 32GB",
+    "runtime": "Windows 11, CUDA 13.0, MSVC 14.43",
+    "compiled_architectures": ["120a"],
+    "requests_per_run": 512,
+    "unique_source_texts": 64,
+    "repetitions": 3,
+    "context_per_sequence": 1024,
+    "sampling": "temperature 0.7, top_p 0.6, top_k 20, repeat_penalty 1.05; seed 42 + request index",
+    "ordering": "p128 variants interleaved, then three p256 Q8 runs, then interleaved p256 reference and weighted F16 runs",
+    "memory": "nvidia-smi device memory.used sampled every 100ms; peak minus reading immediately before process launch, includes initialization",
+    "limitations": ["Shared Windows display device, other resident memory about 12-13 GiB; peak differences are estimates, not isolated per-process allocations.","No warmup excluded from native wall; model/context initialization is separate.","Q8 p256 also uses ubatch2048 instead of p128 ubatch1024; not a fixed-concurrency comparison.","No new portable release or model upload; existing release benchmarks remain historical."]
+  },
+  "models": {
+    "bf16_source": {"filename": "Hy-MT2-1.8B-BF16.gguf","size_bytes": 3587534560,"sha256": "3782e25037d6e85aff19505a412de061084aaa1d012fc2088e215a1029f7677d"},
+    "mse": {"filename": "Hy-MT2-1.8B-NVFP4-MSE-fused.gguf","size_bytes": 1013053920,"sha256": "a90c2014a0cd6c3d014bd5306db354422427c519266ba4a502e0b48d2880dd2b"},
+    "weighted": {"filename": "Hy-MT2-1.8B-NVFP4-IMATRIX-fused.gguf","size_bytes": 1013054272,"sha256": "e1174c1230e970777d42f3b8d24f6e9c70734c7cd46f7b508432f79ec49b8351"},
+    "reference": {"filename": "Hy-MT2-1.8B-NVFP4-fused.gguf","sha256": null,"note": "Reference weight hash was not recorded in this report."}
+  },
+  "quantization": {
+    "mse": {"imatrix_chunks": null,"imatrix_context": null,"matched_tensor_count": 0,"unweighted_tensors": []},
+    "weighted": {"imatrix_chunks": 20,"imatrix_context": 256,"matched_tensor_count": 224,"unweighted_tensors": ["token_embd.weight"]}
+  },
+  "quantizer_library_sha256": {
+    "ggml-base.dll": "855ee18c16d03e975affe2ca34eafd30ba1582dfb332a04b8da5537949b848f2",
+    "ggml-cpu.dll": "d9abba35a1607328300429ec173c7e3ed937f85cf1d6d999c58e02496ffc0712",
+    "ggml-cuda.dll": "8ffc193ee850e2724ce448d1d24df0d67299bcd93ff8f1a02f7df20fef1102ac",
+    "ggml.dll": "5d245b496798ad51af70625d8d0437d8a10f3bb71da6214b314f4aef65b1543b",
+    "llama-common.dll": "2be84f29cff3f2396183ca4ef4b30dea09ad02e95f371c7a3be52b7a4976d227",
+    "llama-quantize-impl.dll": "9b62c46b0be02c7e7c7ac6c263ca977d6c3192b4dde6eaef118bc849f3239f91",
+    "llama-server-impl.dll": "030c6f5d654f449f146356089c95ccc2d8c904ab6632d0e5450e71752441b877",
+    "llama.dll": "616da6d5d00cb74338478c370cccb51186c80928297d20acbe68ad78decf1647",
+    "mtmd.dll": "abb16bebc3aa818c8d87233ea78e660109af0efb9f90e0cc1758ee4a1e71b02d"
+  },
+  "performance_summary": [
+    {"variant": "reference","parallel": 128,"median_completion_tokens_per_second": 4736.526077788371,"completion_tokens_per_second_range": [4730.152970595452,4747.8021379483935],"median_wall_s": 7.0292023,"median_sampled_peak_device_memory_increase_mib": 9835.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "f16","cache_type_v": "f16","wall_s_range": [7.0125079,7.038673],"sampled_peak_device_memory_increase_mib_range": [9801.0,9854.0],"complete_translation_count": 1536},
+    {"variant": "mse","parallel": 128,"median_completion_tokens_per_second": 4670.297874321164,"completion_tokens_per_second_range": [4620.345562900219,4709.310656786469],"median_wall_s": 7.1325215,"median_sampled_peak_device_memory_increase_mib": 9824.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "f16","cache_type_v": "f16","wall_s_range": [7.0734344,7.2096339],"sampled_peak_device_memory_increase_mib_range": [9811.0,9869.0],"complete_translation_count": 1536},
+    {"variant": "weighted","parallel": 128,"median_completion_tokens_per_second": 4772.269741859599,"completion_tokens_per_second_range": [4716.766370498275,4819.819759756588],"median_wall_s": 6.9683823,"median_sampled_peak_device_memory_increase_mib": 9830.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "f16","cache_type_v": "f16","wall_s_range": [6.8996356,7.050381],"sampled_peak_device_memory_increase_mib_range": [9812.0,9872.0],"complete_translation_count": 1536},
+    {"variant": "weighted-q8","parallel": 128,"median_completion_tokens_per_second": 4019.62165215857,"completion_tokens_per_second_range": [3901.8396749226126,4058.8577776894854],"median_wall_s": 8.2597326,"median_sampled_peak_device_memory_increase_mib": 6171.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "q8_0","cache_type_v": "q8_0","wall_s_range": [8.1798875,8.5090631],"sampled_peak_device_memory_increase_mib_range": [6165.0,6183.0],"complete_translation_count": 1536},
+    {"variant": "weighted-q4","parallel": 128,"median_completion_tokens_per_second": 4074.9956880014493,"completion_tokens_per_second_range": [4067.6403050638005,4178.450201060996],"median_wall_s": 8.1180454,"median_sampled_peak_device_memory_increase_mib": 4146.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "q4_0","cache_type_v": "q4_0","wall_s_range": [7.9170502,8.132725],"sampled_peak_device_memory_increase_mib_range": [4113.0,4156.0],"complete_translation_count": 1536},
+    {"variant": "weighted-q8","parallel": 256,"median_completion_tokens_per_second": 4426.0323983706285,"completion_tokens_per_second_range": [4403.288936065848,4485.390851112365],"median_wall_s": 7.5055935,"median_sampled_peak_device_memory_increase_mib": 10990.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "q8_0","cache_type_v": "q8_0","wall_s_range": [7.4062665,7.5443607],"sampled_peak_device_memory_increase_mib_range": [10765.0,10998.0],"complete_translation_count": 1536},
+    {"variant": "reference","parallel": 256,"median_completion_tokens_per_second": 5023.936158822134,"completion_tokens_per_second_range": [4994.131812669118,5100.427937447816],"median_wall_s": 6.6310556,"median_sampled_peak_device_memory_increase_mib": 18142.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "f16","cache_type_v": "f16","wall_s_range": [6.5316088,6.6706289],"sampled_peak_device_memory_increase_mib_range": [18119.0,18171.0],"complete_translation_count": 1536},
+    {"variant": "weighted","parallel": 256,"median_completion_tokens_per_second": 5045.950834684178,"completion_tokens_per_second_range": [5002.586765318204,5100.617073122169],"median_wall_s": 6.5999454,"median_sampled_peak_device_memory_increase_mib": 18159.0,"all_runs_valid": true,"runs": 3,"cache_type_k": "f16","cache_type_v": "f16","wall_s_range": [6.52921,6.6571559],"sampled_peak_device_memory_increase_mib_range": [18133.0,18167.0],"complete_translation_count": 1536}
+  ],
+  "quality_conditions": {
+    "kind": "Limited BF16 teacher-forced distribution comparison, not translation quality scores",
+    "calibration_chunks": 20,
+    "calibration_context": 256,
+    "calibration_parse_special": false,
+    "calibration_text_sha256": "009b3ecebbfc82b30d8d568be5931d71fe74eea6a035f45dfe15336b485c34f3",
+    "calibration_targets": "BF16 greedy pseudo-translations; no human references",
+    "mask": "assistant marker position <= p < len(tokens)-1; predicts translation plus terminal token",
+    "limitations": ["Only four held-out synthetic English/Chinese examples; no BLEU/chrF/COMET or human scoring.","MSE/imatrix lowers the selected reconstruction objective, not a guarantee of semantic improvement.","Q4 KV was measured for speed/memory/completion only; no BF16 distribution comparison."],
+    "calibration_examples": 32,
+    "heldout_examples": 4,
+    "split_note": "Disjoint source texts, synthetic smoke data; not representative translation quality."
+  },
+  "quality_metrics": {
+    "reference-f16": {"positions": 262,"mean_kl": 0.20529141837872314,"top1_match_rate": 0.8969465648854962,"mean_nll_delta": 0.18041891424196949},
+    "mse-f16": {"positions": 262,"mean_kl": 0.17684441277121796,"top1_match_rate": 0.8740458015267175,"mean_nll_delta": 0.15192683140926558},
+    "weighted-f16": {"positions": 262,"mean_kl": 0.15135116601975704,"top1_match_rate": 0.9083969465648855,"mean_nll_delta": 0.12839017792094015},
+    "weighted-q8_0": {"positions": 262,"mean_kl": 0.13643992881517034,"top1_match_rate": 0.916030534351145,"mean_nll_delta": 0.1257269311471784}
+  },
+  "run_validation": {
+    "runs": 24,
+    "valid_runs": 24,
+    "error_requests": 0,
+    "truncated_requests": 0
+  },
+  "failed_runs": [],
+  "validation": {
+    "quantize_fns": "0 failures; default reference bytes, chunk invariance, weighted/unweighted per-block objective checks",
+    "batch_launcher_q8": "3/3 translations, no truncation/empty output",
+    "api_q8": "health, chat translation with number and negation, managed stop verified"
+  }
+}

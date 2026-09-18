@@ -27,9 +27,9 @@ git -C src/llama-baseline -c core.autocrlf=false checkout --detach bdcbaaf6e7520
 .\.venv\Scripts\python.exe scripts/prepare_source.py --repository src/llama-baseline --destination results/source-check
 ```
 
-此命令从本地 Git 对象获取固定提交，因此可以离线执行；并非复制已经修改的工作文件。它检查完整修改列表与 35 个当前修改文件的哈希，并在新 checkout 的 `.git/hy-mt2-prepared.json` 保存补丁和最终 Git tree ID。修改文件数量随未来补丁更新，不是硬编码要求。
+此命令从本地 Git 对象获取固定提交，因此可以离线执行；并非复制已经修改的工作文件。它检查完整修改列表与当前修改文件的哈希，并在新 checkout 的 `.git/hy-mt2-prepared.json` 保存补丁和最终 Git tree ID。修改文件数量随补丁更新，不是硬编码要求。
 
-本次已在独立 `results/source-repro-check-3` 验证主补丁：35/35 修改文件匹配；补丁 SHA256 为 `ad38fb9f932201fe88b2397395526eb6ca451bece1f0370df7c78ece8b3b93bb`，准备后 Git tree 为 `fad56bd8e27d21e686fc874e6742ed113b8e41f0`。这项检查验证源码复现，不涉及重新编译或 GPU 测试。
+当前补丁已独立重放并核对 39 个修改文件；固定提交、补丁哈希与 Git tree 见 [源码复现摘要](../benchmarks/source-reproducibility.json)。
 
 ## 更改后的验证
 

@@ -2,7 +2,7 @@
 
 运行环境包中的 `setup-model.cmd` 会根据显卡下载适合的模型；下载地址与 SHA-256 在 [manifest.json](manifest.json) 中。
 
-- RTX 50（CC 12.0）：`Hy-MT2-1.8B-NVFP4-fused.gguf`
+- RTX 50（CC 12.0）：`Hy-MT2-1.8B-NVFP4-fused.gguf`，使用 OPUS 中英翻译语料校准和局部加权 MSE 尺度搜索
 - GTX 16、RTX 20/30/40：`Hy-MT2-1.8B-Q4_K_M-fused.gguf`
 
 模型文件在 [Hugging Face](https://huggingface.co/divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF) 分发，不进入 Git。手动下载时保持文件名不变。

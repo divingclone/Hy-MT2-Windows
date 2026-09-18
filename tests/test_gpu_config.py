@@ -1,8 +1,10 @@
 """Pure decision/fixture tests. No nvidia-smi, CUDA, models or inference execute."""
 
 import contextlib
+import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -115,6 +117,61 @@ class MemoryTests(unittest.TestCase):
         self.assertEqual(result["budget"]["workspace_reserve_mib"], 4096)
 
 
+    def test_quantized_kv_includes_block_scales_and_independent_types(self):
+        for key, value, expected_k, expected_v in (("q8_0", "q8_0", 17, 17),
+                                                   ("q4_0", "q4_0", 9, 9),
+                                                   ("f16", "q8_0", 32, 17),
+                                                   ("q8_0", "q4_0", 17, 9)):
+            with self.subTest(key=key, value=value):
+                result = self.plan(parallel=8, cache_type_k=key, cache_type_v=value)
+                budget = result["budget"]
+                self.assertEqual((result["cache_type_k"], result["cache_type_v"]), (key, value))
+                self.assertEqual((budget["k_per_slot_mib"], budget["v_per_slot_mib"]), (expected_k, expected_v))
+                self.assertEqual(budget["kv_total_mib"], 8 * (expected_k + expected_v))
+                self.assertEqual(budget["k_total_mib"] + budget["v_total_mib"], budget["kv_total_mib"])
+        rounded = self.plan(context=1025, cache_type_k="q8_0", cache_type_v="q8_0")
+        self.assertEqual(rounded["budget"]["kv_per_slot_mib"], 42.5)
+
+    def test_quantized_cache_changes_admission_budget(self):
+        for cache_type, expected_parallel in (("f16", 8), ("q8_0", 16), ("q4_0", 32)):
+            result = config.memory_plan(mode="batch", free_mib=3072, model_bytes=1024*config.MIB,
+                                        cache_type_k=cache_type, cache_type_v=cache_type)
+            self.assertEqual(result["parallel"], expected_parallel)
+        for kwargs in ({"cache_type_k": "fp8"}, {"cache_type_v": "q4_k"}):
+            with self.assertRaisesRegex(config.ConfigError, "cache-type"):
+                self.plan(**kwargs)
+
+
+class CacheCompatibilityTests(unittest.TestCase):
+    def test_f16_requires_current_binary_and_passes_explicit_cache_types(self):
+        self.assertEqual(config.cache_type_args(), ['--cache-type-k', 'f16', '--cache-type-v', 'f16'])
+        supported = subprocess.CompletedProcess([], 0, '--cache-type-k TYPE\n--cache-type-v TYPE', '')
+        with patch.object(config.subprocess, "run", return_value=supported) as run:
+            config.ensure_cache_type_support("hy-batch.exe", "f16", "f16")
+        run.assert_called_once()
+
+    def test_quantized_cache_requires_both_flags_without_loading_a_model(self):
+        supported = subprocess.CompletedProcess([], 0, "--cache-type-k TYPE\n--cache-type-v TYPE", "")
+        with patch.object(config.subprocess, "run", return_value=supported) as run:
+            config.ensure_cache_type_support("new-hy-batch.exe", "q8_0", "q4_0", env={"PATH": "test"})
+        self.assertEqual(run.call_args.args[0], ["new-hy-batch.exe", "--help"])
+        self.assertEqual(run.call_args.kwargs["timeout"], 15)
+        self.assertEqual(run.call_args.kwargs["env"], {"PATH": "test"})
+        self.assertEqual(config.cache_type_args("q8_0", "f16"),
+                         ["--cache-type-k", "q8_0", "--cache-type-v", "f16"])
+
+    def test_old_binary_and_failed_probe_are_actionable(self):
+        for result in (subprocess.CompletedProcess([], 0, "old help", ""),
+                       subprocess.CompletedProcess([], 0, "--cache-type-k TYPE", ""),
+                       subprocess.CompletedProcess([], 1, "--cache-type-k --cache-type-v", "failed")):
+            with patch.object(config.subprocess, "run", return_value=result):
+                with self.assertRaisesRegex(config.ConfigError, "build-source.ps1"):
+                    config.ensure_cache_type_support("old.exe", "q8_0", "q8_0")
+        with patch.object(config.subprocess, "run", side_effect=subprocess.TimeoutExpired("mock", 15)):
+            with self.assertRaisesRegex(config.ConfigError, "build-source.ps1"):
+                config.ensure_cache_type_support("old.exe", "q8_0", "q8_0")
+
+
 class ResolveTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="hy-gpu-config-test-")
@@ -126,6 +183,10 @@ class ResolveTests(unittest.TestCase):
         model_dir.mkdir()
         for filename in (config.MODEL_FILES["fast"][0], config.MODEL_FILES["official"][0]):
             (model_dir / filename).write_bytes(b"fixture GGUF availability only")
+        (model_dir / 'manifest.json').write_text(json.dumps({'schema_version': 1, 'files': {
+            profile: {'filename': names[0], 'size_bytes': (model_dir / names[0]).stat().st_size,
+                      'sha256': hashlib.sha256((model_dir / names[0]).read_bytes()).hexdigest()}
+            for profile, names in config.MODEL_FILES.items()}}), encoding='utf-8')
         self.detect = patch.object(config, "detect_gpus", return_value=[gpu()]).start()
         self.addCleanup(patch.stopall)
 
@@ -179,38 +240,79 @@ class ResolveTests(unittest.TestCase):
         self.detect.return_value = [gpu(driver="580.88")]
         self.assertTrue(config.resolve_config(self.root)["ok"])
 
-    def test_portable_priority_and_explicit_binary_dir(self):
+    def test_installed_bin_is_authoritative_and_build_override_is_explicit(self):
         portable = self.root / "build/portable/bin"
         self.make_binary(portable)
-        self.assertEqual(config.resolve_config(self.root)["binary_dir"], str(portable))
-        self.assertEqual(config.resolve_config(self.root, binary_dir="bin")["binary_dir"], str(self.root / "bin"))
+        self.assertEqual(config.resolve_config(self.root)["binary_dir"], str(self.root / "bin"))
+        self.assertEqual(config.resolve_config(self.root, binary_dir="build/portable/bin")["binary_dir"], str(portable))
 
-    def test_unknown_metadata_free_binaries_rejected_legacy_only_cc12(self):
+    def test_metadata_required_even_when_an_experimental_build_exists(self):
         (self.root / "bin/build-info.json").unlink()
         with self.assertRaisesRegex(config.ConfigError, "build-info"):
             config.resolve_config(self.root)
         legacy = self.root / "build/optimized/bin"
         self.make_binary(legacy, metadata=False)
-        self.assertEqual(config.resolve_config(self.root)["binary_dir"], str(legacy))
-        self.detect.return_value = [gpu(capability="8.6")]
         with self.assertRaises(config.ConfigError):
             config.resolve_config(self.root)
+        with self.assertRaises(config.ConfigError):
+            config.resolve_config(self.root, binary_dir=legacy)
 
-    def test_auto_fallback_and_explicit_model_profile(self):
+    def test_missing_current_nvfp4_requires_install_instead_of_switching_model(self):
         (self.root / "models" / config.MODEL_FILES["fast"][0]).unlink()
-        result = config.resolve_config(self.root)
-        self.assertEqual(result["profile"], "official")
-        self.assertTrue(result["warnings"])
+        with self.assertRaisesRegex(config.ConfigError, "setup-model.cmd"):
+            config.resolve_config(self.root)
         with self.assertRaisesRegex(config.ConfigError, "模型"):
             config.resolve_config(self.root, profile="fast")
 
-    def test_same_quantization_raw_model_fallback(self):
-        fused = self.root / "models" / config.MODEL_FILES["official"][0]
-        raw = self.root / "models" / config.MODEL_FILES["official"][1]
-        fused.rename(raw)
-        result = config.resolve_config(self.root, profile="official")
-        self.assertEqual(result["model"], str(raw))
-        self.assertTrue(result["warnings"])
+    def test_manifest_selects_current_payload_and_rejects_wrong_size_or_path(self):
+        path = self.root / 'models/manifest.json'
+        manifest = json.loads(path.read_text(encoding='utf-8'))
+        item = manifest['files']['fast']
+        item['filename'] = 'Hy-MT-calibrated.gguf'
+        (self.root / 'models' / item['filename']).write_bytes(b'new calibrated payload')
+        item['size_bytes'] = 22
+        item['sha256'] = hashlib.sha256(b'new calibrated payload').hexdigest()
+        path.write_text(json.dumps(manifest), encoding='utf-8')
+        self.assertEqual(Path(config.resolve_config(self.root)['model']).name, item['filename'])
+        item['size_bytes'] += 1
+        path.write_text(json.dumps(manifest), encoding='utf-8')
+        with self.assertRaisesRegex(config.ConfigError, '大小'):
+            config.resolve_config(self.root)
+        item['filename'] = '../escape.gguf'
+        path.write_text(json.dumps(manifest), encoding='utf-8')
+        with self.assertRaisesRegex(config.ConfigError, 'manifest'):
+            config.resolve_config(self.root)
+
+    def test_same_size_same_mtime_replacement_fails_full_hash_validation(self):
+        result = config.resolve_config(self.root)
+        path = Path(result['model'])
+        before = path.stat()
+        path.write_bytes(b'X' * before.st_size)
+        os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+        self.assertEqual(path.stat().st_size, before.st_size)
+        self.assertEqual(path.stat().st_mtime_ns, before.st_mtime_ns)
+        with self.assertRaisesRegex(config.ConfigError, 'SHA-256'):
+            config.resolve_config(self.root)
+
+    def test_manifest_requires_a_valid_sha256(self):
+        path = self.root / 'models/manifest.json'
+        manifest = json.loads(path.read_text(encoding='utf-8'))
+        for value in (None, '', 17, True, 'f' * 63, 'f' * 65, 'g' * 64, 'f' * 64 + '\n'):
+            with self.subTest(value=value):
+                manifest['files']['fast']['sha256'] = value
+                path.write_text(json.dumps(manifest), encoding='utf-8')
+                with self.assertRaisesRegex(config.ConfigError, 'manifest'):
+                    config.resolve_config(self.root)
+        del manifest['files']['fast']['sha256']
+        path.write_text(json.dumps(manifest), encoding='utf-8')
+        with self.assertRaisesRegex(config.ConfigError, 'manifest'):
+            config.resolve_config(self.root)
+
+    def test_explicit_model_override_does_not_require_manifest_identity(self):
+        path = self.root / 'models' / config.MODEL_FILES['fast'][0]
+        path.write_bytes(b'user selected model with a different identity')
+        (self.root / 'models/manifest.json').write_text('invalid manifest', encoding='utf-8')
+        self.assertEqual(config.resolve_config(self.root, model_override=path)['model'], str(path))
 
     def test_server_and_model_override(self):
         chosen = self.root / "指定模型.gguf"
@@ -223,6 +325,16 @@ class ResolveTests(unittest.TestCase):
         self.assertEqual(result["parallel"], 128)
         with self.assertRaisesRegex(config.ConfigError, "指定模型"):
             config.resolve_config(self.root, model_override="missing.gguf")
+
+    def test_cache_selection_survives_resolution_and_json_cli(self):
+        result = config.resolve_config(self.root, cache_type_k="q8_0", cache_type_v="q4_0")
+        self.assertEqual(result["budget"]["kv_per_slot_mib"], 26)
+        self.assertTrue(any("混合K/V" in warning for warning in result["warnings"]))
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            status = config.main(["--root", str(self.root), "--json", "--cache-type-k", "q8_0", "--cache-type-v", "q8_0"])
+        self.assertEqual(status, 0)
+        self.assertEqual(json.loads(output.getvalue())["budget"]["kv_per_slot_mib"], 34)
 
     def test_json_stdout_is_ascii_and_roundtrips_chinese_paths(self):
         output = io.StringIO()

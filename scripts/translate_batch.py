@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from gpu_config import resolve_config
+from gpu_config import CACHE_TYPE_BYTES, cache_type_args, ensure_cache_type_support, resolve_config
 
 ROOT = Path(__file__).resolve().parents[1]
 PROFILES = {
@@ -28,6 +28,7 @@ def main():
     parser.add_argument('input', type=Path, help='JSONL: id, text, target_lang')
     parser.add_argument('output', type=Path, nargs='?', help='Default: INPUT.translated.jsonl')
     parser.add_argument('--profile', choices=('auto', *PROFILES), default='auto')
+    parser.add_argument('--model', type=Path, help='Use an explicitly selected existing Hy-MT2-1.8B GGUF')
     parser.add_argument('--parallel', type=int, default=None, help='Default: adapt to free GPU memory')
     parser.add_argument('--gpu', help='NVIDIA GPU index or UUID; default: supported GPU with most free memory')
     parser.add_argument('--binary-dir', type=Path, help='Override the executable directory')
@@ -36,6 +37,8 @@ def main():
     parser.add_argument('--cpu-sampling', action='store_true', help='Use the original CPU sampling path')
     parser.add_argument('--context', type=int, default=1024)
     parser.add_argument('--ubatch', type=int, default=None)
+    parser.add_argument('--cache-type-k', choices=CACHE_TYPE_BYTES, default='f16')
+    parser.add_argument('--cache-type-v', choices=CACHE_TYPE_BYTES, default='f16')
     parser.add_argument('--max-tokens', type=int, default=512)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--greedy', action='store_true')
@@ -55,22 +58,23 @@ def main():
         parser.error('input contains no requests')
     config = resolve_config(ROOT, mode='batch', profile=args.profile,
                             parallel=min(args.parallel, count) if args.parallel is not None else None,
-                            context=args.context, ubatch=args.ubatch, gpu=args.gpu, binary_dir=args.binary_dir)
+                            context=args.context, ubatch=args.ubatch, gpu=args.gpu, binary_dir=args.binary_dir,
+                            model_override=args.model, cache_type_k=args.cache_type_k, cache_type_v=args.cache_type_v)
     parallel = min(config['parallel'], count)
     if args.max_tokens < 1 or args.context <= args.max_tokens:
         parser.error('context must exceed positive max-tokens')
-    destination.parent.mkdir(parents=True, exist_ok=True)
+    check_distinct_paths({'model': Path(config['model']), 'input': source, 'output': destination,
+                          'summary': summary, 'log': log_path, 'config': config_path})
     config.update(actual_parallel=parallel, sampling_threads=args.sampling_threads,
                   gpu_prefix=not args.cpu_sampling)
-    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding='utf-8')
-    (ROOT/'cache/cuda').mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     env['PATH'] = str(ROOT/'runtime/cuda') + os.pathsep + str(ROOT/'runtime/msvc') + os.pathsep + env['PATH']
     env.update(CUDA_CACHE_PATH=str(ROOT/'cache/cuda'), LLAMA_HYMT_FUSED_PROJ='1',
                LLAMA_HYMT_SPARSE_PENALTIES='1', LLAMA_HYMT_SAMPLING_SNAPSHOT='1', LLAMA_HYMT_BATCH_SNAPSHOT='1',
                GGML_CUDA_HYMT_DISABLE_ROPE_NORM='0', GGML_CUDA_HYMT_ROPE_NORM_STRICT='1',
                GGML_CUDA_HYMT_EAGER_GRAPHS='1', GGML_CUDA_GRAPH_OPT='0',
-               GGML_CUDA_HYMT_DISABLE_TOPK='0', GGML_CUDA_HYMT_DISABLE_SCALAR_GATHER='0')
+               GGML_CUDA_HYMT_DISABLE_TOPK='0', GGML_CUDA_HYMT_DISABLE_SCALAR_GATHER='0',
+               GGML_CUDA_HYMT_DISABLE_Q8_KV_FUSION='0', GGML_CUDA_Q8_KV_SUBWARP='0')
     env['CUDA_VISIBLE_DEVICES'] = config['cuda_visible_devices']
     command = [str(Path(config['binary_dir'])/'hy-batch.exe'), '-m', config['model'],
                '--input', str(source), '--output', str(destination), '--summary', str(summary),
@@ -78,11 +82,20 @@ def main():
                '--context', str(args.context), '--batch-size', str(config['batch']),
                '--ubatch-size', str(config['ubatch']),
                '--max-tokens', str(args.max_tokens), '--seed', str(args.seed)]
+    command += cache_type_args(args.cache_type_k, args.cache_type_v)
     if args.greedy:
         command.append('--greedy')
     if not args.cpu_sampling:
         command.append('--gpu-prefix')
-    print(f"Translating {count} requests; profile={config['profile']}, parallel={parallel}", flush=True)
+    ensure_cache_type_support(command[0], args.cache_type_k, args.cache_type_v, env=env, cwd=ROOT)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    (ROOT/'cache/cuda').mkdir(parents=True, exist_ok=True)
+    config.update(command=command)
+    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(f"Translating {count} requests; profile={config['profile']}, parallel={parallel}, "
+          f"KV={args.cache_type_k}/{args.cache_type_v}", flush=True)
+    for warning in config['warnings']:
+        print(warning, file=sys.stderr)
     with log_path.open('wb') as log:
         completed = subprocess.run(command, cwd=ROOT, env=env, stdout=log, stderr=log,
                                    creationflags=subprocess.CREATE_NO_WINDOW)
