@@ -10,6 +10,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install numerical test dependency
+        run: python -m pip install (Get-Content requirements-dev.txt | Where-Object { $_ -match '^numpy==' })
       - name: Offline configuration and download tests
         run: python -m unittest discover -s tests -v
       - name: Check Python syntax

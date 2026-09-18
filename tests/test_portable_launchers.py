@@ -236,7 +236,7 @@ class CacheLauncherTests(unittest.TestCase):
         saved = json.loads((self.root/'results/server.config.json').read_text(encoding='utf-8'))
         self.assertEqual(saved['managed_pid'], 4321)
         self.assertEqual(saved['process_creation_filetime'], '133801632000000000')
-        self.assertEqual(saved['executable'], str(self.binary_dir/'llama-server.exe'))
+        self.assertEqual(Path(saved['executable']).resolve(), (self.binary_dir/'llama-server.exe').resolve())
         self.assertEqual(saved['command'][0], saved['executable'])
         self.assertEqual((self.root/'results/server.pid').read_text(encoding='ascii'), '4321')
 
