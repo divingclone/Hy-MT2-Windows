@@ -1,0 +1,31 @@
+name: Desktop checks
+on:
+  push:
+    paths: ['desktop/**', 'scripts/desktop*.py', 'scripts/build_desktop.py', 'tests/test_desktop.py', '.github/workflows/desktop.yml']
+  pull_request:
+    paths: ['desktop/**', 'scripts/desktop*.py', 'scripts/build_desktop.py', 'tests/test_desktop.py', '.github/workflows/desktop.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+        working-directory: desktop
+      - run: npm run build
+        working-directory: desktop
+      - run: node --test tests/config.test.mjs
+        working-directory: desktop
+      - run: cargo test --locked --manifest-path desktop/src-tauri/Cargo.toml
+      - run: python -m unittest discover -s tests -p test_desktop.py -v

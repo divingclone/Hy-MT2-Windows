@@ -1,6 +1,6 @@
 # 发布到 GitHub 与 Hugging Face
 
-Git 保存代码、补丁和文档；GitHub Releases 保存 Windows 运行环境 ZIP；Hugging Face 保存两个 GGUF。不要把模型、DLL、SDK、个人 Token 或测试历史加入 Git。
+Git 保存代码、补丁和文档；GitHub Releases 保存桌面安装包、免安装 ZIP 和命令行运行环境 ZIP；Hugging Face 保存两个 GGUF。不要把模型、DLL、SDK、个人 Token 或测试历史加入 Git。
 
 ## 维护者环境
 
@@ -69,3 +69,18 @@ git push -u origin main
 在该仓库的 [Releases 页面](https://github.com/divingclone/Hy-MT2-Windows/releases) 为对应源码提交创建版本标签和 Release，附加 `HyMT-Windows-NVIDIA-runtime.zip` 和对应 `.sha256` 文件。本次版本为 `v0.2.0`。权重变更时执行上面的 `--upload`，仅说明变更时执行 `--update-card`，同步 Hugging Face。运行用户下载运行环境包，不能把 GitHub 自动生成的 Source code ZIP 当作运行环境。
 
 上传代码前确认 `git status` 不包含模型、二进制或 `.local`，并使用自己的提交署名。CI 在 Windows 上运行无 GPU 单元测试及固定源码补丁复现；真实 GPU 测试仍需本地进行。
+
+
+## 桌面端正式发布
+
+桌面端当前版本为 `desktop-v0.1.3`，与命令行运行核心的 `v0.2.0` 使用独立版本号。构建、更新签名与模型目录规则见 [桌面端说明](DESKTOP.md)。
+
+一次完整发布应包含：
+
+- `HyMT_0.1.3_x64-setup.exe` 与 `.exe.sig`。
+- `HyMT-0.1.3-windows-x64-portable.zip` 与 `.zip.sig`。
+- `desktop-latest.json`，其版本、下载 URL 和签名须与附件一致。
+- `HyMT-Windows-NVIDIA-runtime.zip` 与 `.zip.sha256`，保留命令行用户的固定下载入口。
+- `SHA256SUMS.txt` 与 `RELEASE-NOTES.md`。
+
+先推送经过检查的源码与标签，创建草稿发布并上传全部附件。核对附件大小、SHA-256 与签名，等待 Windows 和桌面端 CI 通过，再将发布设为正式版和 Latest。公开后匿名验证下载与 `releases/latest/download/desktop-latest.json`，确保应用更新入口可访问。发布目录只保留交付文件，模型、用户配置、密钥、编译目录和本机测试记录不上传。

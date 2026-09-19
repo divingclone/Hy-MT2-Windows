@@ -40,3 +40,14 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# Desktop dependencies, staged runtime and build outputs
+/desktop/node_modules/
+/desktop/dist/
+/desktop/src-tauri/target/
+/desktop/src-tauri/gen/
+/desktop/src-tauri/resources/payload/*
+!/desktop/src-tauri/resources/payload/.gitkeep
+/desktop/src-tauri/tauri.release.conf.json
+*.key
+*.key.pub

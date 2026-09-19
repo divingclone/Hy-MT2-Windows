@@ -8,3 +8,5 @@
 # Preserve patch and upstream legal material byte-for-byte.
 *.patch -text -whitespace
 licenses/** -text -whitespace
+# Exclude third-party legal documentation from GitHub language statistics.
+licenses/** linguist-documentation=true

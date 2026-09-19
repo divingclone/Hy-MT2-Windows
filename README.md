@@ -6,6 +6,21 @@
 
 ## 快速开始
 
+### 桌面端（Tauri 2 + Svelte）
+
+桌面端用于管理本地翻译 API：模型下载/导入、显存预算、启动参数、托盘、开机/静默自启、进程绑定清理和签名更新，不包含文本翻译界面。支持 NSIS 安装包与免安装 ZIP；其他应用填入桌面端显示的 Base URL、API Key 和模型名即可调用。构建与使用见 [桌面端说明](docs/DESKTOP.md)。
+
+| Windows x64 下载 | 使用方式 |
+| --- | --- |
+| [0.1.3 安装包](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.1.3/HyMT_0.1.3_x64-setup.exe) | 安装后启动，缺少 WebView2 时自动安装依赖。 |
+| [0.1.3 免安装版](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.1.3/HyMT-0.1.3-windows-x64-portable.zip) | 完整解压后双击 `hymt-desktop.exe`，不要只复制 EXE。 |
+
+首次打开，在「模型管理」下载或导入模型，然后启动服务。默认 **2K 上下文、Q8 KV、总显存 30% 的估算预算**，自动选择并发；修改配置后点击「重新部署 · 应用更改」。免安装版优先将模型放在程序旁的 `models`，安装版使用固定用户目录；已有模型校验后自动复用。模型不随安装包分发。
+
+[发布说明与全部附件](https://github.com/divingclone/Hy-MT2-Windows/releases/tag/desktop-v0.1.3) · [SHA-256 校验清单](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.1.3/SHA256SUMS.txt)
+
+### 命令行运行包
+
 1. 从 [最新 Release](https://github.com/divingclone/Hy-MT2-Windows/releases/latest) 下载 [Windows 运行包](https://github.com/divingclone/Hy-MT2-Windows/releases/latest/download/HyMT-Windows-NVIDIA-runtime.zip) 并解压。GitHub 的源码 ZIP 不包含运行环境。
 2. 安装适合显卡的 NVIDIA 驱动 **580.88 或更新版本**。运行包自带 Python 和 CUDA/MSVC 运行库，无需另装 Python、CUDA Toolkit 或 Visual Studio。
 3. 在解压目录打开终端，下载模型并翻译：
@@ -30,7 +45,7 @@
 
 - Windows x64，覆盖 GTX 16、RTX 20/30/40/50 对应的 CUDA 架构；**只有 RTX 5090 做过实机验证**，其余是编译覆盖。
 - 自动模式在本包支持的 RTX 50 架构上使用 NVFP4，其他支持架构使用腾讯 Q4_K_M。两者都是 4 位量化，并使用本工程专用的无损权重重排布局。
-- 默认根据启动时的**可用显存**选择并发：文件翻译最高 256，API 最高 128，每条上下文 1024 token。`gpu-info.cmd` 可查看检测结果。
+- 命令行默认根据启动时的**可用显存**选择并发：文件翻译最高 256，API 最高 128，每条上下文 1024 token。桌面端默认 2K 上下文、Q8 KV 和总显存 30% 的估算预算。`gpu-info.cmd` 可查看检测结果。
 - GTX 1650 等 4 GB 显卡可从低并发尝试，具体取决于可用显存；自动预算是估计，不是其他显卡的实测承诺。
 
 ```powershell
@@ -44,7 +59,7 @@
 
 完整硬件范围、显存建议、长文本、API 和常见问题见 [使用说明](docs/USAGE.md)。
 
-NVFP4 模型使用公开中英语料校准和局部 MSE 尺度搜索，推理程序支持 Q8 缓存写入融合。默认使用 F16 KV；需要减少显存时，批量命令增加 `--cache-type-k q8_0 --cache-type-v q8_0`，API 启动命令增加 `-CacheTypeK q8_0 -CacheTypeV q8_0`。方法与复现见 [量化与 KV 缓存](docs/QUANTIZATION.md)，质量、速度及显存结果见 [性能报告](docs/PERFORMANCE.md)。
+NVFP4 模型使用公开中英语料校准和局部 MSE 尺度搜索，推理程序支持 Q8 缓存写入融合。命令行默认使用 F16 KV（桌面端默认 Q8）；需要减少显存时，批量命令增加 `--cache-type-k q8_0 --cache-type-v q8_0`，API 启动命令增加 `-CacheTypeK q8_0 -CacheTypeV q8_0`。方法与复现见 [量化与 KV 缓存](docs/QUANTIZATION.md)，质量、速度及显存结果见 [性能报告](docs/PERFORMANCE.md)。
 
 ## 实测加速
 

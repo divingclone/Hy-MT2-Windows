@@ -62,10 +62,10 @@ PYTHON_PACKAGES = frozenset((
 ))
 LICENSE_FILES = (
     "SOURCES.json", "THIRD_PARTY_NOTICES.md", "model-Hy-MT2.txt", "MODEL_CHANGES.md",
-    "openssl-LICENSE.txt", "libffi-LICENSE.txt", "msvc-runtime-license.docx",
-    "msvc-runtime-license.txt", "msvc-redistribution.html", "python-3.12-license.html",
+    "openssl-LICENSE.txt", "libffi-LICENSE.txt",
+    "msvc-runtime-license.txt", "msvc-redistribution.txt", "python-3.12-license.txt",
     "cccl-LICENSE.txt", "stb-LICENSE.txt", "subprocess-LICENSE.txt", "sha1-NOTICE.txt",
-    "sqlite-PUBLIC-DOMAIN.html", "xz-COPYING.txt", "xz-0BSD.txt",
+    "sqlite-PUBLIC-DOMAIN.txt", "xz-COPYING.txt", "xz-0BSD.txt",
 )
 SYSTEM_DLLS = frozenset((
     "advapi32.dll", "authz.dll", "bcrypt.dll", "bcryptprimitives.dll", "cabinet.dll",
