@@ -93,7 +93,7 @@ class DesktopConfigurationTests(unittest.TestCase):
                 plan = instance.plan()
                 self.assertEqual(plan['profile'], 'fast')
                 self.assertGreater(plan['budget']['kv_total_mib'], 0)
-                self.assertTrue(plan['model'].startswith(directory))
+                self.assertTrue(Path(plan['model']).is_relative_to(Path(directory).resolve()))
                 with self.assertRaises(ValueError):
                     instance.plan(verify=True)
 
@@ -159,7 +159,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_portable_versions_and_installed_app_reuse_same_verified_weights(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             old = base/'HyMT-0.1.2-windows-x64-portable/data/models/test.gguf'
             old.parent.mkdir(parents=True)
             old.write_bytes(b'current model')
@@ -185,7 +185,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_wrong_same_size_legacy_file_is_skipped_for_valid_copy(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             for name, content in [('bad', b'incorrect!!!!'), ('good', b'current model')]:
                 path = base/name/'models/test.gguf'
                 path.parent.mkdir(parents=True)
@@ -197,7 +197,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_cross_volume_copy_preserves_original(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             source = base/'new/data/models/test.gguf'
             source.parent.mkdir(parents=True)
             source.write_bytes(b'current model')
@@ -209,7 +209,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_revisions_with_same_filename_coexist(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             first = self.make_bridge(base, content=b'version one')
             second = self.make_bridge(base, content=b'version two')
             old = first.model_item()[1]
@@ -222,7 +222,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_deleted_shared_model_is_not_reimported_from_legacy_directory(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             source = base/'new/data/models/test.gguf'
             source.parent.mkdir(parents=True)
             source.write_bytes(b'current model')
@@ -239,7 +239,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_portable_local_directory_reuses_registered_models_from_other_locations(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             first = self.make_bridge(base, 'first')
             first.models = base/'portable-one/models'
             first.model_registry = base/'user/model-locations.json'
@@ -263,7 +263,7 @@ class SharedModelTests(unittest.TestCase):
 
     def test_unwritable_registry_does_not_break_portable_local_import(self):
         with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
+            base = Path(directory).resolve()
             instance = self.make_bridge(base)
             instance.model_registry = base/'blocked/locations.json'
             (base/'blocked').write_text('not a directory')
@@ -309,7 +309,7 @@ class PortableUpdateTests(unittest.TestCase):
 
     def test_failed_replace_rolls_back_and_preserves_user_data(self):
         with tempfile.TemporaryDirectory() as directory:
-            install = Path(directory)
+            install = Path(directory).resolve()
             (install/'portable.json').write_text('{}')
             (install/updater.EXE).write_bytes(b'old exe')
             (install/'payload').mkdir()
@@ -324,7 +324,7 @@ class PortableUpdateTests(unittest.TestCase):
                 if source == staging/'next/payload':
                     raise OSError('locked payload')
                 rename(source, target)
-            with patch.object(updater, 'wait_parent'), patch.object(updater, 'rename_retry', side_effect=fail_once), self.assertRaises(OSError):
+            with patch.object(updater, 'wait_parent'), patch.object(updater, 'rename_retry', side_effect=fail_once), self.assertRaisesRegex(OSError, 'locked payload'):
                 updater.apply(install, staging, 123)
             self.assertEqual((install/updater.EXE).read_bytes(), b'old exe')
             self.assertEqual((install/'payload/marker').read_text(), 'old runtime')
