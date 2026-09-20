@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { validateDraft, DEFAULT_SETTINGS, resetInference } from "./config";
+  import { validateDraft, DEFAULT_SETTINGS, resetInference, migrateSettings } from "./config";
   import Help from "./Help.svelte";
   import { cacheSaving, performanceHelp } from "./cache-estimates";
   import { onMount } from "svelte";
@@ -50,7 +50,7 @@
   let auto = $state(false);
   let estimating = $state(false);
   let logs = $state("");
-  let version = $state("0.1.3");
+  let version = $state("0.2.0");
   const contextOptions = [512, 1024, 2048, 4096, 8192, 16384, 32768];
   let customContext = $state(false);
   const contextChoice = $derived(
@@ -114,9 +114,9 @@
   const modelName = (profile?: string) =>
     profile === "fast"
       ? "Hy-MT2 · NVFP4"
-      : profile === "official"
-        ? "Hy-MT2 · Q4_K_M"
-        : "自动选择";
+      : profile === "quality"
+        ? "Hy-MT2 · NVFP4 / 16 位激活"
+        : profile === "compat" ? "Hy-MT2 · INT4 / 16 位激活" : "自动选择";
   const gib = (mib: number) => (mib / 1024).toFixed(2);
   const fileSize = (bytes: number) => `${(bytes / 1024 ** 3).toFixed(2)} GB`;
   function failure(value: unknown): Failure {
@@ -225,7 +225,7 @@
   async function importModel(model: Model) {
     const path = await open({
       title: `导入 ${modelName(model.profile)}`,
-      filters: [{ name: "GGUF 模型", extensions: ["gguf"] }],
+      filters: [{ name: "4 位模型包", extensions: ["zip"] }],
       multiple: false,
       directory: false,
     });
@@ -323,7 +323,7 @@
     }, 1000);
     void perform(async () => {
       const saved = await invoke<Partial<Preferences>>("preferences");
-      settings = { ...defaults, ...saved.settings };
+      settings = migrateSettings(saved.settings);
       prefs = {
         ...prefs,
         ...Object.fromEntries(
@@ -610,7 +610,7 @@
               ><button
                 class="reset-button"
                 disabled={busy || updating}
-                title="恢复 2K 上下文、Q8、30% 显存预算及自动模型/显卡/并发；保留 API 端口、鉴权和日志设置。"
+                title="恢复 2K 上下文、INT8 KV、75% 显存预算及自动模型/显卡/并发；保留 API 端口、鉴权和日志设置。"
                 onclick={restoreDefaults}>↺ 恢复默认</button
               >
             </div>
@@ -619,7 +619,7 @@
             <label
               ><span
                 >运行模型<Help
-                  text="NVFP4 使用 RTX 50 系列的原生低精度计算，本项目优化后通常吞吐更高，仅支持已适配的 RTX 50（SM 120）构建。Q4_K_M 支持更多显卡。自动按显卡能力推荐，首次使用须先下载对应模型。"
+                  text="自动模式为 RTX 50 选择 NVFP4，为 RTX 30/40 选择普通 INT4。INT4 使用 16 位激活；所有模式默认使用 INT8 KV。RTX 30/40 尚待实卡验证。"
                 /></span
               >
               <select bind:value={settings.profile}
@@ -627,8 +627,8 @@
                   >自动选择{plan
                     ? ` · ${modelName(plan.profile)}`
                     : " · 检测中"}</option
-                ><option value="fast">Hy-MT2-1.8B · NVFP4（RTX 50）</option
-                ><option value="official">Hy-MT2-1.8B · Q4_K_M</option></select
+                ><option value="fast">NVFP4 · 速度优先（4 位激活）</option
+                ><option value="quality">NVFP4 · 保真优先（16 位激活）</option><option value="compat">INT4 · 兼容模式（RTX 30/40/50）</option></select
               >
             </label>
             <label
@@ -677,37 +677,30 @@
             <label
               ><span
                 >请求并发<Help
-                  text="同时处理请求的最大数量。请求充足时，提高并发通常提高总吞吐，但不会让每个请求都更快，收益受显卡限制。相同上下文下 KV 缓存随并发线性增长；模型权重不会成倍增加。0 按显存预算上限自动推荐，最多 128。"
+                  text="同时处理请求的最大数量。请求充足时，提高并发通常提高总吞吐，但不会让每个请求都更快，收益受显卡限制。KV 使用共享 token 池，容量不足时调度器排队或重算。0 推荐 32，最多 256。"
                 /></span
               >
               <input
                 type="number"
                 min="0"
-                max="128"
+                max="256"
                 step="1"
                 bind:value={settings.parallel}
               /><small
                 >{settings.parallel === 0
                   ? `自动 → ${plan?.parallel ?? "计算中"} 并发`
-                  : "最大 128 · KV 占用随并发增加"}</small
+                  : "最大 256 · KV 为共享 token 池"}</small
               >
             </label>
             <label class="wide"
               ><span>KV 缓存<Help text={performanceHelp} /></span>
               <select bind:value={settings.cache}>
-                <option value="f16">F16 · 完整精度基准</option>
-                <option value="q8_0"
-                  >Q8 · 默认 · KV −46.9% · 吞吐损失参考 13.6%</option
-                >
-                <option value="q4_0">Q4 · KV −71.9% · 吞吐损失参考 14.6%</option
-                >
+                <option value="bfloat16">BF16 · 完整精度 KV</option>
+                <option value="int8_per_token_head">INT8 · 默认 · 同容量 KV −48.44%</option>
+                <option value="fp8_per_token_head">FP8 · 动态逐 token/head · 实验选项</option>
               </select>
-              <small>Q8：{savingLabel("q8_0")}；Q4：{savingLabel("q4_0")}</small
-              >
-              <small
-                >相对同并发、同上下文的 F16。速度百分比为不同条件下的 RTX 5090
-                历史批处理参考，非当前 API 性能预测。</small
-              >
+              <small>INT8：{savingLabel("int8_per_token_head")}</small>
+              <small>缓存容量：{plan?.budget.kv_token_capacity?.toLocaleString() ?? "—"} tokens；同容量比较，不等于整任务显存下降。</small>
             </label>
             <label
               ><span
@@ -725,8 +718,8 @@
             </label>
             <label
               ><span
-                >Micro batch（ubatch）<Help
-                  text="每次实际提交 GPU 的 token 批次大小。较大时可能提高吞吐，但也会增加工作区显存。0 自动选择，显式值须不小于并发。通常保持自动即可。"
+                >调度 token 预算<Help
+                  text="每次调度的 token 预算，0 使用已测试的 2048。提高可能增加工作区显存，通常保持默认即可。"
                 /></span
               >
               <input
@@ -738,7 +731,7 @@
               /><small
                 >{settings.ubatch === 0
                   ? `自动 → ${plan?.ubatch ?? "计算中"}`
-                  : "数值须不小于并发"}</small
+                  : "建议保持默认 2048"}</small
               >
             </label>
           </div>
@@ -776,7 +769,7 @@
             <div class="memory-limit">
               <label for="memory-percent"
                 >显存预算上限<Help
-                  text="默认用总显存的 30% 作为预算，包含模型、KV 缓存、工作区和安全余量。自动并发在这个预算与实际可用显存两者的较小值内推荐；手动并发也须通过预算检查。可调为 10%–100%。这是保守估算，不是驱动层的硬限额，实际占用随负载变化。"
+                  text="默认用总显存的 75% 作为预算，包含模型、KV 缓存、工作区和安全余量。自动并发在这个预算与实际可用显存两者的较小值内推荐；手动并发也须通过预算检查。可调为 10%–100%。这是保守估算，不是驱动层的硬限额，实际占用随负载变化。"
                 /></label
               >
               <div class="memory-limit-controls">
@@ -799,7 +792,7 @@
               <small
                 >{currentGPU && Number.isFinite(settings.memoryPercent)
                   ? `总显存的 ${settings.memoryPercent}% · 上限 ${gib((currentGPU.total_memory_mib * settings.memoryPercent) / 100)} GiB`
-                  : "默认 30% · 自动选择合适的并发"}</small
+                  : "默认 75% · 自动并发 32"}</small
               >
             </div>
             {#if currentGPU}<div class="availability">
@@ -890,13 +883,11 @@
             </div>
             <h2>{modelName(model.profile)}</h2>
             <p>
-              {model.profile === "fast"
-                ? "面向受支持的 RTX 50 架构，使用本项目优化的 NVFP4 权重。"
-                : "腾讯 Q4_K_M 量化，适用于支持列表内的 GTX 16、RTX 20 / 30 / 40 / 50。"}
+              {model.profile === "compat" ? "普通整数 4 位权重，16 位激活；面向 RTX 30/40，也可在 RTX 50 使用。" : "4 位 NVFP4 权重；RTX 50 可选择速度与保真两种计算模式。"}
             </p>
             <div class="model-meta">
               <span>1.8B 参数</span><span>{fileSize(model.size_bytes)}</span
-              ><span>GGUF</span>
+              ><span>{model.quantization} / safetensors</span>
             </div>
             {#if downloading && runtimeState.download.profile === model.profile}<div
                 class="download-progress"
@@ -917,13 +908,13 @@
             <div class="model-buttons">
               <button
                 class="primary"
-                disabled={busy || active || downloading || updating}
+                disabled={busy || active || downloading || updating || (!model.installed && !model.downloadable)}
                 onclick={() => perform(() => download(model))}
                 >{model.installed
                   ? "重新校验 / 修复"
                   : model.downloaded
                     ? "继续下载"
-                    : "下载模型"}</button
+                    : model.downloadable ? "下载模型" : "请导入模型 ZIP"}</button
               ><button
                 disabled={busy || active || downloading}
                 onclick={() => perform(() => importModel(model))}>导入</button
@@ -965,15 +956,15 @@
         <div>
           <strong>首次使用</strong>
           <p>
-            RTX 50 可选 NVFP4，其他受支持显卡选择
-            Q4_K_M。首次下载需要联网，后续推理可离线运行。导入仅接受此项目清单对应的
-            fused.gguf 文件。
+            RTX 50 已实测；RTX 30/40 提供 INT4 兼容路径，尚待对应实卡验证。
+            从 Hugging Face 直接下载 safetensors、配置和 tokenizer，下载后可离线使用；离线导入接受清单对应的
+            NVFP4 或 INT4 ZIP 模型包。
           </p>
           {#if active}<p>请先停止推理服务，再管理模型文件。</p>{/if}
         </div>
       </div>
       <p class="path-line">{runtimeState.portable ? "免安装版模型目录" : "共享模型目录"}：{inventory.model_dir}</p>
-      <p class="muted">{runtimeState.portable ? "模型优先保存在程序旁的 models 文件夹，可随整个文件夹搬走。" : "安装版使用固定模型目录，升级无需重复下载。"}已有模型会校验后自动复用；未找到时可导入旧目录中的 GGUF 文件。</p>
+      <p class="muted">{runtimeState.portable ? "模型优先保存在程序旁的 models 文件夹，可随整个文件夹搬走。" : "安装版使用固定模型目录，升级无需重复下载。"}按显卡下载一个 4 位模型即可，逐文件校验并支持断点续传。已有模型会自动复用；也可导入离线 ZIP。旧 GGUF 不兼容 vLLM。</p>
       {#each inventory.model_warnings ?? [] as warning}
         <p class="muted">{warning}</p>
       {/each}
@@ -1123,7 +1114,7 @@
         <div class="section-heading">
           <div>
             <h2>关于 HyMT</h2>
-            <p>基于 Tauri 2、Svelte、Hy-MT2 与 llama.cpp。</p>
+            <p>基于 Tauri 2、Svelte、Hy-MT2 与 Windows 原生 vLLM。</p>
           </div>
           <button
             onclick={() =>

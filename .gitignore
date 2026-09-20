@@ -25,6 +25,7 @@
 *.7z
 *.log
 __pycache__/
+*.egg-info/
 *.py[cod]
 .pytest_cache/
 .env

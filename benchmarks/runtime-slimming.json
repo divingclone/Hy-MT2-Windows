@@ -1,0 +1,121 @@
+{
+  "version": "0.2.2",
+  "gpu": "RTX 5090",
+  "kv_cache": "int8_per_token_head",
+  "metric": "pretokenized core engine; no HTTP/init/tokenization/file writing",
+  "requests": 512,
+  "warm_repeats": 3,
+  "runs": {
+    "fast-p32": {
+      "baseline_tps": 4134.629677324412,
+      "slim_tps": 4466.612478477409,
+      "identical_translations_and_token_counts": 512
+    },
+    "fast-p256": {
+      "baseline_tps": 21404.168995097403,
+      "slim_tps": 19692.944005820613,
+      "identical_translations_and_token_counts": 512
+    },
+    "compat-p32": {
+      "baseline_tps": 4162.641648292222,
+      "slim_tps": 4351.468939803875,
+      "identical_translations_and_token_counts": 512
+    },
+    "compat-p256": {
+      "baseline_tps": 13251.059685777214,
+      "slim_tps": 14515.549876601752,
+      "identical_translations_and_token_counts": 512
+    }
+  },
+  "size_projection": {
+    "baseline_bytes": 3061459901,
+    "exclusions": {
+      "llvmlite": {
+        "compressed": 38224276,
+        "unpacked": 107175584,
+        "files": 39
+      },
+      "llvmlite-0.47.0.dist-info": {
+        "compressed": 9687,
+        "unpacked": 23709,
+        "files": 9
+      },
+      "numba": {
+        "compressed": 2632827,
+        "unpacked": 11839382,
+        "files": 784
+      },
+      "numba-0.65.0.dist-info": {
+        "compressed": 43923,
+        "unpacked": 101556,
+        "files": 8
+      },
+      "nvidia": {
+        "compressed": 145260281,
+        "unpacked": 356947789,
+        "files": 20
+      },
+      "PyNvVideoCodec": {
+        "compressed": 9705343,
+        "unpacked": 30946633,
+        "files": 16
+      },
+      "pynvvideocodec-2.0.4.dist-info": {
+        "compressed": 8906,
+        "unpacked": 20801,
+        "files": 8
+      },
+      "tilelang": {
+        "compressed": 30477224,
+        "unpacked": 144086891,
+        "files": 4680
+      },
+      "tilelang-0.1.10.dist-info": {
+        "compressed": 315525,
+        "unpacked": 1119931,
+        "files": 6
+      },
+      "lib/cusolverMg64_12.dll": {
+        "compressed": 75005180,
+        "unpacked": 95365152,
+        "files": 1
+      },
+      "lib/nvrtc64_130_0.alt.dll": {
+        "compressed": 38120924,
+        "unpacked": 91028512,
+        "files": 1
+      },
+      "torchcodec": {
+        "compressed": 15108213,
+        "unpacked": 39804806,
+        "files": 162
+      },
+      "torchcodec-0.16.0+cu130.dist-info": {
+        "compressed": 42235,
+        "unpacked": 134049,
+        "files": 14
+      },
+      "vllm": {
+        "compressed": 68673825,
+        "unpacked": 92830208,
+        "files": 3
+      },
+      "WebView2": {
+        "compressed": 312777260,
+        "unpacked": 699773645,
+        "files": 258
+      }
+    },
+    "excluded_compressed_bytes": 736405629,
+    "excluded_unpacked_bytes": 1671198648
+  },
+  "notes": [
+    "One process per configuration; performance fluctuates, these runs do not establish a causal speedup.",
+    "No kernel code, weight, KV precision or supported CUDA architectures changed."
+  ],
+  "fast_p256_control": {
+    "warm_repeats": 9,
+    "full_tps": 21297.098511514414,
+    "slim_tps": 23416.449505855384
+  }
+}

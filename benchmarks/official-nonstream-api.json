@@ -1,0 +1,2118 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-09-20",
+  "protocol": "non_streaming_json",
+  "hardware": {
+    "name": "NVIDIA GeForce RTX 5090",
+    "compute_capability": "12.0",
+    "total_memory_mib": 32607.0,
+    "driver_version": "596.36"
+  },
+  "cpu": "AMD Ryzen 7 9800X3D (8 cores / 16 threads)",
+  "os": "Windows x64, native",
+  "official_baseline": {
+    "official_release": "v0.4.1",
+    "binary_tag": "b10964",
+    "release_url": "https://github.com/ggml-org/llama.cpp/releases/tag/b10964",
+    "model_repo": "tencent/Hy-MT2-1.8B-GGUF",
+    "model_revision": "a0c709d9fac510f2c807aa3af52872340dc37a4a",
+    "downloads": [
+      {
+        "filename": "cudart-llama-bin-win-cuda-13.3-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10964/cudart-llama-bin-win-cuda-13.3-x64.zip",
+        "bytes": 390970417,
+        "sha256": "1462a050eb4c684921ba51dcc4cc488a036674c3e73e9945ee705b854808d03e"
+      },
+      {
+        "filename": "llama-b10964-bin-win-cuda-13.3-x64.zip",
+        "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10964/llama-b10964-bin-win-cuda-13.3-x64.zip",
+        "bytes": 149703589,
+        "sha256": "cd63ae76ad78a1540aa0f30f6c6284bab14c146d99a58f70c3f0a38cb9c62351"
+      },
+      {
+        "filename": "Hy-MT2-1.8B-Q4_K_M.gguf",
+        "url": "https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF/resolve/a0c709d9fac510f2c807aa3af52872340dc37a4a/Hy-MT2-1.8B-Q4_K_M.gguf",
+        "bytes": 1133080448,
+        "sha256": "dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699"
+      }
+    ],
+    "unmodified_extracted_files": {
+      "cublas64_13.dll": "f1d500d0cd892f5b8c6b6cdbffd82d0c55d5f5427215668e7ceb55aeeccc1b63",
+      "cublasLt64_13.dll": "b592cd016d7673e9cb97716a22b27c4010ee635377a3ba28f37070a9bdb76a68",
+      "cudart64_13.dll": "b00ca6f53699120da815bf3e06e2e4285fae2f201235b883dcbb50eec51e2a2a",
+      "ggml-cuda.dll": "e5828727753c5b245e99f61e330dc6e51f9091bd626336373c86cb009a619d9b",
+      "llama-quantize-impl.dll": "bcaa4cf05a476f06a09f3911f84b6e2576280b5fd9f23e775c9997b4fce7b8f3",
+      "llama-mtmd-debug.exe": "c7cbeabe53c3f5bedb3a22b83dc24f7939b8410e68b552eab19f612f1f3ec9fa",
+      "llama-bench-impl.dll": "52b07f0fd3a6004b2de6485c1f7f8f5438bf3709eea14dfcd30fc4ec2f57f067",
+      "ggml-cpu-alderlake.dll": "79bd5a3a21e574963312518c43c99ce76d10aa80651f658ac00003aae1f3fe01",
+      "libomp.dll": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c",
+      "llama-server.exe": "aa2e1f5c67be55f11be26ae58d643a545ca07c6de498f6f870330ac2f4dfec73",
+      "llama-common.dll": "a9590b558f417f54d17fc688961959b3f4a95038195732adc41faab1999b69e3",
+      "llama-completion.exe": "d7c0aac260b64f92e8e0d387218af0b3fb541ee49713d2fee89246655d33144a",
+      "llama-fit-params-impl.dll": "567911c481d9d6d9111b128de622bd9e1a201fe2fb6f060034b030794cc861a2",
+      "llama-cli.exe": "0b3cbc08a0a6c81dd83d347ca6e43504ff6105dd995626ea38a30722c44e7aac",
+      "llama-batched-bench.exe": "27d2d28244b7cfc9746db897ce3e1cc1f51b14ac275267292d0a2fa2e304d04e",
+      "llama-batched-bench-impl.dll": "ae139d30f4aa2a6b47279e6b9d1848c69f8ac7572c1f3ef3b9a239900fcc8c01",
+      "ggml-cpu-sandybridge.dll": "96d99740a206893d081e61a2e2c32ea2b999be0cc82410182e232d2d8041a392",
+      "ggml-cpu-skylakex.dll": "2b6ac583bbea84b6649ebfbf771907df208c9bfac33d024adb430a853018b396",
+      "llama.dll": "d5fed9f3fe95f03dce3714500903763356122faf1ae98a6179e6490f090c3798",
+      "llama-imatrix.exe": "e0e9e595dd47e6ec99ebe03b4ab8ad65fb13971579d1e0fd2c562fa4e7adbe9a",
+      "ggml-cpu-sapphirerapids.dll": "858ea2d8375a94d61d9a80e98ef8f8a88f1ef7c537e98eb69752129fab7cedd2",
+      "llama-results.exe": "ae0e7ef1c6e07265eaa1ce313190ba0492eb6628d111221e17e8e53e1ceb2ae5",
+      "ggml-cpu-haswell.dll": "97302fa13b3fd496828e6f4936ac01433532880cf8277de6bc8b0117add0b816",
+      "llama-quantize.exe": "ff306a447997d2c1deed5b02d1347580ea41dc8c3803fa33b93686ef91700653",
+      "llama-server-impl.dll": "16913f79cdf57f0f80e618aeff139aa0ae096f8f935b06a02510c556e976d9d4",
+      "llama-fit-params.exe": "e7ab857ccec38f47e2ec0f5614d1a9e6fe277d66790493c4061dc785559ce395",
+      "llama-llava-cli.exe": "03109a6ae767a40558a80250377a82e82969e98a608501851d5cb0cf6a1894ab",
+      "llama-perplexity.exe": "cc9b6422ac9bb7aaba390ecf19fc3d6d73e38072cfc87cae5e0ed6d7087f3c39",
+      "llama-completion-impl.dll": "04526c3dfea986a6e058609fb7d2944612b4f9f7fd5a50235e3b60fd4fbe2d94",
+      "ggml-cpu-icelake.dll": "d29a2b47db63d0acb29ca6314cc4a9e0579592d0bbde42926bcab525296bd464",
+      "ggml-cpu-zen4.dll": "b8f6bd5d70bc608cd2d752ae74bbf85925c2945267bb0eded15aab324ff9716a",
+      "llama-gguf-split.exe": "950cd098e4d27615095d367d8e2684b1a98460ad4638f35b1d1a35d6bead4ffb",
+      "ggml-cpu-x64.dll": "9241c4023de3b08eadcb56314bf51ac2bd338b12c4008fa4950c30068c11afb6",
+      "ggml-cpu-sse42.dll": "5c23106448a1edfb2683fcc955df017e8e4bdb3330114afa948c1870f8d7a91f",
+      "llama-gemma3-cli.exe": "03109a6ae767a40558a80250377a82e82969e98a608501851d5cb0cf6a1894ab",
+      "ggml-cpu-ivybridge.dll": "b742628d4a73f24dad4a4c516d8600b7d50d2e7c07cf6011592bb0f0bda45349",
+      "LICENSE-LLVM-OpenMP": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4",
+      "llama-tokenize.exe": "49ac76768cc968b55096c3a2e97e7d5a5f1078c76f8ab06e1f79461eb9543fbb",
+      "mtmd.dll": "5a8a0e95ea7b3da360e1ace6325fa441834a2b01fbe9c50639fb7f0c5d57c479",
+      "ggml-cpu-piledriver.dll": "04540f47f6a6d1ccabbb9a92470a9d27ddff6c47cb015b38f9383ac83a93fc5f",
+      "ggml-cpu-cannonlake.dll": "9959698ba5b224a2541d72f711ec856133e010ee95854b70fd034f2c56a4ee05",
+      "llama-perplexity-impl.dll": "52a6213fcb4f06494c8c0b72d52d863124877f4cf87301375a2fe0fa4b075fe2",
+      "ggml-rpc-server.exe": "ba1633b9cbca15198fddc161b17a1fcedad26a103bb8b7e074fd58c365a30614",
+      "llama-qwen2vl-cli.exe": "03109a6ae767a40558a80250377a82e82969e98a608501851d5cb0cf6a1894ab",
+      "llama-cli-impl.dll": "4d35886296714799c6ca5aece1ef3e036da7982abacd1056fdf6424a31f13b61",
+      "llama-mtmd-cli.exe": "534fa7f35332a866fbf98f28ae80cb9e4801714289efdd7cb447b485f1a9ad9e",
+      "ggml-cpu-cooperlake.dll": "b726f7689ec7b5f5b67aa37bacb8c36348450f535aaf86f68a6756b9f90c98a0",
+      "ggml-base.dll": "645538131f61107314a1fb38ee43b392ce76a16d1a6811f065b693c9552d8e18",
+      "ggml-cpu-cascadelake.dll": "edf3ffb10c59cbce92880c82f9580aae8dbf9c41d7e798a5cd8b4ca0acb10167",
+      "ggml-rpc.dll": "39948a2e2e40454421ac819cda1b4da56a12df93e2c00c2ebdd24df2c448c857",
+      "llama-bench.exe": "d0636452b8e3a283ea01df5decff1da745f459032b5b7dd7e7531ee211af157e",
+      "ggml.dll": "9865b315ce521f45b79c50f1d5cfb56cf9f94f186aac3ed0fceebd67f46e48c7",
+      "llama-minicpmv-cli.exe": "03109a6ae767a40558a80250377a82e82969e98a608501851d5cb0cf6a1894ab",
+      "llama-tts.exe": "f2468fc05543d1454d17c0f8c39d56e72bcaef556e6e717f758608a1fa736dd1",
+      "llama.exe": "abf77f8c2b5a22e603ea0dee0b1d06690af24526881d374accdcc1dfc04af469"
+    }
+  },
+  "official_version_output": "version: 0.4.1-dev (build 10964, commit b29c606e2)\r\nbuilt with Clang 20.1.8 for Windows x86_64\r\n",
+  "vllm_runtime": {
+    "backend": "vllm",
+    "vllm": "0.29.0+cu132",
+    "torch": "2.11.0+cu130",
+    "python": "3.12",
+    "windows_native": true,
+    "host_requirements": [
+      "NVIDIA display driver 596.36+"
+    ],
+    "compiler": "bundled Triton TinyCC/PTXAS",
+    "flashinfer": "prebuilt sampling AOT sm80/sm86/sm89/sm120f"
+  },
+  "vllm_checkpoint": {
+    "repo": {
+      "repo_id": "divingclone/Hy-MT2-1.8B-NVFP4-vLLM",
+      "revision": "2fa2734cffce6dbea70e442095ba1c0f539d23e5"
+    },
+    "files": {
+      "config.json": {
+        "size_bytes": 2879,
+        "sha256": "c328a3d73e112cddce69af51c83e3ae69f35c83365b563fca5e984c3d4884e86"
+      },
+      "generation_config.json": {
+        "size_bytes": 232,
+        "sha256": "ec37b818b1bd539ca96a07da52a60630ecba2550ab8ed5d783c490880a8286a9"
+      },
+      "tokenizer_config.json": {
+        "size_bytes": 369,
+        "sha256": "578b75d18d5041b2b3bfbeca014ae27e48d7661e2a1e7786c773811901c522a5"
+      },
+      "tokenizer.json": {
+        "size_bytes": 9527287,
+        "sha256": "b475bbef1b0b2fd57dcb865332b546475bd1ede2deb3bb91bafd0c047a8a530a"
+      },
+      "chat_template.jinja": {
+        "size_bytes": 654,
+        "sha256": "b7491ec0e9c869dfce20f2176758099bf248d979dd05530ede99deb21698acee"
+      },
+      "model.safetensors": {
+        "size_bytes": 1363492720,
+        "sha256": "b4ae2931e9b24d6e0209d9062d6ec08767e61a7eaab6dff7d9fd5cd99000987e"
+      }
+    }
+  },
+  "workload": {
+    "requests_per_pass": 512,
+    "unique_source_cases": 64,
+    "repetitions_per_case": 8,
+    "languages": "Chinese to English and English to Chinese",
+    "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+    "max_tokens": 512,
+    "context_per_request": 2048,
+    "batch_tokens": 2048,
+    "kv_token_capacity": {
+      "32": 49152,
+      "256": 98304
+    },
+    "llama_kv": "f16",
+    "vllm_kv": "int8_per_token_head",
+    "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.6,
+      "top_k": 20,
+      "min_p": 0,
+      "repetition_penalty": 1.05,
+      "seed": "42 + request index"
+    },
+    "fresh_processes_per_config": 3,
+    "warm_passes_per_process": 3,
+    "first_passes_reported_separately": true,
+    "aggregation": "Median of 3 warm-pass medians from 3 independent server processes, including latency percentile summaries"
+  },
+  "summary": [
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "median": {
+        "initialization_s": 1.6089999999967404,
+        "first_pass_wall_s": 27.441527999995742,
+        "first_pass_completion_tokens_per_second": 1220.449531819263,
+        "wall_s": 26.886354899965227,
+        "completion_tokens_per_second": 1247.286964885053,
+        "requests_per_second": 19.04311692324876,
+        "latency_p50_s": 1.650825300021097,
+        "latency_p95_s": 2.1199767000507563,
+        "latency_p99_s": 2.2873847000300884
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 1.625,
+          "first_pass_wall_s": 27.441527999995742,
+          "first_pass_completion_tokens_per_second": 1220.449531819263,
+          "wall_s": 26.654947699978948,
+          "completion_tokens_per_second": 1257.9653270160602,
+          "requests_per_second": 19.20844136566827,
+          "latency_p50_s": 1.6262475000112318,
+          "latency_p95_s": 2.102381200005766,
+          "latency_p99_s": 2.2333481999812648
+        },
+        {
+          "trial": 2,
+          "initialization_s": 1.6089999999967404,
+          "first_pass_wall_s": 26.9977200999856,
+          "first_pass_completion_tokens_per_second": 1241.0307194798227,
+          "wall_s": 28.638427900034003,
+          "completion_tokens_per_second": 1168.150714025761,
+          "requests_per_second": 17.878076331117047,
+          "latency_p50_s": 1.7339064999832772,
+          "latency_p95_s": 2.2765799000044353,
+          "latency_p99_s": 2.4367513000033796
+        },
+        {
+          "trial": 3,
+          "initialization_s": 1.5939999999827705,
+          "first_pass_wall_s": 27.778646099963225,
+          "first_pass_completion_tokens_per_second": 1206.4302874733828,
+          "wall_s": 26.886354899965227,
+          "completion_tokens_per_second": 1247.286964885053,
+          "requests_per_second": 19.04311692324876,
+          "latency_p50_s": 1.650825300021097,
+          "latency_p95_s": 2.1199767000507563,
+          "latency_p99_s": 2.2873847000300884
+        }
+      ],
+      "process_median_tps_range": [
+        1168.150714025761,
+        1257.9653270160602
+      ]
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "median": {
+        "initialization_s": 1.5939999999827705,
+        "first_pass_wall_s": 25.63404829998035,
+        "first_pass_completion_tokens_per_second": 1307.0506697931783,
+        "wall_s": 25.24393290001899,
+        "completion_tokens_per_second": 1327.3288331381516,
+        "requests_per_second": 20.282101130114114,
+        "latency_p50_s": 10.968528699944727,
+        "latency_p95_s": 16.28291959996568,
+        "latency_p99_s": 17.52908899995964
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 1.5939999999827705,
+          "first_pass_wall_s": 24.78963949996978,
+          "first_pass_completion_tokens_per_second": 1349.7977653140454,
+          "wall_s": 24.774188600014895,
+          "completion_tokens_per_second": 1352.6578222618298,
+          "requests_per_second": 20.666670794606453,
+          "latency_p50_s": 10.708090299973264,
+          "latency_p95_s": 16.127519099973142,
+          "latency_p99_s": 17.23429369996302
+        },
+        {
+          "trial": 2,
+          "initialization_s": 1.6400000000139698,
+          "first_pass_wall_s": 25.63404829998035,
+          "first_pass_completion_tokens_per_second": 1307.0506697931783,
+          "wall_s": 25.24393290001899,
+          "completion_tokens_per_second": 1327.3288331381516,
+          "requests_per_second": 20.282101130114114,
+          "latency_p50_s": 10.968528699944727,
+          "latency_p95_s": 16.28291959996568,
+          "latency_p99_s": 17.52908899995964
+        },
+        {
+          "trial": 3,
+          "initialization_s": 1.5939999999827705,
+          "first_pass_wall_s": 25.91837700002361,
+          "first_pass_completion_tokens_per_second": 1292.017629034777,
+          "wall_s": 25.655266500019934,
+          "completion_tokens_per_second": 1304.2936038093387,
+          "requests_per_second": 19.956916058525533,
+          "latency_p50_s": 11.083297200035304,
+          "latency_p95_s": 16.449411699955817,
+          "latency_p99_s": 17.775479100004304
+        }
+      ],
+      "process_median_tps_range": [
+        1304.2936038093387,
+        1352.6578222618298
+      ]
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "median": {
+        "initialization_s": 35.68699999997625,
+        "first_pass_wall_s": 9.992826099973172,
+        "first_pass_completion_tokens_per_second": 3295.0638458612225,
+        "wall_s": 8.89458049996756,
+        "completion_tokens_per_second": 3701.354999274004,
+        "requests_per_second": 57.56314196064304,
+        "latency_p50_s": 0.5342751000425778,
+        "latency_p95_s": 0.7847206000005826,
+        "latency_p99_s": 0.8792851999751292
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 92.89100000000326,
+          "first_pass_wall_s": 18.320151399995666,
+          "first_pass_completion_tokens_per_second": 1798.893430542708,
+          "wall_s": 8.699796699977014,
+          "completion_tokens_per_second": 3779.0538254861594,
+          "requests_per_second": 58.85194995434235,
+          "latency_p50_s": 0.5171482999576256,
+          "latency_p95_s": 0.7773721000412479,
+          "latency_p99_s": 0.8792851999751292
+        },
+        {
+          "trial": 2,
+          "initialization_s": 35.20299999997951,
+          "first_pass_wall_s": 9.096730599994771,
+          "first_pass_completion_tokens_per_second": 3614.1556176258423,
+          "wall_s": 8.89458049996756,
+          "completion_tokens_per_second": 3701.354999274004,
+          "requests_per_second": 57.56314196064304,
+          "latency_p50_s": 0.5342751000425778,
+          "latency_p95_s": 0.7847206000005826,
+          "latency_p99_s": 0.867084099969361
+        },
+        {
+          "trial": 3,
+          "initialization_s": 35.68699999997625,
+          "first_pass_wall_s": 9.992826099973172,
+          "first_pass_completion_tokens_per_second": 3295.0638458612225,
+          "wall_s": 10.237659999984317,
+          "completion_tokens_per_second": 3224.662667059716,
+          "requests_per_second": 50.01142839289294,
+          "latency_p50_s": 0.6160265000071377,
+          "latency_p95_s": 0.9255525000044145,
+          "latency_p99_s": 1.0281009000027552
+        }
+      ],
+      "process_median_tps_range": [
+        3224.662667059716,
+        3779.0538254861594
+      ]
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "median": {
+        "initialization_s": 40.15700000000652,
+        "first_pass_wall_s": 7.6168132000020705,
+        "first_pass_completion_tokens_per_second": 4315.846947643545,
+        "wall_s": 7.805744300014339,
+        "completion_tokens_per_second": 4212.7949284656415,
+        "requests_per_second": 65.59271996637905,
+        "latency_p50_s": 3.078590399993118,
+        "latency_p95_s": 6.572801399976015,
+        "latency_p99_s": 7.312151200021617
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 40.15700000000652,
+          "first_pass_wall_s": 7.6168132000020705,
+          "first_pass_completion_tokens_per_second": 4315.846947643545,
+          "wall_s": 7.764148799993563,
+          "completion_tokens_per_second": 4231.758154870401,
+          "requests_per_second": 65.9441251306807,
+          "latency_p50_s": 3.078590399993118,
+          "latency_p95_s": 6.379486299993005,
+          "latency_p99_s": 7.271053200005554
+        },
+        {
+          "trial": 2,
+          "initialization_s": 40.17200000002049,
+          "first_pass_wall_s": 7.587936699972488,
+          "first_pass_completion_tokens_per_second": 4336.224892350419,
+          "wall_s": 7.805744300014339,
+          "completion_tokens_per_second": 4212.7949284656415,
+          "requests_per_second": 65.59271996637905,
+          "latency_p50_s": 3.070631400041748,
+          "latency_p95_s": 6.572801399976015,
+          "latency_p99_s": 7.312151200021617
+        },
+        {
+          "trial": 3,
+          "initialization_s": 38.70299999997951,
+          "first_pass_wall_s": 7.7906287999940105,
+          "first_pass_completion_tokens_per_second": 4219.043269013827,
+          "wall_s": 7.973293400020339,
+          "completion_tokens_per_second": 4122.637704504408,
+          "requests_per_second": 64.21436843133027,
+          "latency_p50_s": 3.2141323999967426,
+          "latency_p95_s": 6.71923730004346,
+          "latency_p99_s": 7.400750600034371
+        }
+      ],
+      "process_median_tps_range": [
+        4122.637704504408,
+        4231.758154870401
+      ]
+    }
+  ],
+  "comparison": [
+    {
+      "concurrency": 32,
+      "throughput_ratio": 2.9675247986056776,
+      "request_rate_ratio": 3.0227794217010326,
+      "batch_time_reduction_percent": 66.91786397575574,
+      "p95_response_reduction_percent": 62.98447053772832
+    },
+    {
+      "concurrency": 256,
+      "throughput_ratio": 3.1738894110402884,
+      "request_rate_ratio": 3.234019963986345,
+      "batch_time_reduction_percent": 69.07873138892526,
+      "p95_response_reduction_percent": 59.63376617059591
+    }
+  ],
+  "passes": [
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 27.441527999995742,
+        "completion_tokens": 33491,
+        "completion_tokens_per_second": 1220.449531819263,
+        "requests_per_second": 18.65785316328156,
+        "latency_s": {
+          "p50": 1.670584700012114,
+          "p95": 2.219132400001399,
+          "p99": 2.3393109999597073
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.06682250002632,
+          "p95": 26.67593940004008,
+          "p99": 27.340669900004286
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "05e8a0c76c264a9a143df02e7be73836579fe6e287fca794eeeb7c80604419f9"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.770237600023393,
+        "completion_tokens": 33531,
+        "completion_tokens_per_second": 1252.5477173938382,
+        "requests_per_second": 19.1257174347811,
+        "latency_s": {
+          "p50": 1.6318814000114799,
+          "p95": 2.1227720000315458,
+          "p99": 2.2534775999956764
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.312610000022687,
+          "p95": 26.015538699983153,
+          "p99": 26.64443250000477
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "a9360f4ea10b8008ba60c919d8da1302c06fd3ac00c10d6ea48d56ebaafc4f4e"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.528565199987497,
+        "completion_tokens": 33531,
+        "completion_tokens_per_second": 1263.958293530922,
+        "requests_per_second": 19.299950681096064,
+        "latency_s": {
+          "p50": 1.6262475000112318,
+          "p95": 2.102381200005766,
+          "p99": 2.232264199992642
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.080096599995159,
+          "p95": 25.784133399953134,
+          "p99": 26.417729099979624
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "f6437676b6dafcbb78c3c4cc357d8d34ce0ec206fc8b4da10807b5a304a2b0d6"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.654947699978948,
+        "completion_tokens": 33531,
+        "completion_tokens_per_second": 1257.9653270160602,
+        "requests_per_second": 19.20844136566827,
+        "latency_s": {
+          "p50": 1.6094458000152372,
+          "p95": 2.081917200004682,
+          "p99": 2.2333481999812648
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 13.995864199998323,
+          "p95": 25.819216199975926,
+          "p99": 26.53839939995669
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "4695da2ddf72b900b0fbe6d707a9eaa19ffaf8f5d1e98dc13db2d83af9f9ab88"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 18.320151399995666,
+        "completion_tokens": 32956,
+        "completion_tokens_per_second": 1798.893430542708,
+        "requests_per_second": 27.94736729086863,
+        "latency_s": {
+          "p50": 0.6208841999759898,
+          "p95": 8.727045600011479,
+          "p99": 9.001710000040475
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 13.825216399971396,
+          "p95": 17.997287999955006,
+          "p99": 18.286138899973594
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "8abfbf16d16af98667192fded623316e15fe383a7efa9d73b615bd15f743bac8"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.687198199972045,
+        "completion_tokens": 32985,
+        "completion_tokens_per_second": 3796.9664373613746,
+        "requests_per_second": 58.937299255086366,
+        "latency_s": {
+          "p50": 0.5171482999576256,
+          "p95": 0.7728953000041656,
+          "p99": 0.8792851999751292
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 4.6703021000139415,
+          "p95": 8.403440199967008,
+          "p99": 8.630295699986164
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "cb13dc4e1ad4a01b8f96a8c959b343f74d6ccf45aab4535352576445c0109b63"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.699796699977014,
+        "completion_tokens": 32877,
+        "completion_tokens_per_second": 3779.0538254861594,
+        "requests_per_second": 58.85194995434235,
+        "latency_s": {
+          "p50": 0.514040699985344,
+          "p95": 0.7773721000412479,
+          "p99": 0.8906738999648951
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 4.735770799976308,
+          "p95": 8.399938999966253,
+          "p99": 8.665422899997793
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "cd2342f1701d175cc62ed37f0245f7039bc4826a3a1e6826249eef5fef7d6aed"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 1,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 9.039120999979787,
+        "completion_tokens": 32942,
+        "completion_tokens_per_second": 3644.3809082845187,
+        "requests_per_second": 56.64267576472811,
+        "latency_s": {
+          "p50": 0.5418557000230066,
+          "p95": 0.8112894000369124,
+          "p99": 0.8762825999874622
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 4.750540099979844,
+          "p95": 8.818915100011509,
+          "p99": 8.998087199986912
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "759be5c6a0298f02a875cad69842319a42b867d8bfcea9fd571f1663418b2d70"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 24.78963949996978,
+        "completion_tokens": 33461,
+        "completion_tokens_per_second": 1349.7977653140454,
+        "requests_per_second": 20.653789660822785,
+        "latency_s": {
+          "p50": 10.588790599955246,
+          "p95": 16.031440299993847,
+          "p99": 17.080775999987964
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.06229849997908,
+          "p95": 24.502847899973858,
+          "p99": 24.69888290000381
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "55e6d72fb046898729d091659f295b4dc65dc1cc6e14f3b621d4c19f93ec05ab"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 24.902124299958814,
+        "completion_tokens": 33528,
+        "completion_tokens_per_second": 1346.391159089004,
+        "requests_per_second": 20.560494913313352,
+        "latency_s": {
+          "p50": 10.769249799952377,
+          "p95": 16.37244040000951,
+          "p99": 17.41895309998654
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 17.618913499987684,
+          "p95": 24.68756549997488,
+          "p99": 24.843418599979486
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "78a080c9d2736b42b7e3c4e65834b31b546c7e3cbd137166be7d47f43ff99f7c"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 24.529511100030504,
+        "completion_tokens": 33481,
+        "completion_tokens_per_second": 1364.9273262506388,
+        "requests_per_second": 20.872817151229864,
+        "latency_s": {
+          "p50": 10.572631400020327,
+          "p95": 16.127519099973142,
+          "p99": 17.23429369996302
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 17.38889460003702,
+          "p95": 24.27819450001698,
+          "p99": 24.459594700019807
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "4d7aba573b1837a54bbe1cbed826987e71a9b1aa8e50657e83b46e5ec817eba5"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 24.774188600014895,
+        "completion_tokens": 33511,
+        "completion_tokens_per_second": 1352.6578222618298,
+        "requests_per_second": 20.666670794606453,
+        "latency_s": {
+          "p50": 10.708090299973264,
+          "p95": 16.1089569000178,
+          "p99": 17.119756300002337
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 17.347050000040326,
+          "p95": 24.53887069999473,
+          "p99": 24.690326899988577
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "d1214433b8cd76f36cb7750a4ab4b4513dbba5f7b2cc35296cb807a77ae5d62b"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.6168132000020705,
+        "completion_tokens": 32873,
+        "completion_tokens_per_second": 4315.846947643545,
+        "requests_per_second": 67.21971335726873,
+        "latency_s": {
+          "p50": 3.243223399971612,
+          "p95": 5.872669300006237,
+          "p99": 6.648369200003799
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.791805099986959,
+          "p95": 7.580261400027666,
+          "p99": 7.610100599995349
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "060f7e6a2ab9008e8c8b0f37f001a0261b24ee70f934913367e97aeeb5280893"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.764148799993563,
+        "completion_tokens": 32856,
+        "completion_tokens_per_second": 4231.758154870401,
+        "requests_per_second": 65.9441251306807,
+        "latency_s": {
+          "p50": 3.0261988999554887,
+          "p95": 6.379486299993005,
+          "p99": 7.271053200005554
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.746138499991503,
+          "p95": 7.711376799969003,
+          "p99": 7.741089899966028
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "618c7845e93ec146fddda2a37ad7bcfbd239411d2fa57a4c435d4102645d6bee"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.627325400011614,
+        "completion_tokens": 32844,
+        "completion_tokens_per_second": 4306.096603660044,
+        "requests_per_second": 67.12706920819458,
+        "latency_s": {
+          "p50": 3.078590399993118,
+          "p95": 6.22407930000918,
+          "p99": 7.013640200020745
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.881756899994798,
+          "p95": 7.582129100046586,
+          "p99": 7.610218600020744
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "0bfcd42f24add33f7a80c9126216440f3bd322f30ae344b9ef58bc6a9b499c85"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 1,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.012696899997536,
+        "completion_tokens": 32853,
+        "completion_tokens_per_second": 4100.117652024264,
+        "requests_per_second": 63.898585755834276,
+        "latency_s": {
+          "p50": 3.2607144999783486,
+          "p95": 6.633115800039377,
+          "p99": 7.583729900012258
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 7.136070600012317,
+          "p95": 7.973327299987432,
+          "p99": 7.9995975000201724
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "e07b7f8f6d3bb32c0bd212a2e077666a40533d18ac7e3c55157ea3fe29851fe3"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.587936699972488,
+        "completion_tokens": 32903,
+        "completion_tokens_per_second": 4336.224892350419,
+        "requests_per_second": 67.47552335298954,
+        "latency_s": {
+          "p50": 3.3001417000195943,
+          "p95": 5.6148544999887235,
+          "p99": 6.547329400025774
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.77852549997624,
+          "p95": 7.545260999992024,
+          "p99": 7.568023399973754
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "c834a65feeb264e12bf485130de1c98b2b3cb83e1d71689bdb532a83500133e6"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.805744300014339,
+        "completion_tokens": 32884,
+        "completion_tokens_per_second": 4212.7949284656415,
+        "requests_per_second": 65.59271996637905,
+        "latency_s": {
+          "p50": 3.070631400041748,
+          "p95": 6.572801399976015,
+          "p99": 7.312151200021617
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 7.011027299973648,
+          "p95": 7.761818600003608,
+          "p99": 7.788434099988081
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "1ca0bb7d0c09d588c08a09cbdb08c90f86a31d4209574c5dfdb6a15912d0c1b7"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.675545800011605,
+        "completion_tokens": 32799,
+        "completion_tokens_per_second": 4273.181458958972,
+        "requests_per_second": 66.70535403478745,
+        "latency_s": {
+          "p50": 3.064628999971319,
+          "p95": 6.311912500008475,
+          "p99": 7.101891700003762
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.892647699976806,
+          "p95": 7.619950999971479,
+          "p99": 7.648807399964426
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "e0eba7be2e9e20f7055b7c2508ebb909c20894a847bdd0703342c3e1a9d8e491"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.106689399981406,
+        "completion_tokens": 32870,
+        "completion_tokens_per_second": 4054.676129577062,
+        "requests_per_second": 63.15771762529528,
+        "latency_s": {
+          "p50": 3.158100000000559,
+          "p95": 6.579872700036503,
+          "p99": 7.487746799946763
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 7.118322299967986,
+          "p95": 8.054068099998403,
+          "p99": 8.087002899963409
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "d73528e9c4f4c55af31e2fdcde7bdba81f262f24c749ca9f7a1eae2520ba4224"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 25.63404829998035,
+        "completion_tokens": 33505,
+        "completion_tokens_per_second": 1307.0506697931783,
+        "requests_per_second": 19.973435097272265,
+        "latency_s": {
+          "p50": 11.019136599963531,
+          "p95": 16.86799380002776,
+          "p99": 17.984963700000662
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.944415499980096,
+          "p95": 25.326643400010653,
+          "p99": 25.524434100021608
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "e2711f9e33c08e5b6d0834c6e351b911fe75a3b39c09a9aa1d517f5adeaae480"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 25.458540400024503,
+        "completion_tokens": 33440,
+        "completion_tokens_per_second": 1313.5081381165046,
+        "requests_per_second": 20.111129387429738,
+        "latency_s": {
+          "p50": 11.008978300029412,
+          "p95": 16.58047099999385,
+          "p99": 17.52908899995964
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.463207399996463,
+          "p95": 25.198446700000204,
+          "p99": 25.37544730002992
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "b6a4b7edb85112fd4f14e732f54264e1815475103a171f66a7bbe7808a6f2409"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 25.24393290001899,
+        "completion_tokens": 33507,
+        "completion_tokens_per_second": 1327.3288331381516,
+        "requests_per_second": 20.282101130114114,
+        "latency_s": {
+          "p50": 10.968528699944727,
+          "p95": 16.28291959996568,
+          "p99": 17.825176100013778
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.10488030000124,
+          "p95": 24.97918069997104,
+          "p99": 25.14027289999649
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "934f4034f33508349d542a670603a6c5fcff014b72d141035e8a393be135360c"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 2,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 24.900731200003065,
+        "completion_tokens": 33467,
+        "completion_tokens_per_second": 1344.0167572266264,
+        "requests_per_second": 20.56164519377395,
+        "latency_s": {
+          "p50": 10.772047400008887,
+          "p95": 16.206570699985605,
+          "p99": 17.432105600018986
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 17.8514752999763,
+          "p95": 24.652007099997718,
+          "p99": 24.82177480001701
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "60718100bbb2bb5c9ca7235a5188edf4ad4b62090c48ef939abfb5d8641424fd"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 9.096730599994771,
+        "completion_tokens": 32877,
+        "completion_tokens_per_second": 3614.1556176258423,
+        "requests_per_second": 56.28395766719686,
+        "latency_s": {
+          "p50": 0.54749670001911,
+          "p95": 0.8468429999775253,
+          "p99": 0.9814596999785863
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 4.850992200023029,
+          "p95": 8.969247900007758,
+          "p99": 9.062801500025671
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "f442729144da0b0de235f77349215a9ad5f170b5e6b288212eec11510cd9509f"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.89458049996756,
+        "completion_tokens": 32922,
+        "completion_tokens_per_second": 3701.354999274004,
+        "requests_per_second": 57.56314196064304,
+        "latency_s": {
+          "p50": 0.5342751000425778,
+          "p95": 0.7871639000368305,
+          "p99": 0.9165052999742329
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 5.000890899973456,
+          "p95": 8.723532399977557,
+          "p99": 8.814211099990644
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "225b51e69a710419ea4e7f7d23b0dc0d13af3e70dcecf07bd011db5eb9074910"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 9.040655300021172,
+        "completion_tokens": 32939,
+        "completion_tokens_per_second": 3643.430581843206,
+        "requests_per_second": 56.633062870874085,
+        "latency_s": {
+          "p50": 0.550336700049229,
+          "p95": 0.7847206000005826,
+          "p99": 0.867084099969361
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 4.9965407000272535,
+          "p95": 8.90445670002373,
+          "p99": 9.001700700027868
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "46aa7ba4b770ea47e2fbbf3f18f5af33bb74cb4dd42b0b0b2098cc5907951ea2"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.57088830001885,
+        "completion_tokens": 32871,
+        "completion_tokens_per_second": 3835.1917385188303,
+        "requests_per_second": 59.73709866209246,
+        "latency_s": {
+          "p50": 0.5113368000020273,
+          "p95": 0.746503499976825,
+          "p99": 0.8469246000167914
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 4.717235999996774,
+          "p95": 8.274672400031704,
+          "p99": 8.526161200017668
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "2c431aa98f6d6628d58caf7de857d5cb55d071c0fc0289b9809c303c880fc539"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.9977200999856,
+        "completion_tokens": 33505,
+        "completion_tokens_per_second": 1241.0307194798227,
+        "requests_per_second": 18.96456434483418,
+        "latency_s": {
+          "p50": 1.6532883999752812,
+          "p95": 2.153218899969943,
+          "p99": 2.2687847999623045
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.23036270000739,
+          "p95": 26.100381000025664,
+          "p99": 26.867644599988125
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "f96e5d51c916689162b4228f006bc41c564e356b8d1188689e1ce227fe766c74"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.88990280003054,
+        "completion_tokens": 33489,
+        "completion_tokens_per_second": 1245.4117163994347,
+        "requests_per_second": 19.04060434161995,
+        "latency_s": {
+          "p50": 1.6296334999497049,
+          "p95": 2.1112424000166357,
+          "p99": 2.2484185000066645
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.07727170002181,
+          "p95": 26.085115500027314,
+          "p99": 26.75462449999759
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "c59a59e3c670f2c13f71a670decf769e10181dfc1cb0b4960794b37c4dcb1221"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 28.638427900034003,
+        "completion_tokens": 33454,
+        "completion_tokens_per_second": 1168.150714025761,
+        "requests_per_second": 17.878076331117047,
+        "latency_s": {
+          "p50": 1.7339064999832772,
+          "p95": 2.2765799000044353,
+          "p99": 2.4367513000033796
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 15.235919500002638,
+          "p95": 27.887425200024154,
+          "p99": 28.53295280004386
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "11805af30809b40710f59577f30eaaa4c5641267a4476bb1a1a3a47552f53e09"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 2,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 28.768335399974603,
+        "completion_tokens": 33532,
+        "completion_tokens_per_second": 1165.5870780771556,
+        "requests_per_second": 17.797345341032557,
+        "latency_s": {
+          "p50": 1.7385261000017636,
+          "p95": 2.2793472000048496,
+          "p99": 2.4642492000130005
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 15.642159099981654,
+          "p95": 27.88348939997377,
+          "p99": 28.645911199972034
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "53e363dd8cbb68867046e2e74624b54f3d603cf900815ec2d2707cbf0f8de483"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 27.778646099963225,
+        "completion_tokens": 33513,
+        "completion_tokens_per_second": 1206.4302874733828,
+        "requests_per_second": 18.4314238410877,
+        "latency_s": {
+          "p50": 1.690554000029806,
+          "p95": 2.2192111000185832,
+          "p99": 2.3203804999939166
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.438260599970818,
+          "p95": 26.913528299948666,
+          "p99": 27.653819300001487
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "c4a5005997de7125c3cf985849763a61c4b97ab52020566e16fdd577baaceb00"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 27.517932899994776,
+        "completion_tokens": 33488,
+        "completion_tokens_per_second": 1216.9518735909978,
+        "requests_per_second": 18.606048712332502,
+        "latency_s": {
+          "p50": 1.678001200023573,
+          "p95": 2.1606125000398606,
+          "p99": 2.3421705000218935
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.57092329999432,
+          "p95": 26.534851499949582,
+          "p99": 27.388045599975158
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "bb85aec95e27eacc3b7056e9367457d3e65492e28be1103e3fe8b225170dee6a"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.886354899965227,
+        "completion_tokens": 33535,
+        "completion_tokens_per_second": 1247.286964885053,
+        "requests_per_second": 19.04311692324876,
+        "latency_s": {
+          "p50": 1.650825300021097,
+          "p95": 2.1199767000507563,
+          "p99": 2.2873847000300884
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.166129299963359,
+          "p95": 26.097009200020693,
+          "p99": 26.771773700020276
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "e3a3804dee2dda466d44ee4ecf2b499e5bd8d499d19d7a67ef9525f02486c6ff"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.50087520002853,
+        "completion_tokens": 33454,
+        "completion_tokens_per_second": 1262.373402670263,
+        "requests_per_second": 19.320116642768415,
+        "latency_s": {
+          "p50": 1.6163118000258692,
+          "p95": 2.068769400008023,
+          "p99": 2.2406071000150405
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 14.117492699995637,
+          "p95": 25.74190790002467,
+          "p99": 26.376615400018636
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "614dad5358ad8727d00129116acfaf6ecbb336ce7150ecd1c3deb6687d3c5040"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 9.992826099973172,
+        "completion_tokens": 32927,
+        "completion_tokens_per_second": 3295.0638458612225,
+        "requests_per_second": 51.23675673705305,
+        "latency_s": {
+          "p50": 0.5960269999923185,
+          "p95": 0.917525700002443,
+          "p99": 1.0256446999846958
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 5.3353793999995105,
+          "p95": 9.657417199981865,
+          "p99": 9.910583699995186
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "bf41f1511b319f1704694056a7608de64d7b429f034d1edbd8cf1aaefb3c4a2b"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 10.162279800046235,
+        "completion_tokens": 32995,
+        "completion_tokens_per_second": 3246.8108189512636,
+        "requests_per_second": 50.3823954933489,
+        "latency_s": {
+          "p50": 0.6160265000071377,
+          "p95": 0.8955204000230879,
+          "p99": 1.0192269999533892
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 5.551320700033102,
+          "p95": 9.862597000028472,
+          "p99": 10.120271400024649
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "9a9a9e3ad284e909e6930255b6bb688489b5f48ea6af2721b3581a7122fb8bf6"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 10.29095110000344,
+        "completion_tokens": 32877,
+        "completion_tokens_per_second": 3194.7484426380192,
+        "requests_per_second": 49.752447079437474,
+        "latency_s": {
+          "p50": 0.6168569999863394,
+          "p95": 0.9255525000044145,
+          "p99": 1.0738252000301145
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 5.559474300011061,
+          "p95": 9.993496700015385,
+          "p99": 10.23848340002587
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "e42dd8ba38f8522da768c4e17492090bbb3a3eb4e3525ea47a03fda6f152ecee"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 32,
+      "trial": 3,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 10.237659999984317,
+        "completion_tokens": 33013,
+        "completion_tokens_per_second": 3224.662667059716,
+        "requests_per_second": 50.01142839289294,
+        "latency_s": {
+          "p50": 0.6053079999983311,
+          "p95": 0.9405189999961294,
+          "p99": 1.0281009000027552
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 5.332951099961065,
+          "p95": 10.032835299964063,
+          "p99": 10.12145320000127
+        },
+        "valid": true,
+        "observed_peak_in_flight": 32
+      },
+      "output_sha256": "3a0b4e0259d4e5848ba3df63f4dd8effce5d698d0082a5abd23d99fd92f61ffd"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 25.91837700002361,
+        "completion_tokens": 33487,
+        "completion_tokens_per_second": 1292.017629034777,
+        "requests_per_second": 19.75432335132457,
+        "latency_s": {
+          "p50": 11.148021699977107,
+          "p95": 16.76257339998847,
+          "p99": 17.956713300023694
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 19.139326800010167,
+          "p95": 25.595403900020756,
+          "p99": 25.81026220001513
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "5e00ce357f4603d595c2c37e0f1bdb9a17e45b796b5e4faafcf3b33643409768"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 26.04046589997597,
+        "completion_tokens": 33531,
+        "completion_tokens_per_second": 1287.6497728111285,
+        "requests_per_second": 19.661706590298465,
+        "latency_s": {
+          "p50": 11.144204000011086,
+          "p95": 17.42925429996103,
+          "p99": 18.46529299998656
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.816126799967606,
+          "p95": 25.780030699970666,
+          "p99": 25.977179899986368
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "8daddbd849a19fbe19c3443c6542edda6f8d0ec5b15c5b51b74cb46243511338"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 25.655266500019934,
+        "completion_tokens": 33462,
+        "completion_tokens_per_second": 1304.2936038093387,
+        "requests_per_second": 19.956916058525533,
+        "latency_s": {
+          "p50": 11.083297200035304,
+          "p95": 16.350754800019786,
+          "p99": 17.775479100004304
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.366933899989817,
+          "p95": 25.4298888000194,
+          "p99": 25.584681100037415
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "ec1f827bd1c3f273c8128c187d394ab3027e187cc7b348ff6f414a4b90c8c1e8"
+    },
+    {
+      "backend": "llama",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 25.52858380001271,
+        "completion_tokens": 33510,
+        "completion_tokens_per_second": 1312.6462581125754,
+        "requests_per_second": 20.05594998966394,
+        "latency_s": {
+          "p50": 10.882519699982367,
+          "p95": 16.449411699955817,
+          "p99": 17.496006900037173
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 18.203988900000695,
+          "p95": 25.267099599994253,
+          "p99": 25.456418499990832
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "09fe3c8faa34d17b29f9ef6e82a9e8259eb3da6ead4aaab7ca5c6f0b80c9df69"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "cold",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.7906287999940105,
+        "completion_tokens": 32869,
+        "completion_tokens_per_second": 4219.043269013827,
+        "requests_per_second": 65.71998398901943,
+        "latency_s": {
+          "p50": 3.3040783000178635,
+          "p95": 5.873709499952383,
+          "p99": 6.857710400014184
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.9560119999805465,
+          "p95": 7.746844700013753,
+          "p99": 7.776608899992425
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "059e4f5caba4eede7f1478030eefa97aecdef4090569ef5186e1413e09b72468"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "warm-1",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.973293400020339,
+        "completion_tokens": 32871,
+        "completion_tokens_per_second": 4122.637704504408,
+        "requests_per_second": 64.21436843133027,
+        "latency_s": {
+          "p50": 2.969289199972991,
+          "p95": 6.75840779999271,
+          "p99": 7.4973513999721035
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 7.191068699990865,
+          "p95": 7.921551099978387,
+          "p99": 7.9529996999772266
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "0783b1a07a2f65fd577ff23f136f00a5a281ae24bd2addf50d0e4285b219aaaf"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "warm-2",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 7.735714100010227,
+        "completion_tokens": 32857,
+        "completion_tokens_per_second": 4247.442391899742,
+        "requests_per_second": 66.1865205177791,
+        "latency_s": {
+          "p50": 3.2141323999967426,
+          "p95": 6.276966599980369,
+          "p99": 7.094935100001749
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 6.98712579999119,
+          "p95": 7.693289700022433,
+          "p99": 7.722316900035366
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "89022b8050be7621afafbf78a69402d60a1f88d4ded522bd5b5b8d2f4e72fa6c"
+    },
+    {
+      "backend": "vllm",
+      "concurrency": 256,
+      "trial": 3,
+      "phase": "warm-3",
+      "metrics": {
+        "requests": 512,
+        "completed": 512,
+        "errors": 0,
+        "truncated": 0,
+        "wall_s": 8.09306700003799,
+        "completion_tokens": 32914,
+        "completion_tokens_per_second": 4066.937787595913,
+        "requests_per_second": 63.2640258628276,
+        "latency_s": {
+          "p50": 3.349146499997005,
+          "p95": 6.71923730004346,
+          "p99": 7.400750600034371
+        },
+        "ttft_s": {
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "end_to_end_s": {
+          "p50": 7.170982000010554,
+          "p95": 8.059469100029673,
+          "p99": 8.089256200008094
+        },
+        "valid": true,
+        "observed_peak_in_flight": 256
+      },
+      "output_sha256": "a15d15393160778fd944862cb1d2fa12f0a39024b66835d75f544841d6406713"
+    }
+  ],
+  "validated_requests": 24576,
+  "failed_attempts": [
+    {
+      "name": "llama-p256-t2",
+      "backend": "llama",
+      "parallel": 256,
+      "trial": 2,
+      "errors": [
+        {
+          "id": "r004-zh18",
+          "error": "URLError: <urlopen error [WinError 10055] 由于系统缓冲区空间不足或队列已满，不能执行套接字上的操作。>"
+        }
+      ],
+      "phases": [
+        {
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 511,
+            "errors": 1,
+            "truncated": 0,
+            "wall_s": 25.612268700031564,
+            "completion_tokens": 33426,
+            "completion_tokens_per_second": 1305.0776716222256,
+            "requests_per_second": 19.951375881019484,
+            "latency_s": {
+              "p50": 11.065570200036746,
+              "p95": 16.203674799995497,
+              "p99": 17.802133099990897
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 18.61786790000042,
+              "p95": 25.332598000008147,
+              "p99": 25.50609420001274
+            },
+            "valid": false,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "04375206c621ed49c3eebc34a16263e39a58638edecb1621ff2c847219631f62"
+        }
+      ]
+    }
+  ],
+  "cooldown_history": [
+    {
+      "after_completed_runs": 5,
+      "seconds": 120
+    }
+  ],
+  "total_requests": 25088,
+  "total_errors": 1,
+  "total_truncations": 0,
+  "notes": [
+    "Untouched official stable v0.4.1 release binaries (nightly b10964) and untouched Tencent Q4_K_M.",
+    "Complete translation deployment comparison; weight format, activation precision, KV format and allocation differ.",
+    "Both use loopback POST /v1/chat/completions with stream=false; identical prompts and sampling settings.",
+    "512 requests, bounded client concurrency; client thread startup, server startup and output file writing excluded.",
+    "Both have prefix/prompt caching disabled. First complete workload pass reported separately.",
+    "Both use shared KV pools with equal token capacity and a 2048-token per-request context limit.",
+    "Fresh server process per trial/configuration; backend and concurrency order alternate.",
+    "Unchanged 64 multilingual cases repeated eight times; not a production traffic or length distribution."
+  ],
+  "detailed_report_sha256": "819d22e9a0e523563dabe48c0c82b280d4659375c095f343d3da41e7ba288f0a"
+}

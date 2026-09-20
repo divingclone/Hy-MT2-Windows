@@ -1,54 +1,14 @@
-"""Download a verified Hy-MT model using the bundled Python; no pip is needed."""
+"""Verified four-bit checkpoint bundles for the native Windows vLLM backend."""
 from __future__ import annotations
-
-import argparse
+import argparse, hashlib, http.client, json, math, os, re, shutil, sys, tempfile, time, zipfile
 from contextlib import contextmanager
-import hashlib
-import http.client
-import json
-import math
-import os
 from pathlib import Path
-import re
-import sys
-import time
-import urllib.error
-import urllib.parse
-import urllib.request
-
-from gpu_config import ConfigError, choose_binary, detect_gpus
-
-ROOT = Path(__file__).resolve().parents[1]
-CHUNK = 4 * 1024 * 1024
-
-
+import urllib.error, urllib.parse, urllib.request
+from gpu_config import ConfigError
+ROOT=Path(__file__).resolve().parents[1]
+CHUNK=4*1024**2
 class SetupError(ValueError):
     pass
-
-
-def load_manifest(path: Path) -> dict:
-    try:
-        manifest = json.loads(path.read_text(encoding="utf-8-sig"))
-    except (OSError, ValueError) as error:
-        raise SetupError(f"Cannot read model manifest {path}: {error}") from error
-    if not isinstance(manifest, dict) or manifest.get("schema_version", manifest.get("schema")) != 1:
-        raise SetupError("models/manifest.json must use schema version 1")
-    files = manifest.get("files")
-    if not isinstance(files, dict):
-        raise SetupError("Model manifest is missing the files map")
-    for profile in ("fast", "official"):
-        item = files.get(profile)
-        if not isinstance(item, dict):
-            raise SetupError(f"Model manifest is missing profile {profile}")
-        name, size, digest = item.get("filename"), item.get("size_bytes"), item.get("sha256")
-        if (not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*\.gguf", name) or
-                type(size) is not int or size <= 0 or
-                not isinstance(digest, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", digest)):
-            raise SetupError(f"Invalid filename, size_bytes or SHA256 for profile {profile}")
-    if files["fast"]["filename"].casefold() == files["official"]["filename"].casefold():
-        raise SetupError("Profiles must use distinct model filenames")
-    return manifest
-
 
 def model_url(repo: str | None, revision: str, filename: str) -> str:
     if (not isinstance(repo, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo) or
@@ -57,34 +17,6 @@ def model_url(repo: str | None, revision: str, filename: str) -> str:
     if not isinstance(revision, str) or not revision or any(c in revision for c in "\r\n"):
         raise SetupError("Model revision is missing or invalid")
     return "https://huggingface.co/" + repo + "/resolve/" + urllib.parse.quote(revision, safe="") + "/" + urllib.parse.quote(filename, safe="")
-
-
-def select_profile(root: Path, profile: str, gpu: str | None = None) -> tuple[str, str]:
-    # An explicit profile can stage a model for another computer without probing
-    # local hardware. The inference launcher still validates its actual GPU.
-    if profile != "auto" and gpu is None:
-        return profile, "explicit profile; hardware is checked when inference starts"
-    devices = detect_gpus()
-    if gpu is not None:
-        selector = str(gpu).strip()
-        devices = [item for item in devices if selector in (str(item["index"]), item["uuid"])]
-        if not devices:
-            raise SetupError(f"GPU {selector!r} was not found; check nvidia-smi -L")
-    devices.sort(key=lambda item: (-item["free_memory_mib"], item["index"]))
-    failures = []
-    for device in devices:
-        try:
-            _, metadata, _ = choose_binary(root, "batch", device)
-            fast_allowed = device["compute_capability"] in metadata.get("nvfp4_compute_capabilities", [])
-            if profile == "fast" and not fast_allowed:
-                raise SetupError("This GPU/build does not declare the NVFP4 fast profile; use --profile official")
-            chosen = ("fast" if fast_allowed and device["compute_capability"] == "12.0" else "official") if profile == "auto" else profile
-            return chosen, f"GPU {device['index']}: {device['name']} (CC {device['compute_capability']})"
-        except (ConfigError, SetupError) as error:
-            failures.append(str(error))
-    raise SetupError("No supported GPU/build for automatic setup. Extract the complete runtime package, "
-                     "or use --profile official/fast to download explicitly. " + "; ".join(failures))
-
 
 class HTTPSRedirectHandler(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, request, fp, code, message, headers, newurl):
@@ -95,11 +27,9 @@ class HTTPSRedirectHandler(urllib.request.HTTPRedirectHandler):
             redirected.remove_header("Authorization")
         return redirected
 
-
 def sha256(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
-
 
 @contextmanager
 def model_lock(path: Path):
@@ -129,7 +59,6 @@ def model_lock(path: Path):
                 msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
-
 
 def _download_attempt(url: str, part: Path, expected_size: int, opener, timeout: float, token: str | None) -> None:
     offset = part.stat().st_size if part.is_file() else 0
@@ -178,7 +107,6 @@ def _download_attempt(url: str, part: Path, expected_size: int, opener, timeout:
         if written != expected_size:
             raise OSError(f"Download interrupted at {written} of {expected_size} bytes; partial data retained")
 
-
 def install_model(url: str, destination: Path, expected_size: int, expected_sha256: str,
                   *, retries: int = 3, timeout: float = 60, opener=None, token: str | None = None) -> str:
     if token:
@@ -225,49 +153,163 @@ def install_model(url: str, destination: Path, expected_size: int, expected_sha2
             time.sleep(min(2**attempt, 8))
     raise SetupError("Model installation did not complete")
 
+def load_manifest(path):
+    manifest=json.loads(Path(path).read_text(encoding='utf-8-sig'))
+    if manifest.get('schema_version')!=2 or manifest.get('backend')!='vllm':
+        raise SetupError('需要 vLLM schema 2 模型清单，GGUF 不能用于此后端。')
+    if not isinstance(manifest.get('files'),dict) or 'fast' not in manifest['files'] or set(manifest['files'])-{'fast','compat'}:
+        raise SetupError('模型清单必须包含 fast，可选 compat checkpoint。')
+    if set(manifest.get('checkpoints',{})) != set(manifest['files'])-{'fast'}:
+        raise SetupError('模型清单的 checkpoint 与模型包不一致。')
+    if 'repositories' in manifest:
+        if set(manifest['repositories']) != set(manifest['files']):
+            raise SetupError('模型仓库与 checkpoint 清单不一致。')
+        for remote in manifest['repositories'].values():
+            model_url(remote.get('repo_id'),remote.get('revision'),'config.json')
+            if not re.fullmatch(r'[a-f0-9]{40}',remote['revision']):
+                raise SetupError('模型下载必须固定到完整提交哈希。')
+    for profile,item in manifest['files'].items():
+        spec=checkpoint_manifest(manifest,profile)
+        if not spec.get('checkpoint_files'):
+            raise SetupError('模型清单缺少 checkpoint 文件。')
+        for name in [spec.get('checkpoint_dir',''),item.get('filename',''),*spec['checkpoint_files']]:
+            if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*',name) or name in ('.','..'):
+                raise SetupError('模型清单包含不安全的路径。')
+        for record in [item,*spec['checkpoint_files'].values()]:
+            if type(record.get('size_bytes')) is not int or record['size_bytes']<=0 or not re.fullmatch(r'[a-f0-9]{64}',record.get('sha256','')):
+                raise SetupError('模型清单大小或 SHA256 无效。')
+        if spec.get('checkpoint_size_bytes') != sum(x['size_bytes'] for x in spec['checkpoint_files'].values()):
+            raise SetupError('checkpoint 总大小不符。')
+    return manifest
 
-def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, epilog="Auto: RTX 50 uses NVFP4; other supported GPUs use official Q4_K_M. Existing verified files are reused.")
-    parser.add_argument("--repo", help="Hugging Face OWNER/REPOSITORY override")
-    parser.add_argument("--profile", choices=("auto", "fast", "official"), default="auto",
-                        help="Explicit fast/official can download for another PC without probing this GPU")
-    parser.add_argument("--gpu", help="NVIDIA GPU index or full GPU UUID for automatic selection")
-    parser.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
-    parser.add_argument("--manifest", type=Path, help="Alternate model manifest (default: models/manifest.json)")
-    parser.add_argument("--timeout", type=float, default=60, help="Per-read HTTPS timeout in seconds (60)")
-    parser.add_argument("--retries", type=int, default=3, help="Retries after a transient failure (3)")
-    parser.add_argument("--pause-on-exit", action="store_true", help=argparse.SUPPRESS)
-    args = parser.parse_args(argv)
-    if not math.isfinite(args.timeout) or args.timeout <= 0 or args.retries < 0 or args.retries > 10:
-        parser.error("timeout must be positive; retries must be between 0 and 10")
-    root = args.root.resolve()
-    manifest = load_manifest(args.manifest.resolve() if args.manifest else root/"models/manifest.json")
-    profile, reason = select_profile(root, args.profile, args.gpu)
-    item = manifest["files"][profile]
-    url = model_url(args.repo or manifest.get("repo_id"), manifest.get("revision", "main"), item["filename"])
-    print(f"Model profile: {profile}; {reason}")
-    print(f"Source: {args.repo or manifest.get('repo_id')}; revision: {manifest.get('revision', 'main')}")
-    destination = root/"models"/item["filename"]
-    result = install_model(url, destination, item["size_bytes"], item["sha256"],
-                           retries=args.retries, timeout=args.timeout, token=os.environ.get("HF_TOKEN"))
-    print(f"Ready ({result}): {destination}\nNext: translate-batch.cmd examples\\input.jsonl output.jsonl\nOr: start-server.cmd")
+
+def checkpoint_manifest(manifest,profile):
+    variant='compat' if profile=='compat' else 'fast'
+    if variant not in manifest['files']:
+        raise SetupError(f'运行包清单缺少 {variant} 模型，请更新程序包后再下载模型。')
+    if variant=='fast': return manifest
+    spec=manifest.get('checkpoints',{}).get(variant)
+    if not isinstance(spec,dict): raise SetupError('模型清单缺少 compat checkpoint。')
+    return {**manifest, **{k:spec.get(k) for k in ('checkpoint_dir','checkpoint_size_bytes','checkpoint_files')}}
+
+def checkpoint_path(root,manifest):
+    return Path(root)/'models'/manifest['checkpoint_dir']
+
+def verify_checkpoint(path,manifest):
+    path=Path(path)
+    for name,item in manifest['checkpoint_files'].items():
+        file=path/name
+        if not file.is_file() or file.stat().st_size!=item['size_bytes'] or sha256(file)!=item['sha256']:
+            raise SetupError(f'checkpoint 文件缺失或 SHA256 不符：{file}。请运行 setup-model.cmd 或导入对应模型包。')
+    return path
+
+
+def checkpoint_complete(path,manifest):
+    """Cheap inventory check; loading still verifies every SHA-256."""
+    path=Path(path)
+    return bool(manifest['checkpoint_files']) and all(
+        (path/name).is_file() and (path/name).stat().st_size==item['size_bytes']
+        for name,item in manifest['checkpoint_files'].items())
+
+
+def checkpoint_downloaded(path,manifest):
+    staging=Path(path).with_name(Path(path).name+'.download')
+    total=0
+    for name,item in manifest['checkpoint_files'].items():
+        file=staging/name
+        part=file.with_name(name+'.part')
+        if file.is_file(): total+=min(file.stat().st_size,item['size_bytes'])
+        elif part.is_file(): total+=min(part.stat().st_size,item['size_bytes'])
+    return total
+
+
+def download_checkpoint(target,manifest,profile,*,repo=None):
+    """Resume individual raw files, then publish one fully verified directory."""
+    target=Path(target)
+    remote=manifest.get('repositories',{}).get(profile)
+    if not remote: raise SetupError('清单未配置原始模型仓库，请更新程序或导入离线 ZIP。')
+    target.parent.mkdir(parents=True,exist_ok=True)
+    staging=target.with_name(target.name+'.download')
+    if target.is_symlink() or staging.is_symlink(): raise SetupError('模型目录不能是符号链接。')
+    with model_lock(target.with_name(target.name+'.lock')):
+        if target.exists():
+            verify_checkpoint(target,manifest)
+            return 'already_verified'
+        staging.mkdir(exist_ok=True)
+        remaining=manifest['checkpoint_size_bytes']-checkpoint_downloaded(target,manifest)
+        if shutil.disk_usage(target.parent).free < remaining+128*1024**2:
+            raise SetupError('磁盘空间不足，无法下载模型。')
+        for name,item in manifest['checkpoint_files'].items():
+            print('Downloading checkpoint file: '+name,flush=True)
+            file=staging/name
+            install_model(model_url(repo or remote['repo_id'],remote['revision'],name),
+                          file,item['size_bytes'],item['sha256'])
+            file.with_name(name+'.lock').unlink(missing_ok=True)
+        verify_checkpoint(staging,manifest)
+        os.replace(staging,target)
+    return 'downloaded_verified'
+
+def extract_checkpoint(bundle,target,manifest):
+    target=Path(target)
+    if target.exists(): return verify_checkpoint(target,manifest)
+    target.parent.mkdir(parents=True,exist_ok=True)
+    with model_lock(target.with_name(target.name+'.lock')):
+        if target.exists(): return verify_checkpoint(target,manifest)
+        with tempfile.TemporaryDirectory(prefix='nvfp4-',dir=target.parent) as temporary:
+            staging=Path(temporary)/'checkpoint'
+            staging.mkdir()
+            with zipfile.ZipFile(bundle) as archive:
+                names=archive.namelist()
+                if len(names)!=len(set(names)) or set(names)!=set(manifest['checkpoint_files']):
+                    raise SetupError('模型包文件集合不符；拒绝解压。')
+                for name,item in manifest['checkpoint_files'].items():
+                    if archive.getinfo(name).file_size!=item['size_bytes']:
+                        raise SetupError('模型包解压大小不符。')
+                    with archive.open(name) as source,(staging/name).open('wb') as output:
+                        shutil.copyfileobj(source,output)
+            verify_checkpoint(staging,manifest)
+            os.replace(staging,target)
+    return target
+
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source',type=Path,help='Import the verified ZIP bundle for the selected profile')
+    parser.add_argument('--repo',help='Optional raw checkpoint repository with the same pinned revision and files')
+    parser.add_argument('--profile',choices=('auto','fast','quality','compat'),default='auto')
+    parser.add_argument('--root',type=Path,default=ROOT)
+    parser.add_argument('--pause-on-exit',action='store_true')
+    args=parser.parse_args(argv)
+    root=args.root.resolve()
+    manifest=load_manifest(root/'models/manifest.json')
+    from gpu_config import detect_gpus, select_profile
+    profile=args.profile
+    if profile=='auto':
+        devices=sorted(detect_gpus(),key=lambda x:-x['free_memory_mib'])
+        supported=[d for d in devices if d['compute_capability'] in ('8.0','8.6','8.9','12.0')]
+        if not supported: raise SetupError('当前运行包需要 RTX 30/40/50 或对应受支持架构。')
+        profile=select_profile(supported[0],profile)
+    variant='compat' if profile=='compat' else 'fast'
+    manifest=checkpoint_manifest(manifest,variant)
+    target=checkpoint_path(root,manifest)
+    if target.exists():
+        verify_checkpoint(target,manifest)
+        print(f'Ready: {target}')
+        return 0
+    item=manifest['files'][variant]
+    bundle=args.source or root/'models'/item['filename']
+    if not bundle.is_file():
+        if args.source: raise SetupError('指定的离线 ZIP 不存在。')
+        download_checkpoint(target,manifest,variant,repo=args.repo)
+        print(f'Ready: {target}')
+        return 0
+    if bundle.stat().st_size!=item['size_bytes'] or sha256(bundle)!=item['sha256']:
+        raise SetupError('模型包 SHA256 或大小不符。')
+    extract_checkpoint(bundle,target,manifest)
+    print(f'Ready: {target}')
     return 0
 
-
-if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8")
-    sys.stderr.reconfigure(encoding="utf-8")
-    try:
-        result = main()
-    except (ConfigError, SetupError, OSError) as error:
-        print(f"Setup error: {error}", file=sys.stderr)
-        result = 1
-    except KeyboardInterrupt:
-        print("\nDownload cancelled; partial data retained for the next run.", file=sys.stderr)
-        result = 130
-    if "--pause-on-exit" in sys.argv and sys.stdin.isatty():
-        try:
-            input("Press Enter to close...")
-        except (EOFError, KeyboardInterrupt):
-            pass
-    raise SystemExit(result)
+if __name__=='__main__':
+    try: raise SystemExit(main())
+    except (ValueError,OSError) as error:
+        print(str(error),file=sys.stderr)
+        raise SystemExit(1)

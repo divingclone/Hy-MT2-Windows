@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hymt-vllm-native"
+version = "0.1.0"
+description = "Opt-in Hy-MT2 native model registration for vLLM Windows experiments"
+requires-python = ">=3.12"
+
+[project.entry-points."vllm.general_plugins"]
+hymt_native = "hymt_vllm_native:register"
+
+[tool.setuptools]
+py-modules = ["hymt_vllm_native", "hymt_vllm_model"]

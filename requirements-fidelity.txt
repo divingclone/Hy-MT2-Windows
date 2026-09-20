@@ -1,0 +1,4 @@
+# CPU-side teacher-relative scoring; inference environments remain separate.
+numpy==2.5.3
+sacrebleu==2.6.0
+rapidfuzz==3.14.3

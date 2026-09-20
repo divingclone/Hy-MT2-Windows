@@ -48,3 +48,7 @@ The package's manifest independently hashes the actual files
 distributed. A package dependency check follows normal and delay-load PE imports
 and explicitly includes the dynamically loaded ggml backends and server module;
 it cannot prove the absence of every possible runtime `LoadLibrary` call.
+
+## WebView2 Fixed Version
+
+The desktop UI prefers the system Evergreen WebView2 runtime. If unavailable, it downloads a verified app-local Microsoft WebView2 Fixed Version runtime (also available in optional offline builds). Its use and redistribution are subject to the accompanying WEBVIEW2-FIXED-LICENSE.txt terms. It includes Microsoft Defender SmartScreen, which collects and sends information to Microsoft as described at https://aka.ms/privacy and https://learn.microsoft.com/en-us/microsoft-edge/privacy-whitepaper#smartscreen. The downloaded runtime retains its third-party notices.

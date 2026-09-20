@@ -1,27 +1,26 @@
 # Model attribution and modifications
 
 Original model: Tencent Hy-MT2-1.8B, copyright (C) 2026 Tencent.
+Source: https://huggingface.co/tencent/Hy-MT2-1.8B at revision
+`9a341cd1b679d3efd23b46e847b01745a71ed792`.
+The original Apache-2.0 license text is preserved in `licenses/model-Hy-MT2.txt`.
 
-Official source: https://huggingface.co/tencent/Hy-MT2-1.8B
+The project distributes two modified checkpoint variants in separate repositories:
 
-Official GGUF source: https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF
+- NVFP4 W4A4, compressed-tensors format, group size 16. Linear weights and input
+  activations use four-bit floating-point quantization; activation scaling is
+  dynamic locally with calibrated global scales. Tied embedding/output weights
+  remain BF16.
+- GPTQ INT4 W4A16, compressed-tensors format, symmetric weight quantization with
+  group size 128. Tied embedding/output weights remain BF16. Quantization versions,
+  source hashes and output hashes are recorded in `benchmarks/int4-quantization.json`.
 
-The included license was retrieved from official model revision
-`9a341cd1b679d3efd23b46e847b01745a71ed792` and identifies Apache License 2.0.
-The original complete text is preserved in `model-Hy-MT2.txt`.
+Both were calibrated on 256 OPUS translation examples, disjoint from the project's
+teacher-output evaluation examples. Configuration was normalized for the pinned
+vLLM runtime and the project's native Hunyuan model plugin. Tokenizer and chat
+template accompany each checkpoint. These are independent quantizations of the
+source safetensors checkpoint, not conversions from the previous GGUF artifacts.
 
-This package contains modified model files, not Tencent's unmodified download:
-
-- `Hy-MT2-1.8B-Q4_K_M-fused.gguf` repacks the official Q4_K_M GGUF into joined
-  QKV/QK and gate/up projection tensors used by this modified inference build.
-  The repacking preserves the source quantized tensor block bytes.
-- `Hy-MT2-1.8B-NVFP4-fused.gguf` was quantized locally from the model's BF16 GGUF
-  to the NVFP4 format using fixed OPUS-100 English/Chinese translation calibration
-  and local imatrix-weighted MSE scale search, then repacked for joined projections.
-  The calibration and evaluation inputs use disjoint validation/test splits.
-- Quantization and tensor layout changes were performed in this project.
-  Tencent does not endorse this package or guarantee its modifications.
-
-The SHA-256 of each distributed model file is recorded in
-`MANIFEST.sha256.json` and `SHA256SUMS.txt`. These hashes identify the packaged
-artifacts; they do not establish translation quality or numerical equivalence.
+Every checkpoint file's size and SHA-256 are recorded in `models/manifest.json`. KV cache quantization is selected at
+runtime and does not modify these checkpoint files. Tencent does not endorse
+this packaging or guarantee its modifications.

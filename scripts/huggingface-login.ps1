@@ -40,7 +40,7 @@ $button.Add_Click({
     try {
         $startInfo = New-Object Diagnostics.ProcessStartInfo
         $startInfo.FileName = $python
-        $startInfo.Arguments = '-E -s -X utf8 scripts/publish_models.py --login-stdin'
+        $startInfo.Arguments = '-E -s -X utf8 scripts/publish_vllm_models.py --login-stdin'
         $startInfo.WorkingDirectory = $root
         $startInfo.UseShellExecute = $false
         $startInfo.CreateNoWindow = $true

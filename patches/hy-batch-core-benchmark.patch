@@ -1,0 +1,178 @@
+--- a/tools/hy-batch/hy-batch.cpp
++++ b/tools/hy-batch/hy-batch.cpp
+@@ -414,22 +414,50 @@
+     sampling_pool pool(opt.sampling_threads);
+     const double initialization_s = elapsed(init_start);
+ 
++    if (opt.continuous || opt.input == "-" || opt.output == "-" || opt.summary.empty())
++        throw std::runtime_error("core benchmark requires fixed-wave mode and input/output/summary files");
++    const int repeats = std::getenv("HYMT_CORE_REPEATS") ? positive_integer(std::getenv("HYMT_CORE_REPEATS"), "HYMT_CORE_REPEATS") : 3;
++    const auto preprocess_start = clock_type::now();
++    std::vector<request> bench_items;
++    std::vector<std::vector<llama_token>> bench_prompts;
++    std::ifstream bench_input(std::filesystem::u8path(opt.input), std::ios::binary);
++    if (!bench_input) throw std::runtime_error("could not read benchmark input");
++    std::string bench_line;
++    while (std::getline(bench_input, bench_line)) {
++        if (blank(bench_line)) continue;
++        const auto data = common_json::parse(bench_line);
++        request item;
++        item.id = data.at("id"); item.text = data.at("text").get<std::string>();
++        item.target = target_name(data.at("target_lang").get<std::string>());
++        item.source_lang = data.value("source_lang", "");
++        common_chat_msg message;
++        message.role = "user";
++        message.content = "Translate the following text into " + item.target +
++            ". Note that you should only output the translated result without any additional explanation:\n" + item.text;
++        common_chat_templates_inputs chat_input;
++        chat_input.messages.push_back(message); chat_input.add_generation_prompt = true; chat_input.use_jinja = true;
++        const auto formatted = common_chat_templates_apply(templates.get(), chat_input);
++        bench_prompts.push_back(common_tokenize(vocab, formatted.prompt, true, true));
++        bench_items.push_back(std::move(item));
++    }
++    if (bench_items.empty() || bench_input.bad()) throw std::runtime_error("empty or invalid input");
++    const double preprocess_s = elapsed(preprocess_start);
++    common_json prompt_evidence = common_json::array();
++    for (size_t i = 0; i < bench_items.size(); ++i)
++        prompt_evidence.push_back(common_json({{"id", bench_items[i].id}, {"token_ids", bench_prompts[i]}}));
++    std::ofstream prompt_file(std::filesystem::u8path(opt.summary + ".prompts.json"), std::ios::binary);
++    prompt_file << prompt_evidence.dump() << '\n'; prompt_file.close();
++    int failures = 0;
++    for (int repetition = 0; repetition <= repeats; ++repetition) {
++    const std::string phase = repetition == 0 ? "cold" : "warm-" + std::to_string(repetition);
++    const double phase_start_unix_s = std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count();
++    const auto prefix_before = llama_get_hymt_prefix_stats(ctx.get());
+     const auto work_start = clock_type::now();
+-    std::ifstream input_file;
+-    std::ofstream output_file;
+-    std::istream * input = &std::cin;
+-    std::ostream * output = &std::cout;
+-    if (opt.input != "-") {
+-        input_file.open(std::filesystem::u8path(opt.input), std::ios::binary);
+-        if (!input_file) throw std::runtime_error("could not open input file");
+-        input = &input_file;
+-    }
+-    if (opt.output != "-") {
+-        output_file.open(std::filesystem::u8path(opt.output), std::ios::binary);
+-        if (!output_file) throw std::runtime_error("could not open output file");
+-        output = &output_file;
+-    }
+-
++    double core_wall_s = 0;
++    llama_perf_context_reset(ctx.get());
++    std::ofstream output_file(std::filesystem::u8path(opt.output + "." + phase + ".jsonl"), std::ios::binary);
++    if (!output_file) throw std::runtime_error("could not write benchmark output");
++    std::ostream * output = &output_file;
+     uint64_t line_number = 0, requests = 0, waves = 0, prompt_tokens = 0;
+     uint64_t completion_tokens = 0, output_tokens = 0, dummy_decode_tokens = 0, decode_tokens = 0;
+     uint64_t stopped = 0, truncated = 0, empty = 0;
+@@ -439,30 +467,11 @@
+     double snapshot_wait_s = 0, cpu_sampling_s = 0, refill_prefill_s = 0;
+     std::vector<int> wave_widths;
+     bool input_exhausted = false;
++    size_t bench_cursor = 0;
+     auto read_request = [&](request & item) {
+-        if (input_exhausted) return false;
+-        std::string line;
+-        while (std::getline(*input, line)) {
+-            ++line_number;
+-            if (line_number == 1 && line.compare(0, 3, "\xef\xbb\xbf") == 0) line.erase(0, 3);
+-            if (blank(line)) continue;
+-            const auto data = common_json::parse(line);
+-            if (!data.is_object() || !data.contains("text") || !data.at("text").is_string() ||
+-                !data.contains("target_lang") || !data.at("target_lang").is_string()) {
+-                throw std::runtime_error("line " + std::to_string(line_number) + " needs string text and target_lang");
+-            }
+-            item.id = data.value("id", common_json::make(line_number));
+-            item.text = data.at("text").get<std::string>();
+-            item.target = target_name(data.at("target_lang").get<std::string>());
+-            item.source_lang = data.value("source_lang", "");
+-            if (blank(item.text) || item.target.empty()) {
+-                throw std::runtime_error("empty text or target_lang on line " + std::to_string(line_number));
+-            }
+-            return true;
+-        }
+-        if (input->bad()) throw std::runtime_error("failed while reading input");
+-        input_exhausted = true;
+-        return false;
++        if (bench_cursor >= bench_items.size()) { input_exhausted = true; return false; }
++        item = bench_items[bench_cursor++];
++        return true;
+     };
+     std::map<uint64_t, common_json> completed;
+     auto finish_request = [&](const request & item, const slot & current) {
+@@ -497,6 +506,7 @@
+         request next_item;
+         while (items.size() < size_t(opt.parallel) && read_request(next_item)) items.push_back(std::move(next_item));
+         if (items.empty()) break;
++        const auto core_wave_start = clock_type::now();
+         ++waves;
+         // CPU samplers are not retained by the context. Backend sampling keeps
+         // all registered sampler slots alive and padded until it has a separate
+@@ -526,16 +536,7 @@
+         auto prepare_slot = [&](int i) {
+             auto & current = slots[i];
+             const auto & item = items[i];
+-            common_chat_msg message;
+-            message.role = "user";
+-            message.content = "Translate the following text into " + item.target +
+-                ". Note that you should only output the translated result without any additional explanation:\n" + item.text;
+-            common_chat_templates_inputs chat_input;
+-            chat_input.messages.push_back(message);
+-            chat_input.add_generation_prompt = true;
+-            chat_input.use_jinja = true;
+-            const auto formatted = common_chat_templates_apply(templates.get(), chat_input);
+-            current.prompt = common_tokenize(vocab, formatted.prompt, true, true);
++            current.prompt = bench_prompts.at(current.request_index);
+             if (current.prompt.empty() || current.prompt.size() + opt.max_tokens > size_t(opt.context)) {
+                 throw std::runtime_error("prompt plus max-tokens exceeds per-sequence context for id " + item.id.dump());
+             }
+@@ -728,6 +729,8 @@
+             decode_tokens += step_width;
+             dummy_decode_tokens += step_dummy;
+         }
++        llama_synchronize(ctx.get());
++        core_wall_s += elapsed(core_wave_start);
+         if (!opt.continuous) {
+             for (size_t i = 0; i < items.size(); ++i) finish_request(items[i], slots[i]);
+         }
+@@ -742,6 +745,10 @@
+     common_json width_counts = common_json::object();
+     for (const auto & entry : decode_width_counts) width_counts[std::to_string(entry.first)] = entry.second;
+     common_json summary = {
++        {"phase_start_unix_s", phase_start_unix_s}, {"phase_end_unix_s", phase_start_unix_s + wall_s},
++        {"core_schema_version", 1}, {"phase", phase}, {"preprocess_s", preprocess_s},
++        {"core_wall_s", core_wall_s}, {"core_completion_tokens_per_second", completion_tokens / core_wall_s},
++        {"core_metric", "Pretokenized native engine: KV reset, sampler setup, prefill, decode, sampling and detokenization. Excludes model init, input parsing/tokenization and output JSON serialization; caches cleared between requests."},
+         {"schema_version", 1}, {"engine", opt.continuous ? "hy-batch-continuous" : "hy-batch-fixed-wave"}, {"model", opt.model},
+         {"requests", requests}, {"waves", waves}, {"parallel", opt.parallel},
+         {"wave_widths", wave_widths}, {"final_wave_width", wave_widths.empty() ? 0 : wave_widths.back()},
+@@ -757,9 +764,9 @@
+         {"decode_steps", decode_steps}, {"snapshot_wait_s", snapshot_wait_s}, {"cpu_sampling_s", cpu_sampling_s},
+         {"decode_width_counts", width_counts},
+         {"refill_prefill_s", refill_prefill_s},
+-        {"gpu_prefix_stats", common_json({{"rows", prefix_stats.rows}, {"fallback_rows", prefix_stats.fallback_rows},
+-                                          {"candidate_bytes", prefix_stats.candidate_bytes},
+-                                          {"raw_logits_bytes", prefix_stats.raw_logits_bytes}})},
++        {"gpu_prefix_stats", common_json({{"rows", prefix_stats.rows - prefix_before.rows}, {"fallback_rows", prefix_stats.fallback_rows - prefix_before.fallback_rows},
++                                          {"candidate_bytes", prefix_stats.candidate_bytes - prefix_before.candidate_bytes},
++                                          {"raw_logits_bytes", prefix_stats.raw_logits_bytes - prefix_before.raw_logits_bytes}})},
+         {"initialization_s", initialization_s}, {"wall_s", wall_s},
+         {"prompt_tokens", prompt_tokens}, {"completion_tokens", completion_tokens}, {"output_tokens", output_tokens},
+         {"completion_tokens_per_second", completion_tokens / wall_s},
+@@ -787,11 +794,13 @@
+         })},
+     };
+     if (!opt.summary.empty()) {
+-        std::ofstream file(std::filesystem::u8path(opt.summary), std::ios::binary);
++        std::ofstream file(std::filesystem::u8path(opt.summary + "." + phase + ".json"), std::ios::binary);
+         if (!file || !(file << summary.dump(2) << '\n')) throw std::runtime_error("could not write summary file");
+     }
+     std::cerr << "hy-batch summary: " << summary.dump_safe() << '\n';
+-    return truncated || empty ? 2 : 0;
++    failures += truncated || empty;
++    }
++    return failures ? 2 : 0;
+ }
+ 
+ } // namespace

@@ -17,7 +17,7 @@ import desktop_update as updater
 
 class DesktopConfigurationTests(unittest.TestCase):
     def test_config_rejects_boolean_fraction_and_unbounded_allocation(self):
-        for values in ({'parallel': True}, {'parallel': 1.5}, {'parallel': 129},
+        for values in ({'parallel': True}, {'parallel': 1.5}, {'parallel': 257},
                        {'context': 0}, {'context': 32769}, {'port': 1}, {'port': 65536},
                        {'ubatch': -1}, {'cache': 'bogus'}, {'profile': '../../bad'}, {'gpu': []},
                        {'memoryPercent': 9}, {'memoryPercent': 101}, {'memoryPercent': True}, {'memoryPercent': 30.5}):
@@ -27,8 +27,8 @@ class DesktopConfigurationTests(unittest.TestCase):
     def test_defaults_and_explicit_settings_are_preserved(self):
         self.assertEqual(bridge.validate_settings({})['parallel'], 0)
         self.assertEqual(bridge.validate_settings({})['context'], 2048)
-        self.assertEqual(bridge.validate_settings({})['memoryPercent'], 30)
-        self.assertEqual(bridge.validate_settings({})['cache'], 'q8_0')
+        self.assertEqual(bridge.validate_settings({})['memoryPercent'], 75)
+        self.assertEqual(bridge.validate_settings({})['cache'], 'int8_per_token_head')
         self.assertEqual(bridge.validate_settings({})['logMode'], 'memory')
         self.assertTrue(bridge.validate_settings({})['apiKeyEnabled'])
         self.assertEqual(bridge.validate_settings({'parallel': 32, 'cache': 'q8_0'})['parallel'], 32)
@@ -68,66 +68,14 @@ class DesktopConfigurationTests(unittest.TestCase):
             state['phase'] = 'error'
             self.assertEqual(bridge.reclaim_memory([gpu], state)[0]['reclaimable_memory_mib'], 0)
 
-    def test_running_preview_includes_reclaim_without_duplicate_safety(self):
-        gpu = {'index': 0, 'uuid': 'GPU-a', 'compute_capability': '12.0', 'total_memory_mib': 24000, 'free_memory_mib': 4000}
-        state = {'phase': 'ready', 'pid': 123, 'loaded_memory_mib': 6000, 'plan': {'gpu': {'uuid': 'GPU-a'}}}
-        with tempfile.TemporaryDirectory() as directory:
-            instance = bridge.Bridge({'root': str(ROOT), 'data': directory, 'output': str(Path(directory)/'result.json'), 'args': {'parallel': 16, 'context': 1537, 'memoryPercent': 100}, 'service': state})
-            with patch.object(bridge, 'detect_gpus', return_value=[gpu]), patch.object(bridge.subprocess, 'run', side_effect=OSError()), patch.object(bridge, 'choose_binary', return_value=(ROOT/'bin', {'nvfp4_compute_capabilities': ['12.0']}, {})):
-                plan = instance.plan()
-            self.assertEqual(plan['budget']['free_memory_mib'], 10000)
-            self.assertEqual(plan['budget']['safety_margin_mib'], 500)
-            self.assertEqual(plan['budget']['kv_context_tokens_rounded'], 1792)
-            self.assertEqual(plan['settings']['context'], 1537)
 
     def test_error_hints_cover_oom_download_and_corruption(self):
         for message, expected in [('CUDA out of memory', 'memory'), ('Model SHA256 mismatch', 'integrity'),
                                   ('urlopen timed out', 'network'), ('nvidia-smi failed', 'gpu')]:
             self.assertEqual(bridge.friendly_error(RuntimeError(message))['code'], expected)
 
-    def test_plan_works_before_download_and_checks_hardware(self):
-        gpu = {'index': 0, 'uuid': 'GPU-test', 'compute_capability': '12.0', 'free_memory_mib': 24000, 'total_memory_mib': 32768}
-        with tempfile.TemporaryDirectory() as directory:
-            instance = bridge.Bridge({'root': str(ROOT), 'data': directory, 'output': str(Path(directory)/'result.json'), 'args': {}})
-            with patch.object(bridge, 'detect_gpus', return_value=[gpu]), patch.object(bridge, 'choose_binary', return_value=(ROOT/'bin', {'nvfp4_compute_capabilities': ['12.0']}, {})):
-                plan = instance.plan()
-                self.assertEqual(plan['profile'], 'fast')
-                self.assertGreater(plan['budget']['kv_total_mib'], 0)
-                self.assertTrue(Path(plan['model']).is_relative_to(Path(directory).resolve()))
-                with self.assertRaises(ValueError):
-                    instance.plan(verify=True)
 
-    def test_default_budget_is_total_memory_thirty_percent_not_free_memory(self):
-        gpu = {'index': 0, 'uuid': 'GPU-a', 'compute_capability': '12.0', 'total_memory_mib': 32768, 'free_memory_mib': 24000}
-        with tempfile.TemporaryDirectory() as directory:
-            instance = bridge.Bridge({'root': str(ROOT), 'data': directory, 'output': str(Path(directory)/'result.json')})
-            with patch.object(bridge, 'detect_gpus', return_value=[gpu]), patch.object(bridge, 'choose_binary', return_value=(ROOT/'bin', {'nvfp4_compute_capabilities': ['12.0']}, {})):
-                plan = instance.plan()
-                self.assertEqual(plan['context'], 2048)
-                self.assertEqual(plan['budget']['memory_limit_mib'], 9830)
-                self.assertEqual(plan['budget']['usable_memory_mib'], 9830)
-                self.assertLessEqual(plan['budget']['estimated_total_mib'], 9830)
-                # Low physical availability remains a separate constraint.
-                gpu['free_memory_mib'] = 5000
-                smaller = instance.plan()
-                self.assertEqual(smaller['budget']['usable_memory_mib'], 5000)
-                self.assertLess(smaller['parallel'], plan['parallel'])
-                self.assertLessEqual(smaller['budget']['estimated_total_mib'], 5000)
-                gpu['free_memory_mib'] = 24000
-                instance.args = {'parallel': 128}
-                with self.assertRaisesRegex(ValueError, '30%'):
-                    instance.plan()
-                instance.args['memoryPercent'] = 100
-                self.assertEqual(instance.plan()['parallel'], 128)
 
-    def test_small_gpu_never_silently_exceeds_user_budget(self):
-        gpu = {'index': 0, 'uuid': 'GPU-a', 'compute_capability': '12.0', 'total_memory_mib': 4096, 'free_memory_mib': 4000}
-        with tempfile.TemporaryDirectory() as directory:
-            instance = bridge.Bridge({'root': str(ROOT), 'data': directory, 'output': str(Path(directory)/'result.json')})
-            with patch.object(bridge, 'detect_gpus', return_value=[gpu]), patch.object(bridge, 'choose_binary', return_value=(ROOT/'bin', {'nvfp4_compute_capabilities': ['12.0']}, {})):
-                with self.assertRaisesRegex(ValueError, '调高显存预算比例'):
-                    instance.plan()
-                self.assertEqual(instance.args, {})
 
     def test_import_rejects_invalid_model_without_replacing_existing(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -155,7 +103,30 @@ class SharedModelTests(unittest.TestCase):
                                  'output': str(base/'result.json'), 'args': {'profile': 'fast'}})
         instance.manifest['files'] = {'fast': {'filename': 'test.gguf', 'size_bytes': len(content),
                                              'sha256': hashlib.sha256(content).hexdigest()}}
+        instance.manifest.update(checkpoint_dir='test-checkpoint',checkpoint_size_bytes=len(content),
+            checkpoint_files={'model.safetensors':{'size_bytes':len(content),'sha256':hashlib.sha256(content).hexdigest()}},
+            checkpoints={},repositories={})
         return instance
+
+    def test_raw_checkpoint_reuse_and_removal_preserve_original(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base=Path(directory).resolve()
+            source=base/'new/models/test-checkpoint/model.safetensors'
+            source.parent.mkdir(parents=True);source.write_bytes(b'current model')
+            instance=self.make_bridge(base)
+            instance.reuse_models()
+            bundle=instance.model_item()[1]
+            checkpoint=bundle.parent/'test-checkpoint'
+            self.assertFalse(bundle.exists())
+            self.assertEqual((checkpoint/'model.safetensors').read_bytes(),b'current model')
+            with patch.object(bridge,'detect_gpus',return_value=[]):
+                self.assertTrue(instance.inventory()['models'][0]['installed'])
+            with patch.object(bridge,'download_checkpoint') as download:
+                self.assertEqual(instance.download()['result'],'already_verified')
+                download.assert_not_called()
+            instance.remove_model();instance.reuse_models()
+            self.assertFalse(checkpoint.exists())
+            self.assertEqual(source.read_bytes(),b'current model')
 
     def test_portable_versions_and_installed_app_reuse_same_verified_weights(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -289,13 +260,32 @@ class PortableUpdateTests(unittest.TestCase):
 
     def test_rejects_traversal_data_overwrite_and_case_collision(self):
         for name in ('../escape', '/absolute', 'payload/../escape', 'payload/a:stream',
-                     'data/models/existing.gguf', 'payload\\escape', 'HYMT-DESKTOP.EXE', 'payload/file. '):
+                     'data/models/existing.gguf', 'payload\\escape', 'HYMT-DESKTOP.EXE', 'payload/file. ',
+                     'vcruntime140.dll/child', 'unlisted.dll'):
             with self.subTest(name=name), self.archive([name]) as archive, self.assertRaises(ValueError):
                 updater.validate_entries(archive)
 
     def test_accepts_complete_portable_layout(self):
-        with self.archive(['portable.json', 'payload/bin/llama-server.exe']) as archive:
+        with self.archive(['portable.json', 'payload/runtime/vllm/python.exe', *updater.ROOT_DLLS]) as archive:
             self.assertGreater(updater.validate_entries(archive), 0)
+
+    def test_runtime_dll_update_rolls_back_even_when_one_dll_was_new(self):
+        with tempfile.TemporaryDirectory() as directory:
+            install=Path(directory).resolve();(install/'portable.json').write_text('{}')
+            (install/updater.EXE).write_bytes(b'old');(install/'payload').mkdir()
+            staging=install/'data/updates';(staging/'next/payload').mkdir(parents=True)
+            (staging/'next'/updater.EXE).write_bytes(b'new')
+            for name in updater.ROOT_DLLS: (staging/'next'/name).write_bytes(b'new dll')
+            (install/updater.ROOT_DLLS[1]).write_bytes(b'old dll')
+            rename=updater.rename_retry
+            def fail(source,target):
+                if source==staging/'next'/updater.ROOT_DLLS[1]: raise OSError('locked DLL')
+                rename(source,target)
+            with patch.object(updater,'wait_parent'),patch.object(updater,'rename_retry',side_effect=fail),self.assertRaises(OSError):
+                updater.apply(install,staging,123)
+            self.assertEqual((install/updater.EXE).read_bytes(),b'old')
+            self.assertFalse((install/updater.ROOT_DLLS[0]).exists())
+            self.assertEqual((install/updater.ROOT_DLLS[1]).read_bytes(),b'old dll')
 
     def test_cleanup_never_escapes_staging_parent(self):
         with tempfile.TemporaryDirectory() as directory:

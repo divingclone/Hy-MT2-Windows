@@ -18,6 +18,7 @@ import time
 import zipfile
 
 EXE = 'hymt-desktop.exe'
+ROOT_DLLS = ('vcruntime140.dll', 'vcruntime140_1.dll', 'msvcp140.dll')
 
 
 def confined_remove(path: Path, parent: Path):
@@ -37,7 +38,8 @@ def validate_entries(archive: zipfile.ZipFile):
         path = PurePosixPath(name)
         if (not name or '\\' in name or ':' in name or path.is_absolute() or
                 any(part in ('.', '..') or part.endswith(('.', ' ')) for part in name.rstrip('/').split('/')) or
-                path.parts[0] not in (EXE, 'payload', 'portable.json', 'README-desktop.txt') or
+                path.parts[0] not in (EXE, 'payload', 'portable.json', 'README-desktop.txt', *ROOT_DLLS) or
+                (path.parts[0] != 'payload' and len(path.parts) != 1) or
                 ((item.external_attr >> 16) & 0o170000) == 0o120000):
             raise ValueError(f'Unsafe update entry: {name}')
         key = name.rstrip('/').casefold()
@@ -45,8 +47,8 @@ def validate_entries(archive: zipfile.ZipFile):
             raise ValueError('Duplicate update path')
         seen.add(key)
         total += item.file_size
-        if total > 8 * 1024**3:
-            raise ValueError('Portable update exceeds 8 GiB unpacked limit')
+        if total > 12 * 1024**3:
+            raise ValueError('Portable update exceeds 12 GiB unpacked limit')
     if EXE not in seen or 'payload/scripts/desktop_bridge.py' not in seen:
         raise ValueError('Incomplete portable update')
     return total
@@ -112,12 +114,13 @@ def apply(install: Path, staging: Path, pid: int):
     backup.mkdir()
     moved, applied = [], []
     try:
-        for name in (EXE, 'payload'):
+        for name in (EXE, 'payload', *(name for name in ROOT_DLLS if (staging/'next'/name).is_file())):
             old, new = install / name, staging / 'next' / name
             if old.is_symlink() or (hasattr(old, 'is_junction') and old.is_junction()):
                 raise ValueError('Linked application path is not supported')
-            rename_retry(old, backup / name)
-            moved.append(name)
+            if old.exists():
+                rename_retry(old, backup / name)
+                moved.append(name)
             rename_retry(new, old)
             applied.append(name)
     except Exception:

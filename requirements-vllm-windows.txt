@@ -1,0 +1,12 @@
+# Install into a separate CPython 3.12 Windows x64 environment with uv.
+# Use --extra-index-url https://download.pytorch.org/whl/cu130
+# and --index-strategy unsafe-best-match; see docs/VLLM_MIGRATION.md.
+vllm @ https://github.com/SystemPanic/vllm-windows/releases/download/v0.29.0/vllm-0.29.0+cu132-cp312-cp312-win_amd64.whl
+torch==2.11.0+cu130
+transformers==5.17.0
+compressed-tensors==0.17.0
+triton-windows==3.6.0.post26
+ninja==1.13.2
+flashinfer-python==0.6.11.post3
+aiohttp==3.14.3
+winloop==0.6.3

@@ -1,0 +1,10 @@
+--- a/flashinfer/jit/cpp_ext.py
++++ b/flashinfer/jit/cpp_ext.py
+@@ -465,6 +465,7 @@
+             cwd=str(workdir.resolve()),
+             check=True,
+             text=True,
++            errors="replace",
+         )
+     except subprocess.CalledProcessError as e:
+         msg = "Ninja build failed."

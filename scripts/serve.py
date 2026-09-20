@@ -1,21 +1,9 @@
-"""Portable local Hy-MT server launcher. Uses bundled binaries and stdlib only."""
-import argparse
-import json
-import os
+"""Managed native Windows vLLM API. Default: NVFP4 CUTLASS and INT8 KV."""
+import argparse,json,os,re,socket,subprocess,sys,time,urllib.request
 from pathlib import Path
-import re
-import socket
-import subprocess
-import sys
-import time
-import urllib.error
-import urllib.request
-
-from gpu_config import CACHE_TYPE_BYTES, ensure_cache_type_support, resolve_config
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
+from gpu_config import resolve_config
+from vllm_runtime import environment,server_command,stop_process_tree
+ROOT=Path(__file__).resolve().parents[1]
 def process_creation_filetime(process):
     import ctypes
     from ctypes import wintypes
@@ -27,7 +15,6 @@ def process_creation_filetime(process):
         raise ctypes.WinError(ctypes.get_last_error())
     created = timestamps[0]
     return str((created.dwHighDateTime << 32) | created.dwLowDateTime)
-
 
 def check_managed_label(label):
     pid_file = ROOT/'results'/f'{label}.pid'
@@ -59,95 +46,66 @@ def check_managed_label(label):
     finally:
         kernel.CloseHandle(handle)
 
-
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--profile', choices=('auto', 'fast', 'official'), default='auto')
-    parser.add_argument('--binary-dir', type=Path, help='Explicit executable directory for source-build validation; default: bin')
-    parser.add_argument('--model')
-    parser.add_argument('--parallel', type=int)
-    parser.add_argument('--context', type=int, default=1024)
-    parser.add_argument('--batch', type=int)
-    parser.add_argument('--ubatch', type=int)
-    parser.add_argument('--cache-type-k', choices=CACHE_TYPE_BYTES, default='f16')
-    parser.add_argument('--cache-type-v', choices=CACHE_TYPE_BYTES, default='f16')
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--profile',choices=('auto','fast','quality','compat'),default='auto')
+    parser.add_argument('--model',type=Path)
+    parser.add_argument('--parallel',type=int,default=32)
+    parser.add_argument('--context',type=int,default=2048)
+    parser.add_argument('--batch-tokens',type=int,default=2048)
+    parser.add_argument('--kv-cache-dtype',choices=('int8_per_token_head','bfloat16','fp8_per_token_head'),default='int8_per_token_head')
+    parser.add_argument('--kv-gib',type=float)
+    parser.add_argument('--memory-percent',type=int,default=75)
     parser.add_argument('--gpu')
-    parser.add_argument('--port', type=int, default=18080)
-    parser.add_argument('--label', default='server')
-    parser.add_argument('--background', action='store_true')
-    parser.add_argument('--backend-sampling', action='store_true')
-    args = parser.parse_args()
-    if not re.fullmatch(r'[a-zA-Z0-9_.-]+', args.label):
-        parser.error('label must contain only letters, digits, dots, underscores or hyphens')
-    if not 1 <= args.port <= 65535:
-        parser.error('port must be in 1..65535')
+    parser.add_argument('--port',type=int,default=18080)
+    parser.add_argument('--label',default='server')
+    parser.add_argument('--background',action='store_true')
+    args=parser.parse_args()
+    if not re.fullmatch(r'[a-zA-Z0-9_.-]+',args.label) or not 1<=args.port<=65535:
+        parser.error('Invalid label or port')
     check_managed_label(args.label)
-    config = resolve_config(ROOT, mode='server', profile=args.profile, parallel=args.parallel,
-                            context=args.context, ubatch=args.ubatch, gpu=args.gpu,
-                            binary_dir=args.binary_dir, model_override=args.model,
-                            cache_type_k=args.cache_type_k, cache_type_v=args.cache_type_v)
-    batch = args.batch or config['batch']
-    if batch < config['ubatch']:
-        parser.error('batch must be at least ubatch')
-    exe = (Path(config['binary_dir'])/'llama-server.exe').resolve()
-    if not exe.is_file():
-        raise FileNotFoundError(f'Missing server executable: {exe}')
-    for directory in ('results', 'cache/cuda', 'cache/llama', 'cache/huggingface'):
-        (ROOT/directory).mkdir(parents=True, exist_ok=True)
-    with socket.socket() as probe:
-        probe.bind(('127.0.0.1', args.port))
-    env = os.environ.copy()
-    env['PATH'] = str(ROOT/'runtime/cuda') + os.pathsep + str(ROOT/'runtime/msvc') + os.pathsep + env.get('PATH', '')
-    env.update(CUDA_VISIBLE_DEVICES=config['cuda_visible_devices'], CUDA_CACHE_PATH=str(ROOT/'cache/cuda'),
-               HF_HOME=str(ROOT/'cache/huggingface'), LLAMA_CACHE=str(ROOT/'cache/llama'),
-               LLAMA_HYMT_FUSED_PROJ='1', LLAMA_HYMT_SPARSE_PENALTIES='1',
-               LLAMA_HYMT_SAMPLING_SNAPSHOT='1', LLAMA_HYMT_BATCH_SNAPSHOT='1',
-               GGML_CUDA_HYMT_DISABLE_ROPE_NORM='0', GGML_CUDA_HYMT_ROPE_NORM_STRICT='1',
-               GGML_CUDA_HYMT_EAGER_GRAPHS='1', GGML_CUDA_GRAPH_OPT='0',
-               GGML_CUDA_HYMT_DISABLE_Q8_KV_FUSION='0', GGML_CUDA_Q8_KV_SUBWARP='0')
-    command = [str(exe), '-m', config['model'], '--alias', 'hy-mt2', '--host', '127.0.0.1',
-               '--port', str(args.port), '-ngl', 'all', '-fa', 'on',
-               '--cache-type-k', args.cache_type_k, '--cache-type-v', args.cache_type_v,
-               '-c', str(config['parallel']*args.context), '-np', str(config['parallel']),
-               '-b', str(batch), '-ub', str(config['ubatch']), '-t', '8', '-tb', '8', '--jinja',
-               '--temp', '0.7', '--top-p', '0.6', '--top-k', '20', '--min-p', '0',
-               '--repeat-penalty', '1.05', '--repeat-last-n', str(max(4096, args.context)),
-               '--metrics', '--no-context-shift', '--no-warmup']
-    if args.backend_sampling:
-        command.append('--backend-sampling')
-    ensure_cache_type_support(exe, args.cache_type_k, args.cache_type_v, env=env, cwd=ROOT)
-    for warning in config['warnings']:
-        print(warning, file=sys.stderr)
-    config.update(command=command, batch=batch, port=args.port, mode='server', label=args.label, executable=str(exe.resolve()))
-    config_path = ROOT/'results'/f'{args.label}.config.json'
-    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding='utf-8')
+    with socket.socket() as probe: probe.bind(('127.0.0.1',args.port))
+    plan=resolve_config(ROOT,profile=args.profile,model_override=args.model,parallel=args.parallel,
+        context=args.context,ubatch=args.batch_tokens,gpu=args.gpu,cache_type_k=args.kv_cache_dtype,
+        kv_gib=args.kv_gib,memory_percent=args.memory_percent)
+    env=environment(ROOT,gpu=plan['gpu']['uuid'])
+    # Credentials are supplied through the environment, never persisted in config/logs.
+    if os.environ.get('VLLM_API_KEY'): env['VLLM_API_KEY']=os.environ['VLLM_API_KEY']
+    command=server_command(plan,root=ROOT,port=args.port)
+    results=ROOT/'results'
+    results.mkdir(exist_ok=True)
+    cfg={**plan,'command':command,'mode':'server','label':args.label,'port':args.port,'executable':command[0]}
+    config_path=results/f'{args.label}.config.json'
     if not args.background:
-        return subprocess.call(command, cwd=ROOT, env=env)
-    with (ROOT/'results'/f'{args.label}.stdout.log').open('wb') as out, (ROOT/'results'/f'{args.label}.stderr.log').open('wb') as err:
-        process = subprocess.Popen(command, cwd=ROOT, env=env, stdin=subprocess.DEVNULL, stdout=out, stderr=err,
-                                   close_fds=True, creationflags=subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP)
-    (ROOT/'results'/f'{args.label}.pid').write_text(str(process.pid), encoding='ascii')
-    config.update(managed_pid=process.pid, process_creation_filetime=process_creation_filetime(process))
-    config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding='utf-8')
-    deadline = time.monotonic() + 120
-    local_http = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-    while time.monotonic() < deadline:
-        if process.poll() is not None:
-            raise RuntimeError(f'Server exited ({process.returncode}); inspect results/{args.label}.stderr.log')
-        try:
-            with local_http.open(f'http://127.0.0.1:{args.port}/health', timeout=1) as response:
-                if json.load(response).get('status') == 'ok':
-                    print(f"Ready: http://127.0.0.1:{args.port} ; PID {process.pid}; profile={config['profile']}; parallel={config['parallel']}")
-                    return 0
-        except (OSError, ValueError, urllib.error.URLError):
-            pass
-        time.sleep(0.25)
-    raise RuntimeError(f'Server is still loading; PID {process.pid}; inspect results/{args.label}.stderr.log')
-
-
-if __name__ == '__main__':
+        config_path.write_text(json.dumps(cfg,indent=2),encoding='utf-8')
+        proc=subprocess.Popen(command,env=env,cwd=ROOT)
+        try: return proc.wait()
+        finally: stop_process_tree(proc)
+    with (results/f'{args.label}.stdout.log').open('wb') as out,(results/f'{args.label}.stderr.log').open('wb') as err:
+        proc=subprocess.Popen(command,env=env,cwd=ROOT,stdin=subprocess.DEVNULL,stdout=out,stderr=err,
+            creationflags=subprocess.CREATE_NO_WINDOW|subprocess.CREATE_NEW_PROCESS_GROUP)
+    cfg.update(managed_pid=proc.pid,process_creation_filetime=process_creation_filetime(proc))
+    config_path.write_text(json.dumps(cfg,indent=2),encoding='utf-8')
+    (results/f'{args.label}.pid').write_text(str(proc.pid),encoding='ascii')
+    opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    deadline=time.monotonic()+600
     try:
-        raise SystemExit(main())
-    except (OSError, ValueError, RuntimeError) as error:
-        print(f'Error: {error}', file=sys.stderr)
+        while proc.poll() is None and time.monotonic()<deadline:
+            try:
+                with opener.open(f'http://127.0.0.1:{args.port}/health',timeout=2) as response:
+                    if response.status==200:
+                        print(f'Ready: http://127.0.0.1:{args.port}; vLLM PID {proc.pid}; {plan["kernel"]}; KV={plan["cache"]}',flush=True)
+                        return 0
+            except OSError: pass
+            time.sleep(1)
+        raise RuntimeError(f'vLLM failed or timed out; see {results}/{args.label}.stderr.log')
+    except BaseException:
+        stop_process_tree(proc)
+        (results/f'{args.label}.pid').unlink(missing_ok=True)
+        raise
+
+if __name__=='__main__':
+    try: raise SystemExit(main())
+    except (OSError,ValueError,RuntimeError) as error:
+        print(str(error),file=sys.stderr)
         raise SystemExit(1)

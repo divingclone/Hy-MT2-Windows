@@ -1,9 +1,9 @@
 name: Desktop checks
 on:
   push:
-    paths: ['desktop/**', 'scripts/desktop*.py', 'scripts/build_desktop.py', 'tests/test_desktop.py', '.github/workflows/desktop.yml']
+    paths: ['desktop/**', 'scripts/*.py', 'tests/*.py', 'models/manifest.json', '.github/workflows/desktop.yml']
   pull_request:
-    paths: ['desktop/**', 'scripts/desktop*.py', 'scripts/build_desktop.py', 'tests/test_desktop.py', '.github/workflows/desktop.yml']
+    paths: ['desktop/**', 'scripts/*.py', 'tests/*.py', 'models/manifest.json', '.github/workflows/desktop.yml']
   workflow_dispatch:
 permissions:
   contents: read

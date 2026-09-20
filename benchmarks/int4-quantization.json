@@ -1,0 +1,39 @@
+{
+  "scheme": "W4A16",
+  "ignored_modules": [
+    "lm_head"
+  ],
+  "seed": 42,
+  "quantize_lm_head": false,
+  "calibration_sha256": "e0f8c0db1836358ed0e66e78190469b4d8c9398813407d9ecb30a720710cea60",
+  "evaluation_sha256": "4e033c7cd2ee71930dc9ba3ca01ac5587900999af554971275574e70491a6e82",
+  "calibration_samples": 256,
+  "max_seq_length": 4096,
+  "calibration_format": "project translation prompt plus reference assistant answer",
+  "source_provenance": {
+    "repo": "tencent/Hy-MT2-1.8B",
+    "revision": "9a341cd1b679d3efd23b46e847b01745a71ed792",
+    "files": [
+      "LICENSE.txt",
+      "chat_template.jinja",
+      "config.json",
+      "generation_config.json",
+      "model.safetensors",
+      "special_tokens_map.json",
+      "tokenizer.json",
+      "tokenizer_config.json"
+    ]
+  },
+  "source_weights": {
+    "model.safetensors": "29e9117a44c79f81857613601968ff482d8a23c2d6736a1710bba9e5ca4762e5"
+  },
+  "output_weights": {
+    "model.safetensors": "c1ba8070cbd2fef8a07895354ed64ea707f41b4e8551ea5c1e0341ad5f48671d"
+  },
+  "versions": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.14.1",
+    "llmcompressor": "0.13.0",
+    "compressed-tensors": "0.18.0"
+  }
+}

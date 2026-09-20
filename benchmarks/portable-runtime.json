@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "platform": "Native Windows 11, RTX 5090, driver 596.36",
+  "hardware_tested": [
+    "RTX 5090"
+  ],
+  "compatible_but_not_hardware_tested": [
+    "SM8.0",
+    "RTX 30 / SM8.6",
+    "RTX 40 / SM8.9"
+  ],
+  "excluded": [
+    "GTX 10",
+    "GTX 16",
+    "RTX 20"
+  ],
+  "runtime": {
+    "backend": "vllm",
+    "vllm": "0.29.0+cu132",
+    "torch": "2.11.0+cu130",
+    "python": "3.12",
+    "windows_native": true,
+    "host_requirements": [
+      "NVIDIA display driver 596.36+"
+    ],
+    "compiler": "bundled Triton TinyCC/PTXAS",
+    "flashinfer": "prebuilt sampling AOT sm80/sm86/sm89/sm120f"
+  },
+  "aot": {
+    "module": "sampling",
+    "architectures": [
+      "sm_80",
+      "sm_86",
+      "sm_89",
+      "sm_120f"
+    ],
+    "flashinfer": "0.6.11.post3",
+    "torch": "2.11.0+cu130",
+    "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Jul_16_20:06:48_Pacific_Daylight_Time_2025\nCuda compilation tools, release 13.0, V13.0.48\nBuild cuda_13.0.r13.0/compiler.36260728_0",
+    "size_bytes": 44623872,
+    "sha256": "3f50f8b0eb7bf5be7b30dd6c13f8e0b621469dbfe1b1712530a81a03c2a9a36c",
+    "runtime_jit_required": false
+  },
+  "cold_start_checks": {
+    "NVFP4": {
+      "passed": true,
+      "exit_code": 0,
+      "profile": "fast",
+      "parallel": 32,
+      "host_build_tools_excluded": true,
+      "cold_cache": true,
+      "flashinfer_jit_disabled": true,
+      "gpu": {
+        "index": 0,
+        "uuid": "GPU-37871805-2e4b-9e1e-1399-2585b4985fcf",
+        "name": "NVIDIA GeForce RTX 5090",
+        "compute_capability": "12.0",
+        "total_memory_mib": 32607.0,
+        "free_memory_mib": 29741.0,
+        "driver_version": "596.36"
+      },
+      "subprocess_count": 118,
+      "throughput_benchmark": false
+    },
+    "INT4": {
+      "passed": true,
+      "exit_code": 0,
+      "profile": "compat",
+      "parallel": 32,
+      "host_build_tools_excluded": true,
+      "cold_cache": true,
+      "flashinfer_jit_disabled": true,
+      "gpu": {
+        "index": 0,
+        "uuid": "GPU-37871805-2e4b-9e1e-1399-2585b4985fcf",
+        "name": "NVIDIA GeForce RTX 5090",
+        "compute_capability": "12.0",
+        "total_memory_mib": 32607.0,
+        "free_memory_mib": 29867.0,
+        "driver_version": "596.36"
+      },
+      "subprocess_count": 107,
+      "throughput_benchmark": false
+    }
+  },
+  "core_benchmark": {
+    "requests": 512,
+    "concurrencies": [
+      32,
+      256
+    ],
+    "kv": "int8_per_token_head",
+    "pretokenized": true,
+    "http": false,
+    "repeats": 3,
+    "metric": "one process per model/concurrency, median of three warm passes",
+    "results": {
+      "fast-p32": {
+        "wall_s": 7.96733990003122,
+        "completion_tokens_per_second": 4134.629677324412,
+        "requests_per_second": 64.2623518544745
+      },
+      "fast-p256": {
+        "wall_s": 1.5348878999939188,
+        "completion_tokens_per_second": 21404.168995097403,
+        "requests_per_second": 333.5748493437394
+      },
+      "compat-p32": {
+        "wall_s": 8.101826400030404,
+        "completion_tokens_per_second": 4162.641648292222,
+        "requests_per_second": 63.19562709935115
+      },
+      "compat-p256": {
+        "wall_s": 2.5430418999749236,
+        "completion_tokens_per_second": 13251.059685777214,
+        "requests_per_second": 201.3336862460067
+      }
+    },
+    "notes": [
+      "These are regression checks on the RTX 5090, not throughput estimates for RTX 30/40.",
+      "Initialization, first pass and output file writes are excluded.",
+      "Historical 4323.68/23795.47 uses three independent processes per configuration; do not silently replace it with this smaller regression run."
+    ]
+  },
+  "fidelity_report": "benchmarks/int4-teacher-fidelity.json",
+  "webview2": {
+    "version": "153.0.4234.48",
+    "source": "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/08cd33ee-d109-49b8-9301-9f0bea43c575/Microsoft.WebView2.FixedVersionRuntime.153.0.4234.48.x64.cab",
+    "cab_sha256": "11e8240cb0bc56dcd3e4498907203c251346f65107fe35a3a13e152c7d51c79e",
+    "signature": {
+      "status": "Valid",
+      "signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    "distribution": "Fixed Version; app-local, no system installation"
+  },
+  "host_compiler_control": {
+    "fast-p32": {
+      "wall_s": 8.934190800006036,
+      "completion_tokens_per_second": 3687.1833988566423,
+      "requests_per_second": 57.30793212964
+    },
+    "fast-p256": {
+      "wall_s": 1.457523500022944,
+      "completion_tokens_per_second": 22540.288372354087,
+      "requests_per_second": 351.28078551868305
+    }
+  },
+  "host_compiler_control_note": "Same weights/config/runtime with MSVC launcher compilation; sequential, one process per concurrency. Variation is mixed and does not establish a systematic regression from removing host tools."
+}

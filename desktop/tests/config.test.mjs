@@ -13,12 +13,12 @@ test('custom context keeps exact input and rejects blank, fraction and out of ra
 });
 
 test('restore inference defaults preserves client connection and log settings', () => {
-  const settings = { ...DEFAULT_SETTINGS, context: 8192, memoryPercent: 100, parallel: 128, gpu: 'GPU-custom', cache: 'f16', port: 19900, apiKeyEnabled: false, logMode: 'off' };
+  const settings = { ...DEFAULT_SETTINGS, context: 8192, memoryPercent: 100, parallel: 128, gpu: 'GPU-custom', cache: 'bfloat16', port: 19900, apiKeyEnabled: false, logMode: 'off' };
   const restored = resetInference(settings);
   assert.equal(restored.context, 2048);
-  assert.equal(restored.memoryPercent, 30);
+  assert.equal(restored.memoryPercent, 75);
   assert.equal(restored.parallel, 0);
-  assert.equal(restored.cache, 'q8_0');
+  assert.equal(restored.cache, 'int8_per_token_head');
   assert.equal(restored.gpu, '');
   assert.equal(restored.port, 19900);
   assert.equal(restored.apiKeyEnabled, false);
@@ -29,10 +29,9 @@ test('restore inference defaults preserves client connection and log settings', 
   }
 });
 
-test('cache savings include block scales and compare identical slot count, not total VRAM', () => {
-  const plan = { parallel: 8, budget: { kv_elements_per_token_per_cache: 16384, kv_context_tokens_rounded: 2048, kv_total_mib: 544, estimated_total_mib: 4544 } };
-  assert.deepEqual(cacheSaving(plan, 'q8_0'), { mib: 480, kvPercent: 46.875, totalPercent: 480 / 5024 * 100 });
-  assert.deepEqual(cacheSaving(plan, 'q4_0'), { mib: 736, kvPercent: 71.875, totalPercent: 736 / 5024 * 100 });
-  assert.equal(cacheSaving(null, 'q8_0'), null);
-  assert.equal(cacheSaving(plan, 'f16').mib, 0);
+test('cache savings compare the same token pool including FP32 scales', () => {
+ const plan = { parallel: 32, budget: { kv_token_capacity: 49152, kv_total_mib: 1584, estimated_total_mib: 5584 } };
+ assert.deepEqual(cacheSaving(plan, 'int8_per_token_head'), { mib: 1488, kvPercent: 48.4375, totalPercent: 1488 / 7072 * 100 });
+ assert.equal(cacheSaving(plan, 'bfloat16').mib, 0);
+ assert.equal(cacheSaving(null, 'int8_per_token_head'), null);
 });

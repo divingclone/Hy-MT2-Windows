@@ -21,7 +21,7 @@ import subprocess
 import sys
 import time
 
-from run_native_experiment import build_requests, ROOT
+from benchmark_inputs import build_requests, ROOT
 from translate import Sampling, request_json, translate_many
 
 

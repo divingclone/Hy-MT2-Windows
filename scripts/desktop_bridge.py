@@ -26,9 +26,9 @@ import time
 import urllib.error
 import urllib.request
 
-from gpu_config import (ConfigError, choose_binary, detect_gpus,
-                        ensure_cache_type_support, memory_plan)
-from setup_model import install_model, load_manifest, model_lock, model_url, sha256
+from gpu_config import ConfigError, select_profile, detect_gpus, memory_plan, normalize_cache
+from vllm_runtime import environment, server_command, python_executable, stop_process_tree
+from setup_model import install_model, load_manifest, model_lock, model_url, sha256, extract_checkpoint, checkpoint_manifest, verify_checkpoint, checkpoint_complete, checkpoint_downloaded, download_checkpoint
 
 
 def write_json(path: Path, value):
@@ -53,14 +53,16 @@ def validate_settings(raw: dict) -> dict:
         raise ValueError('启动参数必须为对象。')
     result = {'profile': raw.get('profile', 'auto'), 'context': raw.get('context', 2048),
               'parallel': raw.get('parallel', 0), 'ubatch': raw.get('ubatch', 0),
-              'port': raw.get('port', 18080), 'cache': raw.get('cache', 'q8_0'),
+              'port': raw.get('port', 18080), 'cache': raw.get('cache', 'int8_per_token_head'),
               'gpu': raw.get('gpu', ''), 'apiKeyEnabled': raw.get('apiKeyEnabled', True),
-              'logMode': raw.get('logMode', 'memory'), 'memoryPercent': raw.get('memoryPercent', 30)}
+              'logMode': raw.get('logMode', 'memory'), 'memoryPercent': raw.get('memoryPercent', 75)}
     if type(result['apiKeyEnabled']) is not bool or result['logMode'] not in ('memory', 'file', 'off'):
         raise ValueError('API 密钥开关或日志模式无效。')
-    if result['profile'] not in ('auto', 'fast', 'official') or result['cache'] not in ('f16', 'q8_0', 'q4_0'):
+    result['profile'] = 'auto' if result['profile'] == 'official' else result['profile']
+    result['cache'] = normalize_cache('int8_per_token_head' if result['cache'] == 'q4_0' else result['cache'])
+    if result['profile'] not in ('auto', 'fast', 'quality', 'compat'):
         raise ValueError('模型或 KV 缓存类型无效。')
-    for key, low, high in [('context', 256, 32768), ('parallel', 0, 128),
+    for key, low, high in [('context', 256, 32768), ('parallel', 0, 256),
                            ('ubatch', 0, 8192), ('port', 1024, 65535), ('memoryPercent', 10, 100)]:
         if type(result[key]) is not int or not low <= result[key] <= high:
             raise ValueError(f'{key} 必须是 {low} 至 {high} 之间的整数。')
@@ -108,7 +110,7 @@ def friendly_error(error) -> dict:
     for words, kind, advice in [
         (('out of memory', 'cuda error: out', '显存', 'bad_alloc'), 'memory', '降低并发或上下文，关闭其他占用 GPU 的程序；若仅预算比例过低，可调高「显存预算上限」后重新部署。'),
         (('sha256', 'checksum', '大小与清单'), 'integrity', '模型不完整或与当前版本不匹配。请在模型页重新下载，程序会校验 SHA-256。'),
-        (('driver', '驱动', 'nvidia-smi', 'no kernel image'), 'gpu', '检查 NVIDIA 显卡和驱动（580.88 或更新），无需另外安装 CUDA Toolkit。'),
+        (('driver', '驱动', 'nvidia-smi', 'no kernel image'), 'gpu', '检查 NVIDIA 显卡和驱动（本版本验证 596.36），并安装 MSVC C++ Build Tools 与 CUDA Toolkit。'),
         (('download', 'http error', 'urlopen', 'hugging face', 'timed out', 'ssl'), 'network', '检查网络或系统代理后重试；下载临时文件会保留，支持续传。'),
         (('space', '空间', '112'), 'disk', '磁盘空间不足，请清理模型目录所在磁盘后重试。'),
         (('permission', 'access is denied', '拒绝访问'), 'permission', '检查目录写入权限或安全软件；免安装版请放在可写目录。'),
@@ -120,14 +122,25 @@ def friendly_error(error) -> dict:
     return {'message': text[-3000:], 'code': code, 'hint': hint}
 
 
+def runtime_path(value):
+    # Rust canonicalize emits extended Windows paths. Python accepts them but
+    # CUDA/MSVC command parsers and third-party model loaders need normal paths.
+    text = str(value)
+    if text.startswith('\\\\?\\UNC\\'):
+        text = '\\\\' + text[8:]
+    elif text.startswith('\\\\?\\'):
+        text = text[4:]
+    return Path(text).resolve()
+
+
 class Bridge:
     def __init__(self, request: dict):
-        self.root = Path(request['root']).resolve()
-        self.data = Path(request['data']).resolve()
+        self.root = runtime_path(request['root'])
+        self.data = runtime_path(request['data'])
         self.output = Path(request['output'])
         self.args = request.get('args') or {}
         self.service_state = request.get('service') or {}
-        self.models = Path(request.get('model_dir') or self.data / 'models').resolve()
+        self.models = runtime_path(request.get('model_dir') or self.data / 'models')
         self.model_registry = Path(request['model_registry']) if request.get('model_registry') else None
         self.search_roots = [Path(p).resolve() for p in request.get('model_search_roots', [str(self.data)]) if p]
         self.models.mkdir(parents=True, exist_ok=True)
@@ -142,7 +155,7 @@ class Bridge:
         return self.models / item['sha256'].lower() / item['filename']
 
     def legacy_model_dirs(self):
-        directories = [self.models, self.data / 'models']
+        directories = [self.models, self.data / 'models', self.root / 'models']
         directories.extend(self.registered_model_dirs())
         for seed in self.search_roots:
             for anchor in [seed, *list(seed.parents)[:3]]:
@@ -182,12 +195,36 @@ class Bridge:
 
     def reuse_models(self):
         directories = None
-        for item in self.manifest['files'].values():
+        for profile,item in self.manifest['files'].items():
             target = self.model_path(item)
-            if target.exists() or target.with_suffix('.removed').exists():
+            spec = checkpoint_manifest(self.manifest,profile)
+            checkpoint = target.parent/spec['checkpoint_dir']
+            if target.exists() or checkpoint.exists() or target.with_suffix('.removed').exists():
                 continue
             if directories is None:
                 directories = self.legacy_model_dirs()
+            reused=False
+            for directory in directories:
+                for source in (directory/item['sha256'].lower()/spec['checkpoint_dir'],directory/spec['checkpoint_dir']):
+                    if source==checkpoint or not checkpoint_complete(source,spec): continue
+                    try:
+                        verify_checkpoint(source,spec)
+                        checkpoint.parent.mkdir(parents=True,exist_ok=True)
+                        with model_lock(checkpoint.with_name(checkpoint.name+'.lock')):
+                            if not checkpoint.exists():
+                                with tempfile.TemporaryDirectory(prefix='reuse-',dir=checkpoint.parent) as temporary:
+                                    staging=Path(temporary)/'checkpoint';staging.mkdir()
+                                    for name in spec['checkpoint_files']:
+                                        try: os.link(source/name,staging/name)
+                                        except OSError: shutil.copyfile(source/name,staging/name)
+                                    verify_checkpoint(staging,spec)
+                                    os.replace(staging,checkpoint)
+                        reused=True
+                        break
+                    except (OSError,ValueError) as error:
+                        self.model_warnings.append(f'无法复用 checkpoint：{error}')
+                if reused: break
+            if reused: continue
             sources = [source for directory in directories for source in
                        (directory / item['sha256'].lower() / item['filename'], directory / item['filename'])]
             for source in sources:
@@ -239,9 +276,13 @@ class Bridge:
         for profile, item in self.manifest['files'].items():
             file = self.model_path(item)
             part = file.with_name(file.name + '.part')
+            spec=checkpoint_manifest(self.manifest,profile)
+            checkpoint=file.parent/spec['checkpoint_dir']
             models.append({'profile': profile, **item,
-                           'installed': file.is_file() and file.stat().st_size == item['size_bytes'],
-                           'downloaded': min(part.stat().st_size, item['size_bytes']) if part.is_file() else 0})
+                           'size_bytes':spec['checkpoint_size_bytes'],
+                           'installed': checkpoint_complete(checkpoint,spec) or (file.is_file() and file.stat().st_size == item['size_bytes']),
+                           'downloadable': profile in self.manifest.get('repositories',{}),
+                           'downloaded': max(checkpoint_downloaded(checkpoint,spec),min(part.stat().st_size,item['size_bytes']) if part.is_file() else 0)})
         return {'gpus': devices, 'gpu_error': error, 'models': models,
                 'data_dir': str(self.data), 'model_dir': str(self.models),
                 'model_warnings': self.model_warnings, 'runtime_dir': str(self.root)}
@@ -257,30 +298,30 @@ class Bridge:
         errors = []
         for gpu in devices:
             try:
-                binary, metadata, _ = choose_binary(self.root, 'server', gpu)
-                fast = gpu['compute_capability'] in metadata.get('nvfp4_compute_capabilities', [])
-                profile = settings['profile']
-                if profile == 'auto':
-                    profile = 'fast' if fast and gpu['compute_capability'] == '12.0' else 'official'
-                if profile == 'fast' and not fast:
-                    raise ConfigError('此显卡/构建不支持 NVFP4，请使用 Q4_K_M。')
-                item = self.manifest['files'][profile]
+                profile = select_profile(gpu, settings['profile'])
+                spec = checkpoint_manifest(self.manifest, profile)
+                item = self.manifest['files']['compat' if profile=='compat' else 'fast']
                 limit = math.floor(gpu['total_memory_mib'] * settings['memoryPercent'] / 100)
                 available = min(limit, gpu['redeploy_available_mib'])
                 try:
                     plan = memory_plan(mode='server', free_mib=available,
-                                       model_bytes=item['size_bytes'], context=settings['context'],
+                                       model_bytes=spec['checkpoint_size_bytes'], context=settings['context'],
                                        parallel=settings['parallel'] or None, ubatch=settings['ubatch'] or None,
                                        cache_type_k=settings['cache'], cache_type_v=settings['cache'])
                 except ConfigError as exc:
                     raise ConfigError(f"显存预算上限为总显存的 {settings['memoryPercent']}%（{limit:.0f} MiB），当前可用于预算 {available:.0f} MiB。{exc} 可降低并发/上下文，或调高显存预算比例。") from exc
                 plan['budget'].update(memory_percent=settings['memoryPercent'], memory_limit_mib=limit,
                                       usable_memory_mib=available)
+                model = self.model_path(item).parent / spec['checkpoint_dir']
                 if verify:
-                    self.verify_model(item, self.model_path(item))
+                    python_executable(self.root)
+                    if model.exists(): verify_checkpoint(model,spec)
+                    else:
+                        self.verify_model(item, self.model_path(item))
+                        extract_checkpoint(self.model_path(item), model, spec)
                 return {**plan, 'gpu': gpu, 'profile': profile, 'port': settings['port'], 'settings': settings,
-                        'cache': settings['cache'], 'binary': str(binary),
-                        'model': str(self.model_path(item))}
+                        'backend':'vllm', 'kernel':'cutlass' if profile=='fast' else 'marlin',
+                        'cache': settings['cache'], 'model': str(model)}
             except (ValueError, OSError) as exc:
                 errors.append(str(exc))
         raise ConfigError('\n'.join(errors) or '未找到选中的 NVIDIA 显卡。')
@@ -288,7 +329,7 @@ class Bridge:
     def model_item(self):
         profile = self.args.get('profile')
         if profile not in self.manifest['files']:
-            raise ValueError('请指定 fast 或 official 模型。')
+            raise ValueError('请指定 fast NVFP4 或 compat INT4 模型。')
         item = self.manifest['files'][profile]
         target = self.model_path(item)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -298,15 +339,16 @@ class Bridge:
         self.reuse_models()
         item, target = self.model_item()
         target.with_suffix('.removed').unlink(missing_ok=True)
+        spec=checkpoint_manifest(self.manifest,self.args['profile'])
+        checkpoint=target.parent/spec['checkpoint_dir']
+        if checkpoint.exists():
+            verify_checkpoint(checkpoint,spec)
+            return {'phase':'complete','result':'already_verified','profile':self.args['profile']}
         if target.is_file() and target.stat().st_size == item['size_bytes'] and sha256(target) == item['sha256'].lower():
             return {'phase': 'complete', 'profile': self.args['profile']}
         self.emit({'phase': 'downloading', 'profile': self.args['profile']})
-        part = target.with_name(target.name + '.part')
-        remaining = max(0, item['size_bytes'] - (part.stat().st_size if part.exists() else 0))
-        if shutil.disk_usage(target.parent).free < remaining + 128 * 1024**2:
-            raise OSError('磁盘空间不足，模型下载还需要约 %.1f GiB。' % (remaining / 1024**3))
-        result = install_model(model_url(self.manifest['repo_id'], self.manifest['revision'], item['filename']),
-                               target, item['size_bytes'], item['sha256'], timeout=30)
+        result=download_checkpoint(checkpoint,spec,self.args['profile'])
+        self.remember_model_dir()
         return {'phase': 'complete', 'result': result, 'profile': self.args['profile']}
 
     def import_model(self):
@@ -318,7 +360,7 @@ class Bridge:
             self.remember_model_dir()
             return {'phase': 'complete'}
         if not source.is_file() or source.stat().st_size != item['size_bytes']:
-            raise ValueError('文件大小与清单不符，请导入本项目对应的 fused.gguf 模型。')
+            raise ValueError('文件大小与清单不符，请导入本项目对应的 ZIP 模型包。')
         self.emit({'phase': 'verifying', 'profile': self.args['profile']})
         if shutil.disk_usage(target.parent).free < item['size_bytes'] + 128 * 1024**2:
             raise OSError('磁盘空间不足。')
@@ -337,7 +379,13 @@ class Bridge:
 
     def remove_model(self):
         _, target = self.model_item()
-        with model_lock(target.with_name(target.name + '.lock')):
+        extracted = target.parent / checkpoint_manifest(self.manifest,self.args['profile'])['checkpoint_dir']
+        with model_lock(extracted.with_name(extracted.name+'.lock')),model_lock(target.with_name(target.name + '.lock')):
+            for directory in (extracted,extracted.with_name(extracted.name+'.download')):
+                if not directory.exists(): continue
+                if not directory.resolve().is_relative_to(self.models.resolve()) or directory.is_symlink():
+                    raise ValueError('Unsafe model removal path')
+                shutil.rmtree(directory)
             target.with_suffix('.removed').touch()
             target.unlink(missing_ok=True)
             target.with_name(target.name + '.part').unlink(missing_ok=True)
@@ -357,14 +405,7 @@ class Bridge:
                     continue
         else:
             raise OSError('指定端口及后续 19 个端口均被占用，请更改 API 端口。')
-        env = os.environ.copy()
-        env['PATH'] = os.pathsep.join([str(self.root / 'runtime/cuda'), str(self.root / 'runtime/msvc'), env.get('PATH', '')])
-        env.update(CUDA_VISIBLE_DEVICES=plan['gpu']['uuid'], CUDA_CACHE_PATH=str(self.data / 'cache'),
-                   LLAMA_HYMT_FUSED_PROJ='1', LLAMA_HYMT_SPARSE_PENALTIES='1',
-                   LLAMA_HYMT_SAMPLING_SNAPSHOT='1', LLAMA_HYMT_BATCH_SNAPSHOT='1',
-                   GGML_CUDA_HYMT_DISABLE_ROPE_NORM='0', GGML_CUDA_HYMT_ROPE_NORM_STRICT='1',
-                   GGML_CUDA_HYMT_EAGER_GRAPHS='1', GGML_CUDA_GRAPH_OPT='0',
-                   GGML_CUDA_HYMT_DISABLE_Q8_KV_FUSION='0', GGML_CUDA_Q8_KV_SUBWARP='0')
+        env = environment(self.root, cache=self.data/'cache', gpu=plan['gpu']['uuid'])
         settings = plan['settings']
         key_path = self.data / 'api-key.txt'
         key = ''
@@ -374,28 +415,14 @@ class Bridge:
             key = key_path.read_text('utf-8').strip()
             if len(key) < 32 or not all(character.isascii() and (character.isalnum() or character in '-_') for character in key):
                 raise ValueError('API 密钥文件无效，请点击 API Key 下方的「刷新密钥」修复并重新部署。')
-        # Remove inherited credentials as well when authentication is disabled.
-        env.pop('LLAMA_API_KEY', None)
-        env.pop('LLAMA_ARG_API_KEY', None)
         if key:
-            env['LLAMA_API_KEY'] = key
-        exe = Path(plan['binary']) / 'llama-server.exe'
-        ensure_cache_type_support(exe, plan['cache'], plan['cache'], env=env, cwd=self.data)
-        command = [str(exe), '-m', plan['model'], '--alias', 'hy-mt2', '--host', '127.0.0.1',
-                   '--port', str(port), '-ngl', 'all', '-fa', 'on',
-                   '--cache-type-k', plan['cache'], '--cache-type-v', plan['cache'],
-                   '-c', str(plan['parallel'] * plan['context']), '-np', str(plan['parallel']),
-                   '-b', str(plan['batch']), '-ub', str(plan['ubatch']), '-t', '8', '-tb', '8', '--jinja',
-                   '--temp', '0.7', '--top-p', '0.6', '--top-k', '20', '--min-p', '0',
-                   '--repeat-penalty', '1.05', '--repeat-last-n', str(max(4096, plan['context'])),
-                   '--no-context-shift', '--no-warmup', '--no-webui']
+            env['VLLM_API_KEY'] = key
+        command = server_command(plan, root=self.root, port=port)
         logger = logging.getLogger('inference')
         logger.setLevel(logging.INFO)
         if settings['logMode'] == 'file':
             handler = RotatingFileHandler(self.data / 'logs/inference.log', maxBytes=2*1024**2, backupCount=2, encoding='utf-8')
             logger.addHandler(handler)
-        if settings['logMode'] == 'off':
-            command.append('--log-disable')
         process = subprocess.Popen(command, env=env, cwd=self.data, stdin=subprocess.DEVNULL,
                                    stdout=subprocess.DEVNULL if settings['logMode'] == 'off' else subprocess.PIPE,
                                    stderr=subprocess.STDOUT, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -414,7 +441,7 @@ class Bridge:
         ready = False
         try:
             opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-            deadline = time.monotonic() + 180
+            deadline = time.monotonic() + 600
             while process.poll() is None and time.monotonic() < deadline:
                 try:
                     request = urllib.request.Request(f'http://127.0.0.1:{port}/v1/models', headers={'Authorization': f'Bearer {key}'})
@@ -442,7 +469,7 @@ class Bridge:
                 time.sleep(3)
                 try:
                     with opener.open(urllib.request.Request(f'http://127.0.0.1:{port}/health', headers={'Authorization': f'Bearer {key}'}), timeout=3) as response:
-                        if json.load(response).get('status') != 'ok':
+                        if response.status != 200:
                             raise OSError('health check failed')
                     failures = 0
                 except (OSError, ValueError):
@@ -451,9 +478,7 @@ class Bridge:
                         raise RuntimeError('推理服务连续健康检查失败，已停止以释放显存。请查看日志并重新启动。')
             raise RuntimeError(f'推理服务意外退出（{process.returncode}），请查看运行诊断。')
         finally:
-            if process.poll() is None:
-                process.kill()
-            process.wait()
+            stop_process_tree(process)
             (self.data / 'service-private.json').unlink(missing_ok=True)
 
     def log_tail(self):

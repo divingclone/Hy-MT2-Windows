@@ -1,0 +1,6 @@
+# Separate environment: llm-compressor and vLLM require different versions of
+# transformers/compressed-tensors. Use the same cu130 index as the serving env.
+llmcompressor==0.13.0
+torch==2.11.0+cu130
+transformers==5.14.1
+compressed-tensors==0.18.0

@@ -41,6 +41,7 @@ export interface Model {
   quantization: string;
   installed: boolean;
   downloaded: number;
+  downloadable?: boolean;
 }
 export interface Inventory {
   gpus: GPU[];
@@ -63,6 +64,8 @@ export interface Plan {
     estimated_total_mib: number;
     model_reserve_mib: number;
     kv_total_mib: number;
+    kv_token_capacity: number;
+    full_context_sequences: number;
     workspace_reserve_mib: number;
     safety_margin_mib: number;
     free_memory_mib: number;

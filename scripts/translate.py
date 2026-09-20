@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
-"""Standard-library client for the local Hy-MT2 llama.cpp server.
+"""Connection-pooled, asynchronous client for the local Hy-MT2 vLLM server.
 
 Examples:
   python scripts/translate.py "今天天气真好。" --target English
   python scripts/translate.py --input-jsonl input.jsonl --concurrency 32 --output output.jsonl
 
 JSONL records: {"id":"1", "text":"Hello.", "target_lang":"Chinese"}.
-The server must load the model's GGUF chat template. No system prompt is added.
+The server must load the model's tokenizer chat template. No system prompt is added.
 """
 
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass
+import asyncio
+from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -57,7 +58,7 @@ def normalize_url(url: str) -> str:
 def request_json(url: str, payload: dict[str, Any] | None, timeout: float) -> dict[str, Any]:
     body = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
     request = urllib.request.Request(
-        url, data=body, headers={"Content-Type": "application/json", "Accept": "application/json"}
+        url, data=body, headers={"Content-Type": "application/json", "Accept": "application/json", **api_headers()}
     )
     # This is a local inference client: avoid sending localhost traffic through OS proxies.
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
@@ -72,6 +73,11 @@ def request_json(url: str, payload: dict[str, Any] | None, timeout: float) -> di
     if result.get("error"):
         raise RuntimeError(str(result["error"]))
     return result
+
+
+def api_headers():
+    key=os.environ.get('VLLM_API_KEY')
+    return {'Authorization':'Bearer '+key} if key else {}
 
 
 def resolve_model(url: str, model: str | None, timeout: float) -> str:
@@ -119,9 +125,8 @@ def translate_one(
             "temperature": 0.0 if sampling.greedy else sampling.temperature,
             "top_p": 1.0 if sampling.greedy else sampling.top_p,
             "top_k": 1 if sampling.greedy else sampling.top_k,
-            "min_p": 0.0, "repeat_penalty": sampling.repeat_penalty,
-            "repeat_last_n": 4096, "seed": sampling.seed,
-            "cache_prompt": cache_prompt,
+            "min_p": 0.0, "repetition_penalty": sampling.repeat_penalty,
+            "seed": sampling.seed,
         }
         response = request_json(normalize_url(url) + "/v1/chat/completions", payload, timeout)
         choices = response.get("choices", [])
@@ -139,10 +144,10 @@ def translate_one(
             "completion_tokens": usage.get("completion_tokens", timings.get("predicted_n")),
             "prompt_tokens": usage.get("prompt_tokens", timings.get("prompt_n")),
             "timings": timings, "usage": usage, "response_id": response.get("id"),
-            "ok": bool(content.strip()),
+            "ok": bool(content.strip()) and choice.get("finish_reason") == "stop",
         })
         if not result["ok"]:
-            result["error"] = "Server returned an empty translation"
+            result["error"] = "Empty, truncated, or unexpected finish reason"
     except Exception as exc:
         result["error"] = f"{type(exc).__name__}: {exc}"
     result["latency_s"] = time.perf_counter() - start
@@ -154,23 +159,55 @@ def translate_many(
     cases: list[dict[str, Any]], *, url: str, model: str, sampling: Sampling,
     concurrency: int, timeout: float = 300, cache_prompt: bool = False,
 ) -> tuple[list[dict[str, Any]], float]:
+    from http_transport import run_async
+    return run_async(translate_many_async(cases,url=url,model=model,sampling=sampling,
+        concurrency=concurrency,timeout=timeout,cache_prompt=cache_prompt))
+
+
+async def translate_many_async(
+    cases: list[dict[str, Any]], *, url: str, model: str, sampling: Sampling,
+    concurrency: int, timeout: float = 300, cache_prompt: bool = False,
+) -> tuple[list[dict[str, Any]], float]:
+    """Reuse bounded connections; errors remain per-record and ordering is stable."""
+    from http_transport import JsonClient
     if concurrency < 1:
         raise ValueError("concurrency must be positive")
-    results: list[dict[str, Any] | None] = [None] * len(cases)
+    endpoint=normalize_url(url)+'/v1/chat/completions'
+    headers=api_headers()
     start = time.perf_counter()
-    with ThreadPoolExecutor(max_workers=concurrency, thread_name_prefix="hy-mt") as executor:
-        futures = {}
-        for index, case in enumerate(cases):
-            settings = Sampling(**{**asdict(sampling), "seed": sampling.seed + index})
-            future = executor.submit(
-                translate_one, case, url=url, model=model, sampling=settings,
-                timeout=timeout, cache_prompt=cache_prompt, submitted_at=time.perf_counter(),
-            )
-            futures[future] = index
-        for future in as_completed(futures):
-            results[futures[future]] = future.result()
+    gate=asyncio.Semaphore(concurrency)
+    async with JsonClient(concurrency,timeout) as client:
+        async def worker(index,case):
+            async with gate:
+                begin=time.perf_counter()
+                row={'id':case.get('id'),'text':case.get('text'),'source_lang':case.get('source_lang'),
+                     'target_lang':case.get('target_lang',case.get('target','English')),
+                     'seed':sampling.seed+index,'ok':False,'translation':'','error':None,
+                     'finish_reason':None,'truncated':False,'completion_tokens':None,'prompt_tokens':None,
+                     'timings':{},'client_queue_s':begin-start}
+                try:
+                    payload={'model':model,'messages':[{'role':'user','content':translation_prompt(case['text'],row['target_lang'])}],
+                        'stream':False,'max_tokens':sampling.max_tokens,'temperature':0.0 if sampling.greedy else sampling.temperature,
+                        'top_p':1.0 if sampling.greedy else sampling.top_p,'top_k':1 if sampling.greedy else sampling.top_k,
+                        'min_p':0.0,'repetition_penalty':sampling.repeat_penalty,'seed':sampling.seed+index}
+                    response=await client.post(endpoint,payload,headers=headers)
+                    choices=response.get('choices',[])
+                    if len(choices)!=1:raise ValueError('Expected one translation')
+                    choice=choices[0];content=choice.get('message',{}).get('content');usage=response.get('usage') or {}
+                    if not isinstance(content,str):raise ValueError('Translation must be a string')
+                    finish=choice.get('finish_reason')
+                    row.update(translation=content,finish_reason=finish,truncated=finish=='length',
+                        completion_tokens=usage.get('completion_tokens'),prompt_tokens=usage.get('prompt_tokens'),
+                        timings=response.get('timings') or {},usage=usage,response_id=response.get('id'),
+                        ok=bool(content.strip()) and finish=='stop')
+                    if not row['ok']:row['error']='Empty, truncated, or unexpected finish reason'
+                except Exception as exc:row['error']=f'{type(exc).__name__}: {exc}'
+                row['latency_s']=time.perf_counter()-begin
+                row['end_to_end_latency_s']=row['client_queue_s']+row['latency_s']
+                return row
+        results=await asyncio.gather(*(worker(i,case) for i,case in enumerate(cases)))
     elapsed = time.perf_counter() - start
-    return [result for result in results if result is not None], elapsed
+    return results,elapsed
 
 
 def add_client_arguments(parser: argparse.ArgumentParser) -> None:
@@ -224,7 +261,7 @@ def main() -> int:
     parser.add_argument("--target", default="English", help="Full language name or common language code")
     parser.add_argument("--output", type=Path, help="Single result JSON or batch results JSONL")
     parser.add_argument("--json", action="store_true", help="Print full result metadata for a single translation")
-    parser.add_argument("--cache-prompt", action="store_true", help="Allow server prompt cache reuse")
+    parser.add_argument("--cache-prompt", action="store_true", help="Legacy compatibility flag; vLLM prefix caching is configured by the server")
     add_client_arguments(parser)
     args = parser.parse_args()
     try:

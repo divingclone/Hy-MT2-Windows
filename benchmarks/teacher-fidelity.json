@@ -1,0 +1,1232 @@
+{
+  "schema_version": 1,
+  "reference": "Unquantized BF16 model greedy outputs at concurrency 32",
+  "dataset_sha256": "4e033c7cd2ee71930dc9ba3ca01ac5587900999af554971275574e70491a6e82",
+  "requests": 256,
+  "sacrebleu_version": "2.6.0",
+  "notes": [
+    "chrF++ measures wording fidelity, not semantic correctness or a quality-retention percentage.",
+    "Exact match ignores only leading/trailing whitespace.",
+    "Teacher-forced NLL and top1 use raw logits on identical teacher prefixes including EOS; prefill diagnostic, not decode throughput.",
+    "Greedy free generation retains repetition_penalty=1.05; prompt logprobs exclude this penalty.",
+    "Paired 95% percentile intervals use 1000 target-language-stratified bootstrap draws; no multiple-comparison correction.",
+    "llama.cpp also changes weight quantization and embedding precision; its gap is not pure engine error."
+  ],
+  "strategies": {
+    "teacher-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "c8d2a4b7bd7b2a94c2d5ee9b89544249b970287e742239b7bbbfa7d55e055b57"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "c8d2a4b7bd7b2a94c2d5ee9b89544249b970287e742239b7bbbfa7d55e055b57"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 100.0,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 100.0,
+          "exact_matches": 256,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 100.0,
+          "exact_matches": 128,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 100.0,
+          "exact_matches": 128,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 100.0,
+          "exact_matches": 64,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 100.0,
+          "exact_matches": 64,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 100.0,
+          "exact_matches": 128,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "582b16e8697bacbd6b173c950ad07e4480104eb7c666cf264eb0f7185af93db7"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.13898396933643714,
+        "raw_top1_agreement_with_teacher": 1.0,
+        "teacher_token_is_raw_top1": 0.9773522180281885,
+        "teacher_token_in_top5": 1.0
+      }
+    },
+    "bf16-int8-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "82331a9b98300035c8c1d20bdc41ded1179a5298842217936051a873449c779b"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "82331a9b98300035c8c1d20bdc41ded1179a5298842217936051a873449c779b"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 97.18261673942119,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 97.18261673942119,
+          "exact_matches": 166,
+          "character_edit_rate": 0.027338825973397336,
+          "length_ratio": 0.9908231901011466
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 89.85734511722771,
+          "exact_matches": 80,
+          "character_edit_rate": 0.06303418803418803,
+          "length_ratio": 0.9648717948717949
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 98.38791831098914,
+          "exact_matches": 86,
+          "character_edit_rate": 0.016314031915314862,
+          "length_ratio": 0.9988384831646054
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 96.56531637938114,
+          "exact_matches": 15,
+          "character_edit_rate": 0.033787576400149684,
+          "length_ratio": 0.9834726206810528
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 98.12489063105917,
+          "exact_matches": 37,
+          "character_edit_rate": 0.018219955581146665,
+          "length_ratio": 1.00604589948178
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 98.73148691435905,
+          "exact_matches": 114,
+          "character_edit_rate": 0.009427798002426957,
+          "length_ratio": 1.0002800336040325
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "e08a31e76d55347b46eefd82352405437bf67abcfe1b853304c035df49b68cf2"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.13948078894186258,
+        "raw_top1_agreement_with_teacher": 0.9926238875229422,
+        "teacher_token_is_raw_top1": 0.9754822176818921,
+        "teacher_token_in_top5": 1.0
+      }
+    },
+    "w4a16-bf16-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "8107598822d8abab852267c09fb394675ef36be4758b0f6599b4f81f439386cb"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "7c5c86c34191d403b1cdfdc0a4ff4f5d6df1aa472430609eceb8b1cfb17203d7"
+      },
+      "repeat_exact_matches": 184,
+      "earlier_chrf_pp": 83.97058713160187,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 84.05850242646471,
+          "exact_matches": 46,
+          "character_edit_rate": 0.1479987495335962,
+          "length_ratio": 0.9957242116515232
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 62.76946571309334,
+          "exact_matches": 25,
+          "character_edit_rate": 0.177991452991453,
+          "length_ratio": 0.9882478632478633
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 87.14215904855416,
+          "exact_matches": 21,
+          "character_edit_rate": 0.13873526655491467,
+          "length_ratio": 0.9980333408127978
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 83.02331977812686,
+          "exact_matches": 0,
+          "character_edit_rate": 0.15785206436322813,
+          "length_ratio": 0.9920325558188848
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 85.50386765221397,
+          "exact_matches": 0,
+          "character_edit_rate": 0.13506621699432425,
+          "length_ratio": 1.0031257711606483
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 86.98090262836084,
+          "exact_matches": 46,
+          "character_edit_rate": 0.1183608699710632,
+          "length_ratio": 1.0010267898814524
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "47f18105c0c701c409f3fadd37dbebea6d6334980b5b6704f2b63a9543949e87"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.24375985819047882,
+        "raw_top1_agreement_with_teacher": 0.9257194306887835,
+        "teacher_token_is_raw_top1": 0.9170620216781522,
+        "teacher_token_in_top5": 0.9975412958409807
+      }
+    },
+    "w4a4-bf16-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "9d3db564ee6022a202c11e52c06c4fa49df1863258f48a2bc70ad91df4b398f0"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "7e99cd8c425a2775a2e21331c61ce48b14d3e15dd07f1c10b7a923a14fc21d34"
+      },
+      "repeat_exact_matches": 59,
+      "earlier_chrf_pp": 79.94095891052072,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 79.22871130343603,
+          "exact_matches": 30,
+          "character_edit_rate": 0.1982695158476448,
+          "length_ratio": 0.9942418038986316
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 56.513464964090474,
+          "exact_matches": 18,
+          "character_edit_rate": 0.2386752136752137,
+          "length_ratio": 0.982051282051282
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 82.80647050575607,
+          "exact_matches": 12,
+          "character_edit_rate": 0.18578989744334307,
+          "length_ratio": 0.9980069427029025
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 78.71324128644314,
+          "exact_matches": 0,
+          "character_edit_rate": 0.20274105026818012,
+          "length_ratio": 0.9920013720843208
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 79.59839213154144,
+          "exact_matches": 0,
+          "character_edit_rate": 0.20095418277535576,
+          "length_ratio": 0.9975734144937073
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 81.51022056663201,
+          "exact_matches": 30,
+          "character_edit_rate": 0.1654065154485205,
+          "length_ratio": 1.0000933445346776
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "8853e334bee6a395c9b07fae9503e2ce826f3d2560a76462e873eb61b678e3fb"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.3472654027374351,
+        "raw_top1_agreement_with_teacher": 0.8946220175225958,
+        "teacher_token_is_raw_top1": 0.8861031270561346,
+        "teacher_token_in_top5": 0.9935242580600477
+      }
+    },
+    "w4a4-int8-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "743d4acbe383efd5b550a1b2c6d919bd1b743fcb7c3bed0dc7256dc79a87d87c"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "743d4acbe383efd5b550a1b2c6d919bd1b743fcb7c3bed0dc7256dc79a87d87c"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 79.59828026679128,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 79.59828026679128,
+          "exact_matches": 29,
+          "character_edit_rate": 0.18636991619858212,
+          "length_ratio": 0.9923459354799673
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 56.703108884103834,
+          "exact_matches": 16,
+          "character_edit_rate": 0.21952991452991452,
+          "length_ratio": 0.9766239316239316
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 83.20986146202452,
+          "exact_matches": 13,
+          "character_edit_rate": 0.17612818922165174,
+          "length_ratio": 0.9972018003510948
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 78.83725629543683,
+          "exact_matches": 0,
+          "character_edit_rate": 0.19636397654983162,
+          "length_ratio": 0.9892260197081203
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 80.72581501012593,
+          "exact_matches": 0,
+          "character_edit_rate": 0.1735214279838776,
+          "length_ratio": 0.9988072715308053
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 81.61449785207614,
+          "exact_matches": 29,
+          "character_edit_rate": 0.15569868384206104,
+          "length_ratio": 0.9963595631475777
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "ec3464f09146a12a3ca9cff790592ab41f6e2b101f992de913f3a2ee05cc0001"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.34842903343294046,
+        "raw_top1_agreement_with_teacher": 0.8934099802611074,
+        "teacher_token_is_raw_top1": 0.884544793434221,
+        "teacher_token_in_top5": 0.992416109706687
+      }
+    },
+    "llama-f16-p32": {
+      "output": {
+        "file": "output.warm-1.jsonl",
+        "sha256": "364cc36fbd5192b84c5238e778a40a0659aa500f139f94edd8610412e7eab0ed"
+      },
+      "earlier_output": {
+        "file": "output.cold.jsonl",
+        "sha256": "364cc36fbd5192b84c5238e778a40a0659aa500f139f94edd8610412e7eab0ed"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 80.71502232443504,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 80.71502232443504,
+          "exact_matches": 29,
+          "character_edit_rate": 0.17950243538416547,
+          "length_ratio": 0.9942014662727026
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 58.16681472085901,
+          "exact_matches": 14,
+          "character_edit_rate": 0.21747863247863247,
+          "length_ratio": 0.9953846153846154
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 84.16439626209556,
+          "exact_matches": 15,
+          "character_edit_rate": 0.16777318743977931,
+          "length_ratio": 0.9938360413394401
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 80.04521174704703,
+          "exact_matches": 0,
+          "character_edit_rate": 0.18661905949856555,
+          "length_ratio": 0.9928589247848323
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 81.5679082269969,
+          "exact_matches": 0,
+          "character_edit_rate": 0.17751089907049436,
+          "length_ratio": 0.9961750431849963
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 82.84371364103775,
+          "exact_matches": 29,
+          "character_edit_rate": 0.14141697003640435,
+          "length_ratio": 0.9977597311677401
+        }
+      }
+    },
+    "llama-q8-p32": {
+      "output": {
+        "file": "output.warm-1.jsonl",
+        "sha256": "ee27da2fec10cfa42c00f28a116db9f15c5b8162ac876028940885b808686610"
+      },
+      "earlier_output": {
+        "file": "output.cold.jsonl",
+        "sha256": "ee27da2fec10cfa42c00f28a116db9f15c5b8162ac876028940885b808686610"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 80.43375454280435,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 80.43375454280435,
+          "exact_matches": 32,
+          "character_edit_rate": 0.18776156429313354,
+          "length_ratio": 0.9984470014017325
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 57.6768961903134,
+          "exact_matches": 14,
+          "character_edit_rate": 0.22303418803418804,
+          "length_ratio": 0.9947435897435898
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 83.99854601953707,
+          "exact_matches": 18,
+          "character_edit_rate": 0.176867336298721,
+          "length_ratio": 0.9995908292966224
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 79.83686740781847,
+          "exact_matches": 0,
+          "character_edit_rate": 0.19042347511537983,
+          "length_ratio": 0.9936541100162155
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 80.67154319255103,
+          "exact_matches": 1,
+          "character_edit_rate": 0.1982808258616435,
+          "length_ratio": 1.0086369992596858
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 83.54289586676158,
+          "exact_matches": 31,
+          "character_edit_rate": 0.14795108746382898,
+          "length_ratio": 1.0040138149911322
+        }
+      }
+    },
+    "teacher-p256": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "afabe328dda062e11711c15a19ee4e76aeaf73c45f532c9c72ce52e0a4cb1565"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "afabe328dda062e11711c15a19ee4e76aeaf73c45f532c9c72ce52e0a4cb1565"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 98.28254762644485,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 98.28254762644485,
+          "exact_matches": 181,
+          "character_edit_rate": 0.014329941611286468,
+          "length_ratio": 1.0016639270695724
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 92.99142791145083,
+          "exact_matches": 88,
+          "character_edit_rate": 0.021239316239316238,
+          "length_ratio": 1.0021794871794871
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 98.8838530818938,
+          "exact_matches": 93,
+          "character_edit_rate": 0.01219592677164315,
+          "length_ratio": 1.0015046922640338
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 98.1045630604156,
+          "exact_matches": 17,
+          "character_edit_rate": 0.013596108269926407,
+          "length_ratio": 1.0009199201696395
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 98.34542298884162,
+          "exact_matches": 46,
+          "character_edit_rate": 0.019371555482438102,
+          "length_ratio": 1.0039483425187135
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 99.22090039341663,
+          "exact_matches": 118,
+          "character_edit_rate": 0.007280873704844581,
+          "length_ratio": 1.0009334453467749
+        }
+      },
+      "same_concurrency_teacher": {
+        "chrf_pp": 100.0,
+        "exact_matches": 256
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "582b16e8697bacbd6b173c950ad07e4480104eb7c666cf264eb0f7185af93db7"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.13898396933643714,
+        "raw_top1_agreement_with_teacher": 1.0,
+        "teacher_token_is_raw_top1": 0.9773522180281885,
+        "teacher_token_in_top5": 1.0
+      }
+    },
+    "w4a4-bf16-p256": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "91683a7fce6864d67eb3e9c511b04c45562b571300e1d747d0c62dea66b0d82b"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "91683a7fce6864d67eb3e9c511b04c45562b571300e1d747d0c62dea66b0d82b"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 79.4851320365045,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 79.4851320365045,
+          "exact_matches": 30,
+          "character_edit_rate": 0.1958290894789387,
+          "length_ratio": 0.9925476236096125
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 57.071035317812324,
+          "exact_matches": 15,
+          "character_edit_rate": 0.23094017094017094,
+          "length_ratio": 0.9786324786324786
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 83.02477960840335,
+          "exact_matches": 15,
+          "character_edit_rate": 0.18498475509153545,
+          "length_ratio": 0.9968454258675079
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 79.07396380084471,
+          "exact_matches": 0,
+          "character_edit_rate": 0.20266309093176998,
+          "length_ratio": 0.9911282275165274
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 79.5355481817097,
+          "exact_matches": 0,
+          "character_edit_rate": 0.19124784075018508,
+          "length_ratio": 0.9922267006662828
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 81.87150520955917,
+          "exact_matches": 30,
+          "character_edit_rate": 0.16531317091384298,
+          "length_ratio": 1.0017735461588724
+        }
+      },
+      "same_concurrency_teacher": {
+        "chrf_pp": 79.30500372444338,
+        "exact_matches": 29
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "8853e334bee6a395c9b07fae9503e2ce826f3d2560a76462e873eb61b678e3fb"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.3472654027374351,
+        "raw_top1_agreement_with_teacher": 0.8946220175225958,
+        "teacher_token_is_raw_top1": 0.8861031270561346,
+        "teacher_token_in_top5": 0.9935242580600477
+      }
+    },
+    "w4a4-int8-p256": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "a617d04ea0ce524984a6741721f13ec1ee4cee47330d31222d15aab14621bcba"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "a617d04ea0ce524984a6741721f13ec1ee4cee47330d31222d15aab14621bcba"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 79.17266894179747,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 79.17266894179747,
+          "exact_matches": 26,
+          "character_edit_rate": 0.19526436271593237,
+          "length_ratio": 0.990288716557587
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 56.22824810688357,
+          "exact_matches": 12,
+          "character_edit_rate": 0.22452991452991453,
+          "length_ratio": 0.9817948717948718
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 82.76094737762762,
+          "exact_matches": 14,
+          "character_edit_rate": 0.18622546625661604,
+          "length_ratio": 0.9929121074931035
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 78.73803563210346,
+          "exact_matches": 0,
+          "character_edit_rate": 0.2021329674441811,
+          "length_ratio": 0.9883840588748909
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 79.48468909521765,
+          "exact_matches": 0,
+          "character_edit_rate": 0.1905075265279263,
+          "length_ratio": 0.9933783005675743
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 81.1048943049293,
+          "exact_matches": 26,
+          "character_edit_rate": 0.16493979277513302,
+          "length_ratio": 0.9946793615233828
+        }
+      },
+      "same_concurrency_teacher": {
+        "chrf_pp": 79.04869213090173,
+        "exact_matches": 25
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "ec3464f09146a12a3ca9cff790592ab41f6e2b101f992de913f3a2ee05cc0001"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.34842903343294046,
+        "raw_top1_agreement_with_teacher": 0.8934099802611074,
+        "teacher_token_is_raw_top1": 0.884544793434221,
+        "teacher_token_in_top5": 0.992416109706687
+      }
+    }
+  },
+  "paired_differences": {
+    "bf16-int8-p32 minus teacher-p32": {
+      "delta_chrf_pp": -2.817383260578808,
+      "ci95_chrf_pp": [
+        -4.285953392604299,
+        -1.8496758840730745
+      ],
+      "delta_nll_nats_per_token": 0.0004968196054254415,
+      "ci95_nll": [
+        0.0001744957580505538,
+        0.0008259058908505746
+      ]
+    },
+    "w4a16-bf16-p32 minus teacher-p32": {
+      "delta_chrf_pp": -15.941497573535287,
+      "ci95_chrf_pp": [
+        -17.025493647204332,
+        -14.893936306786285
+      ],
+      "delta_nll_nats_per_token": 0.10477588885404182,
+      "ci95_nll": [
+        0.09726736848649294,
+        0.11157691775867591
+      ]
+    },
+    "w4a4-bf16-p32 minus w4a16-bf16-p32": {
+      "delta_chrf_pp": -4.829791123028684,
+      "ci95_chrf_pp": [
+        -5.551987965023428,
+        -4.075865000346503
+      ],
+      "delta_nll_nats_per_token": 0.10350554454695604,
+      "ci95_nll": [
+        0.09595595124811573,
+        0.1112929783391359
+      ]
+    },
+    "w4a4-int8-p32 minus w4a4-bf16-p32": {
+      "delta_chrf_pp": 0.369568963355249,
+      "ci95_chrf_pp": [
+        -0.36390439100196587,
+        1.15413455684427
+      ],
+      "delta_nll_nats_per_token": 0.0011636306955055131,
+      "ci95_nll": [
+        -0.007970805269869263,
+        0.01033348839025663
+      ]
+    },
+    "llama-q8-p32 minus llama-f16-p32": {
+      "delta_chrf_pp": -0.2812677816306888,
+      "ci95_chrf_pp": [
+        -1.1760931197134128,
+        0.5748997729029613
+      ]
+    },
+    "w4a4-int8-p32 minus llama-q8-p32": {
+      "delta_chrf_pp": -0.8354742760130733,
+      "ci95_chrf_pp": [
+        -1.7712614145117715,
+        0.15174929136312051
+      ]
+    },
+    "w4a4-int8-p32 minus teacher-p32": {
+      "delta_chrf_pp": -20.401719733208722,
+      "ci95_chrf_pp": [
+        -21.588175534717067,
+        -19.221982962389337
+      ],
+      "delta_nll_nats_per_token": 0.20944506409650337,
+      "ci95_nll": [
+        0.19806463558664542,
+        0.2207400453857529
+      ]
+    },
+    "teacher-p256 minus teacher-p32": {
+      "delta_chrf_pp": -1.7174523735551475,
+      "ci95_chrf_pp": [
+        -2.210559120271772,
+        -1.2936303142322008
+      ],
+      "delta_nll_nats_per_token": 0.0,
+      "ci95_nll": [
+        0.0,
+        0.0
+      ]
+    },
+    "w4a4-int8-p256 minus w4a4-bf16-p256": {
+      "delta_chrf_pp": -0.31246309470702727,
+      "ci95_chrf_pp": [
+        -1.1200857510542757,
+        0.5466626831096224
+      ],
+      "delta_nll_nats_per_token": 0.0011636306955055131,
+      "ci95_nll": [
+        -0.007970805269869263,
+        0.01033348839025663
+      ]
+    },
+    "w4a4-int8-p256 minus w4a4-int8-p32": {
+      "delta_chrf_pp": -0.4256113249938096,
+      "ci95_chrf_pp": [
+        -1.0259825700875935,
+        0.15357097015924862
+      ],
+      "delta_nll_nats_per_token": 0.0,
+      "ci95_nll": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "chrf_signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0",
+  "repeatability_check": {
+    "purpose": "Investigate observed W4A4/BF16 KV free-generation repeat drift",
+    "phases": [
+      {
+        "phase": "cold",
+        "output": {
+          "file": "cold.jsonl",
+          "sha256": "9d3db564ee6022a202c11e52c06c4fa49df1863258f48a2bc70ad91df4b398f0"
+        },
+        "chrf_pp": 79.22871130343603,
+        "exact_matches_with_first": 256,
+        "exact_matches_with_original_warm": 256
+      },
+      {
+        "phase": "warm-1",
+        "output": {
+          "file": "warm-1.jsonl",
+          "sha256": "9d3db564ee6022a202c11e52c06c4fa49df1863258f48a2bc70ad91df4b398f0"
+        },
+        "chrf_pp": 79.22871130343603,
+        "exact_matches_with_first": 256,
+        "exact_matches_with_original_warm": 256
+      },
+      {
+        "phase": "warm-2",
+        "output": {
+          "file": "warm-2.jsonl",
+          "sha256": "9d3db564ee6022a202c11e52c06c4fa49df1863258f48a2bc70ad91df4b398f0"
+        },
+        "chrf_pp": 79.22871130343603,
+        "exact_matches_with_first": 256,
+        "exact_matches_with_original_warm": 256
+      },
+      {
+        "phase": "warm-3",
+        "output": {
+          "file": "warm-3.jsonl",
+          "sha256": "9d3db564ee6022a202c11e52c06c4fa49df1863258f48a2bc70ad91df4b398f0"
+        },
+        "chrf_pp": 79.22871130343603,
+        "exact_matches_with_first": 256,
+        "exact_matches_with_original_warm": 256
+      }
+    ],
+    "teacher_forced": {
+      "source": {
+        "file": "teacher-forced.jsonl",
+        "sha256": "8853e334bee6a395c9b07fae9503e2ce826f3d2560a76462e873eb61b678e3fb"
+      },
+      "tokens": 28877,
+      "nll_nats_per_token": 0.3472654027374351,
+      "max_abs_logprob_difference": 0.0,
+      "raw_top1_agreement_with_original_run": 1.0
+    }
+  },
+  "created_at_utc": "2026-09-19T23:47:32.831075+00:00",
+  "detailed_report_sha256": "50c5a4b9ed216109409d9b1264d44a50fcca1b41cd169a4e85793614955e39a3",
+  "environment": {
+    "os": "Native Windows 11, no WSL",
+    "gpu": "RTX 5090 32GB",
+    "driver": "596.36",
+    "versions": {
+      "vllm": "0.29.0+cu132",
+      "torch": "2.11.0+cu130",
+      "transformers": "5.17.0",
+      "compressed-tensors": "0.17.0",
+      "triton-windows": "3.6.0.post26"
+    }
+  },
+  "protocol": {
+    "variants": [
+      [
+        "teacher",
+        32
+      ],
+      [
+        "bf16-int8",
+        32
+      ],
+      [
+        "w4a16-bf16",
+        32
+      ],
+      [
+        "w4a4-bf16",
+        32
+      ],
+      [
+        "w4a4-int8",
+        32
+      ],
+      [
+        "llama-f16",
+        32
+      ],
+      [
+        "llama-q8",
+        32
+      ],
+      [
+        "teacher",
+        256
+      ],
+      [
+        "w4a4-bf16",
+        256
+      ],
+      [
+        "w4a4-int8",
+        256
+      ]
+    ],
+    "sampling": {
+      "temperature": 0,
+      "top_p": 1,
+      "top_k": 1,
+      "repetition_penalty": 1.05
+    },
+    "context": 4096,
+    "max_tokens": 2048,
+    "free_generation_passes": 2,
+    "teacher_forcing": "Raw logits on original teacher prefixes; includes EOS; not a throughput benchmark",
+    "attention": "All vLLM groups use TRITON_ATTN to isolate KV/linear precision",
+    "reference_generation": "teacher-p32 warm-1; dataset translations are never scored",
+    "kv_cache_bytes": {
+      "p32_bf16": 3221225472,
+      "p32_int8": 1660944384,
+      "p256_bf16": 8589934592,
+      "p256_int8": 4429185024
+    }
+  },
+  "artifacts": {
+    "models/Hy-MT2-1.8B/model.safetensors": {
+      "sha256": "29e9117a44c79f81857613601968ff482d8a23c2d6736a1710bba9e5ca4762e5",
+      "bytes": 4077072784
+    },
+    "models/Hy-MT2-1.8B-NVFP4-vllm/model.safetensors": {
+      "sha256": "b4ae2931e9b24d6e0209d9062d6ec08767e61a7eaab6dff7d9fd5cd99000987e",
+      "bytes": 1363492720
+    },
+    "models/Hy-MT2-1.8B-NVFP4-fused.gguf": {
+      "sha256": "2203f9b20b56e6039d1f5728db2705cbc25a8c75e9cb17a652d37c8786af3560",
+      "bytes": 1013054240
+    },
+    ".local/core-benchmark-v3/hy-batch-core.exe": {
+      "sha256": "2a6b8700b65965d81f9b3e138c2c628128a59a25a015e66ce18b79deb576aa24",
+      "bytes": 155648
+    },
+    "bin/llama.dll": {
+      "sha256": "47608497d44d66842a7ad91dbe8f17b9f1e8732cde98d52677f48f427932153d",
+      "bytes": 2638336
+    },
+    "bin/ggml-cuda.dll": {
+      "sha256": "a25c2a0fce756ea08fff18d3f149dcefdccce022de5b92d6920c47d9bca23eed",
+      "bytes": 101957120
+    },
+    "scripts/benchmark_teacher_fidelity.py": {
+      "sha256": "591f135d2cf44b25b982e659fef3a6e5995f13707e4a8a893b5ea71fb40e4a62",
+      "bytes": 5801
+    },
+    "scripts/benchmark_vllm_offline.py": {
+      "sha256": "4a8ae8b14912b2f6c3a7d51d4fbfe0e7cb7f404860914762ceed203b92789b23",
+      "bytes": 11351
+    },
+    "scripts/score_teacher_fidelity.py": {
+      "sha256": "971dca1574e6c6bc5da08be4a8a05b9468a9c7c453b744f4df0e4bc64a93281f",
+      "bytes": 9976
+    },
+    "scripts/vllm_native_plugin/hymt_vllm_model.py": {
+      "sha256": "b08a828e1be278349a90bdf68454edaf0af11689674fa9a7f947eafb5900e158",
+      "bytes": 776
+    }
+  },
+  "runs": {
+    "teacher-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "teacher-p32.command.json": "79aed5edbbaeb1857c14c6297c8cdd836b044658a1f2f3bee743f53c1f275e9d",
+        "teacher-p32.log": "b62c6245870efa3962f3af1b0f264e84c3d88c589d9ebea3f4fc635dcb2a0517",
+        "teacher-p32.process.json": "7f8df76b2fb33f45baa6dd65f05c441ffb360e0d5a0c7ccb8968761491c04a7e"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 3221225472,
+        "kv_cache_dtype": "auto",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      }
+    },
+    "bf16-int8-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "bf16-int8-p32.command.json": "ea1811f83719b81969f0e41212520090720e4152f000425c2fce9efdff5ff10f",
+        "bf16-int8-p32.log": "dee3ee66cbd5b98573a9725a462fdd0412aaec29a306a3fc936bae433126a088",
+        "bf16-int8-p32.process.json": "b92adf955e08165be5cd348055a2e3d0f91af0867613fc3b4c6553e29445fd54"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 1660944384,
+        "kv_cache_dtype": "int8_per_token_head",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      }
+    },
+    "w4a16-bf16-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "w4a16-bf16-p32.command.json": "34fe0ba76d3730e7b2578be6de6e8409d02ece923978b2d30a5e1babbef2bc69",
+        "w4a16-bf16-p32.log": "0715af682b252fff9ac7ee6739772764227466381d1c3be8dec8628065f05afb",
+        "w4a16-bf16-p32.process.json": "90b31197481430180cfd6e2d0e990691acb580d8e334352a5caad8c83b31eeca"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B-NVFP4-vllm",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 3221225472,
+        "kv_cache_dtype": "auto",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        },
+        "kernel_config": {
+          "linear_backend": "marlin",
+          "enable_flashinfer_autotune": false
+        }
+      }
+    },
+    "w4a4-bf16-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "w4a4-bf16-p32.command.json": "ec8d607b3f37172fcc435ff667f6859104c2c631924625fa3fe9c50b8f4265de",
+        "w4a4-bf16-p32.log": "b2ba5c72f7156e22541af4a9f13a7609727845ccf69a77615828cd6bcddf7bf9",
+        "w4a4-bf16-p32.process.json": "d708aa09f76904eb57f43e7302216cba80411a58b9f8352507e8217dc77c2979"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B-NVFP4-vllm",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 3221225472,
+        "kv_cache_dtype": "auto",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        },
+        "kernel_config": {
+          "linear_backend": "cutlass",
+          "enable_flashinfer_autotune": false
+        }
+      }
+    },
+    "w4a4-int8-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "w4a4-int8-p32.command.json": "2e5502ba3e41dc765f153beb9164a4d6afc565dc098fb03f2ed3bb08f3eae8e0",
+        "w4a4-int8-p32.log": "a3a947c519e6d2b8c35edc8c001b5f301ae3880ecb4c1e44c46540c6243d052c",
+        "w4a4-int8-p32.process.json": "4bc000bc7a839dffe0e5bc77209e97d5850bbfa8082d29d317d6e8cc205e76a7"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B-NVFP4-vllm",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 32,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 1660944384,
+        "kv_cache_dtype": "int8_per_token_head",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        },
+        "kernel_config": {
+          "linear_backend": "cutlass",
+          "enable_flashinfer_autotune": false
+        }
+      }
+    },
+    "llama-f16-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "llama-f16-p32.command.json": "d729cc593e8500a0b42ea3b08ceb5c0b7bed89478f3b7cf91fdb68c9dc1c8798",
+        "llama-f16-p32.log": "76ac7da22f62d5764c183791bd864f8e519392bf473c4b2704237c908566a6e4",
+        "llama-f16-p32.process.json": "e72dd08d05b5d52e24cde9a206eec98d8fbe90b975b9825dec686edfb2ad7825"
+      }
+    },
+    "llama-q8-p32": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "llama-q8-p32.command.json": "241da9ac4a1c0b31479bd7231a6486e6fb20d469d615a939b420264f64d80cc7",
+        "llama-q8-p32.log": "63a5fae61c8113ec487f5a854b601870da0d333fc3112cf48d1204770a770cd7",
+        "llama-q8-p32.process.json": "ee7e2ddfb0ed341f6687943c20aedeaddb9111b04eeac4c169acb081bbd8863c"
+      }
+    },
+    "teacher-p256": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "teacher-p256.command.json": "aa315a4482492d489b0b7c8871d4a271c28d134f7e31928d3b8add4cce68d4b9",
+        "teacher-p256.log": "a0c06c1b492fea30e80c8310e3558b9baaefd011bd21af8f79614ba8ed7560fb",
+        "teacher-p256.process.json": "ae3ed9c098083bdf853dfae7fad3412cfe1485c0a38f56811e8a296598dca042"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 256,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 8589934592,
+        "kv_cache_dtype": "auto",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      }
+    },
+    "w4a4-bf16-p256": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "w4a4-bf16-p256.command.json": "2526f868e8ea933633e522679fc38ccf2bcddbf340f7b3246b170eb90da424b8",
+        "w4a4-bf16-p256.log": "4e9157214936c1410eafae683cbcedc53bec7b51fd2ec758bbc803b65a9c01ea",
+        "w4a4-bf16-p256.process.json": "ff0a724aa63ff8292133afda02f8514c35975dfc3ce3c1ad27e92040c6bbd90e"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B-NVFP4-vllm",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 256,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 8589934592,
+        "kv_cache_dtype": "auto",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        },
+        "kernel_config": {
+          "linear_backend": "cutlass",
+          "enable_flashinfer_autotune": false
+        }
+      }
+    },
+    "w4a4-int8-p256": {
+      "exit_code": 0,
+      "evidence_sha256": {
+        "w4a4-int8-p256.command.json": "8a79bb40fc12be62fb6edd4de257a4b40efbcbd435198c8280dca0373100fe98",
+        "w4a4-int8-p256.log": "cb572ae73a315f884d629c6833e6ce94a1cd0d80427d8bd2e58302ce97c2a8cc",
+        "w4a4-int8-p256.process.json": "a09286d0a8d0e156dda5cda60138e67b3e0bcb9613eecb16dafa854d838184c7"
+      },
+      "config": {
+        "model": "Hy-MT2-1.8B-NVFP4-vllm",
+        "dtype": "bfloat16",
+        "max_model_len": 4096,
+        "max_num_seqs": 256,
+        "max_num_batched_tokens": 2048,
+        "enable_prefix_caching": false,
+        "disable_log_stats": true,
+        "kv_cache_memory_bytes": 4429185024,
+        "kv_cache_dtype": "int8_per_token_head",
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        },
+        "kernel_config": {
+          "linear_backend": "cutlass",
+          "enable_flashinfer_autotune": false
+        }
+      }
+    }
+  },
+  "validation": {
+    "inference_processes": 11,
+    "free_generation_passes": 24,
+    "requests_per_pass": 256,
+    "total_free_generation_results": 6144,
+    "failed": 0,
+    "empty": 0,
+    "truncated": 0,
+    "prompt_token_ids_identical_across_main_matrix": true,
+    "prompt_tokens_per_pass": 34363,
+    "teacher_forced_tokens_per_config": 28877,
+    "teacher_forced_passes": 9,
+    "teacher_forced_raw_logprobs_identical_between_p32_and_p256": true,
+    "original_service_restored_and_health_checked": true
+  }
+}

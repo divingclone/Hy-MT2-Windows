@@ -1,0 +1,2749 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-20",
+  "hardware": {
+    "gpu": "RTX 5090 32 GB",
+    "os": "Windows 11 native",
+    "driver": "596.36",
+    "cuda_toolkit": "13.0",
+    "msvc": "14.43",
+    "wsl": false
+  },
+  "metric": "Native engine steady-state completion tokens per second; pretokenized, no HTTP.",
+  "aggregation": "Median of three process warm medians; each process has one first pass and three warm passes. Backends/concurrencies interleaved.",
+  "workload": {
+    "requests": 512,
+    "unique_cases": 64,
+    "concurrency": [
+      32,
+      256
+    ],
+    "context": 1024,
+    "max_new_tokens": 512,
+    "prefix_cache": false,
+    "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+    "warm_repeats": 3,
+    "temperature": 0.7,
+    "top_p": 0.6,
+    "top_k": 20,
+    "repetition_penalty": 1.05,
+    "seeds": "42 + request index",
+    "process_trials_per_backend_and_concurrency": 3,
+    "prompt_tokens": 41768,
+    "serialized_input_sha256": "6ba3e47ec3de483314005b9d879c33ea0430f55193b2d661831ab6b7ca898cb7"
+  },
+  "timing": {
+    "included": [
+      "request/sampler setup",
+      "KV reset and scheduling",
+      "prefill",
+      "decode",
+      "sampling",
+      "detokenization"
+    ],
+    "excluded": [
+      "model initialization",
+      "input JSON parsing",
+      "prompt formatting/tokenization",
+      "output JSON assembly/writing",
+      "HTTP"
+    ],
+    "native_core_field": "core_wall_s (sum of synchronized wave intervals); legacy wall_s and inherited notes are not used for core throughput.",
+    "vllm_core_field": "wall_s with metric_profile=pretokenized_engine",
+    "initialization_note": "Engine init only, not full process startup; vLLM includes model compilation/graph capture. Existing disk caches retained; not clean-machine cold start.",
+    "preprocess_note": "Native preprocess includes input read/parse; vLLM preprocess is formatting/tokenization only. Excluded from core and not a direct speed comparison."
+  },
+  "configuration": {
+    "native": "NVFP4 fused GGUF, F16 KV, fixed waves, batch/ubatch 2048, GPU prefix sampling, one CPU sampling thread",
+    "vllm": "NVFP4 linear weights, CUTLASS W4A4, BF16 shared embedding/head and KV, continuous batching, token budget 2048, KV budget 3/6 GiB",
+    "native_environment": {
+      "HYMT_VLLM_NATIVE": "1",
+      "LLAMA_HYMT_FUSED_PROJ": "1",
+      "GGML_CUDA_HYMT_DISABLE_ROPE_NORM": "0",
+      "GGML_CUDA_HYMT_ROPE_NORM_STRICT": "1",
+      "LLAMA_HYMT_SPARSE_PENALTIES": "1",
+      "GGML_CUDA_HYMT_DISABLE_TOPK": "0",
+      "LLAMA_HYMT_SAMPLING_SNAPSHOT": "1",
+      "LLAMA_HYMT_BATCH_SNAPSHOT": "1",
+      "GGML_CUDA_HYMT_EAGER_GRAPHS": "1",
+      "GGML_CUDA_GRAPH_OPT": "0",
+      "GGML_CUDA_HYMT_DISABLE_Q8_KV_FUSION": "0",
+      "GGML_CUDA_Q8_KV_SUBWARP": "0",
+      "HYMT_CORE_REPEATS": "3"
+    },
+    "versions": {
+      "vllm": "0.29.0+cu132",
+      "torch": "2.11.0+cu130",
+      "transformers": "5.17.0",
+      "compressed-tensors": "0.17.0",
+      "triton-windows": "3.6.0.post26"
+    }
+  },
+  "comparisons": [
+    {
+      "parallel": 32,
+      "llama_warm_tps": 3728.570830251973,
+      "vllm_warm_tps": 4640.707870420858,
+      "throughput_ratio": 1.2446344944739172,
+      "throughput_gain_percent": 24.463449447391717,
+      "paired_trial_ratios": [
+        1.2381587669173872,
+        1.2468239211858876,
+        1.2446344944739172
+      ]
+    },
+    {
+      "parallel": 256,
+      "llama_warm_tps": 5840.8936502419165,
+      "vllm_warm_tps": 22421.319459217233,
+      "throughput_ratio": 3.8386796270958627,
+      "throughput_gain_percent": 283.86796270958627,
+      "paired_trial_ratios": [
+        3.726867374205739,
+        3.8386796270958627,
+        3.8260137457096324
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "backend": "llama",
+      "parallel": 32,
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 0.6802582,
+          "preprocess_s": 0.5668857,
+          "warm_median_tps": 3840.0218900377536,
+          "warm_median_wall_s": 8.677554700000002,
+          "prompt_ids_sha256": "eb6760d229ab56fc6c9e7210835846fe17d04b94d6c39ca3cf3cbab14fb33bb5",
+          "telemetry_sha256": "20d26ebba14eb6e31b0f9cf924401fa1b029821adfa1da82773f49af4fb306b3",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 8.5954077,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3876.7212868797365,
+              "requests_per_second": 59.56669164163091,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "0fcfa0f2f9cf176cb9cd45307a53976a8893de29cfabb5b34530211aef97028e",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2445.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 253.76,
+                  "min": 98.68,
+                  "max": 257.42
+                },
+                "utilization.gpu": {
+                  "median": 64.0,
+                  "min": 0.0,
+                  "max": 71.0
+                },
+                "memory.used": {
+                  "median": 7097.0,
+                  "min": 7050.0,
+                  "max": 7151.0
+                },
+                "temperature.gpu": {
+                  "median": 58.0,
+                  "min": 51.0,
+                  "max": 59.0
+                },
+                "sample_count": 79
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 8.554712400000001,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3895.163091631227,
+              "requests_per_second": 59.85005410585164,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "4463c10cb1c1b19b42f09c7bd67f0030522cddceb7cd07b8cc1b63b3ea9f5039",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 255.74,
+                  "min": 250.05,
+                  "max": 261.24
+                },
+                "utilization.gpu": {
+                  "median": 65.0,
+                  "min": 57.0,
+                  "max": 71.0
+                },
+                "memory.used": {
+                  "median": 7203.0,
+                  "min": 7153.0,
+                  "max": 7211.0
+                },
+                "temperature.gpu": {
+                  "median": 59.0,
+                  "min": 59.0,
+                  "max": 62.0
+                },
+                "sample_count": 79
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 8.6803079,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3838.803920768755,
+              "requests_per_second": 58.98408281116387,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "838736af1619638a835d70b8ada7b907c518730c2e9308e528c1b5b0a8f80aaa",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 256.66,
+                  "min": 249.11,
+                  "max": 258.75
+                },
+                "utilization.gpu": {
+                  "median": 69.0,
+                  "min": 58.0,
+                  "max": 71.0
+                },
+                "memory.used": {
+                  "median": 7233.0,
+                  "min": 7051.0,
+                  "max": 7279.0
+                },
+                "temperature.gpu": {
+                  "median": 61.0,
+                  "min": 60.0,
+                  "max": 63.0
+                },
+                "sample_count": 79
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 8.677554700000002,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3840.0218900377536,
+              "requests_per_second": 59.00279718202179,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "ae5a9d264f42a78302c63b3056e691458686dc1301e4b5bdc66a3ac061611700",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 258.1,
+                  "min": 253.5,
+                  "max": 264.31
+                },
+                "utilization.gpu": {
+                  "median": 66.0,
+                  "min": 61.0,
+                  "max": 71.0
+                },
+                "memory.used": {
+                  "median": 7073.0,
+                  "min": 6998.0,
+                  "max": 7111.0
+                },
+                "temperature.gpu": {
+                  "median": 61.0,
+                  "min": 61.0,
+                  "max": 63.0
+                },
+                "sample_count": 80
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "initialization_s": 0.7463354,
+          "preprocess_s": 0.6551128,
+          "warm_median_tps": 3687.046314854082,
+          "warm_median_wall_s": 9.0375865,
+          "prompt_ids_sha256": "eb6760d229ab56fc6c9e7210835846fe17d04b94d6c39ca3cf3cbab14fb33bb5",
+          "telemetry_sha256": "77777ee008928fb6c8c873c238ab1d7bb0bb44e5142f788d9863267cbf2ce0c6",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 9.0607035,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3677.639379767807,
+              "requests_per_second": 56.50775350942672,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "3153d0b24378fd63c696ddde94e67de8dcf1a6d5a8bb0969ca01378f97a132d2",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2842.0,
+                  "min": 2422.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 255.84,
+                  "min": 108.25,
+                  "max": 257.9
+                },
+                "utilization.gpu": {
+                  "median": 62.0,
+                  "min": 0.0,
+                  "max": 69.0
+                },
+                "memory.used": {
+                  "median": 6773.0,
+                  "min": 6750.0,
+                  "max": 6847.0
+                },
+                "temperature.gpu": {
+                  "median": 63.0,
+                  "min": 58.0,
+                  "max": 65.0
+                },
+                "sample_count": 83
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 9.0375865,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3687.046314854082,
+              "requests_per_second": 56.65229317583849,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "40c30478fc86f8d710b0a53042c4482c376c9a937004802303ce0ae748aed8da",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 256.86,
+                  "min": 253.41,
+                  "max": 259.1
+                },
+                "utilization.gpu": {
+                  "median": 65.0,
+                  "min": 56.0,
+                  "max": 69.0
+                },
+                "memory.used": {
+                  "median": 6903.0,
+                  "min": 6695.0,
+                  "max": 6928.0
+                },
+                "temperature.gpu": {
+                  "median": 64.0,
+                  "min": 63.0,
+                  "max": 66.0
+                },
+                "sample_count": 84
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 9.0393924,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3686.309712586434,
+              "requests_per_second": 56.64097511686737,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "72d450af550345554016f5011c48af8d4c54d8fb324c10ddd1bc79c54c0c8d11",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 257.73,
+                  "min": 249.44,
+                  "max": 261.32
+                },
+                "utilization.gpu": {
+                  "median": 66.0,
+                  "min": 52.0,
+                  "max": 70.0
+                },
+                "memory.used": {
+                  "median": 6952.0,
+                  "min": 6899.0,
+                  "max": 6957.0
+                },
+                "temperature.gpu": {
+                  "median": 64.0,
+                  "min": 64.0,
+                  "max": 65.0
+                },
+                "sample_count": 83
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 9.004238099999998,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3700.7017839743717,
+              "requests_per_second": 56.86211252010318,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "db71b51c0e2032ebf37914c6622b0f671637fe1e27d34bad4e80273c00c70a53",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 258.82,
+                  "min": 252.97,
+                  "max": 260.74
+                },
+                "utilization.gpu": {
+                  "median": 65.0,
+                  "min": 56.0,
+                  "max": 68.0
+                },
+                "memory.used": {
+                  "median": 6977.0,
+                  "min": 6795.0,
+                  "max": 7017.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 64.0,
+                  "max": 68.0
+                },
+                "sample_count": 83
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "initialization_s": 0.7231059,
+          "preprocess_s": 0.706818,
+          "warm_median_tps": 3728.570830251973,
+          "warm_median_wall_s": 8.936936300000001,
+          "prompt_ids_sha256": "eb6760d229ab56fc6c9e7210835846fe17d04b94d6c39ca3cf3cbab14fb33bb5",
+          "telemetry_sha256": "74ab60042d2b7cdb24e362ffd754eb8aa46b0a8b5dbd3fa4abd5e7f07357a819",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 8.874696100000001,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3754.7201193740025,
+              "requests_per_second": 57.69211635314475,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "f781d85a584b135d06002ddfdf91e67cbb5373739865b5d9c957cdaf7e949fef",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2715.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 260.4,
+                  "min": 128.85,
+                  "max": 265.1
+                },
+                "utilization.gpu": {
+                  "median": 65.0,
+                  "min": 0.0,
+                  "max": 70.0
+                },
+                "memory.used": {
+                  "median": 6946.0,
+                  "min": 6884.0,
+                  "max": 6980.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 61.0,
+                  "max": 66.0
+                },
+                "sample_count": 82
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 8.927744700000002,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3732.4095972412824,
+              "requests_per_second": 57.349310179086984,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "6e943b089e4a91d90c79bf13e64dd0aa2393c2f8a4f79913e3caa3dd360974df",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 261.39,
+                  "min": 256.23,
+                  "max": 263.94
+                },
+                "utilization.gpu": {
+                  "median": 67.0,
+                  "min": 55.0,
+                  "max": 71.0
+                },
+                "memory.used": {
+                  "median": 6836.0,
+                  "min": 6769.0,
+                  "max": 6996.0
+                },
+                "temperature.gpu": {
+                  "median": 66.0,
+                  "min": 66.0,
+                  "max": 67.0
+                },
+                "sample_count": 82
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 8.936936300000001,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3728.570830251973,
+              "requests_per_second": 57.290326663735975,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "b9d242023651e190de117e800b81c40f8ae701729ca4d327d4ff58b147582964",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 261.14,
+                  "min": 253.95,
+                  "max": 264.63
+                },
+                "utilization.gpu": {
+                  "median": 65.0,
+                  "min": 55.0,
+                  "max": 71.0
+                },
+                "memory.used": {
+                  "median": 6871.0,
+                  "min": 6855.0,
+                  "max": 6875.0
+                },
+                "temperature.gpu": {
+                  "median": 66.0,
+                  "min": 66.0,
+                  "max": 68.0
+                },
+                "sample_count": 82
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 9.015271700000001,
+              "completion_tokens": 33322,
+              "completion_tokens_per_second": 3696.1725734788442,
+              "requests_per_second": 56.79252018549812,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "187cc5aef336a731ed307ea7928c98141698879823a7f3b7a8998ca2d10d16ff",
+              "source_report_sha256": "61c0ddb3117e5a1ec1fadf954c93500c9c3952ce1a9a4dd6c959bc6047944eee",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 261.12,
+                  "min": 252.85,
+                  "max": 266.1
+                },
+                "utilization.gpu": {
+                  "median": 64.0,
+                  "min": 53.0,
+                  "max": 72.0
+                },
+                "memory.used": {
+                  "median": 6922.0,
+                  "min": 6698.0,
+                  "max": 6948.0
+                },
+                "temperature.gpu": {
+                  "median": 66.0,
+                  "min": 66.0,
+                  "max": 68.0
+                },
+                "sample_count": 83
+              }
+            }
+          ]
+        }
+      ],
+      "warm_tps_process_medians": {
+        "median": 3728.570830251973,
+        "min": 3687.046314854082,
+        "max": 3840.0218900377536
+      },
+      "warm_wall_s_process_medians": {
+        "median": 8.936936300000001,
+        "min": 8.677554700000002,
+        "max": 9.0375865
+      },
+      "cold_tps": {
+        "median": 3754.7201193740025,
+        "min": 3677.639379767807,
+        "max": 3876.7212868797365
+      },
+      "cold_wall_s": {
+        "median": 8.874696100000001,
+        "min": 8.5954077,
+        "max": 9.0607035
+      },
+      "initialization_s": {
+        "median": 0.7231059,
+        "min": 0.6802582,
+        "max": 0.7463354
+      },
+      "all_nine_warm_tps": {
+        "median": 3728.570830251973,
+        "min": 3686.309712586434,
+        "max": 3895.163091631227
+      }
+    },
+    {
+      "backend": "vllm",
+      "parallel": 32,
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 125.4395530000038,
+          "preprocess_s": 0.06286130001535639,
+          "warm_median_tps": 4754.556768304919,
+          "warm_median_wall_s": 6.96931419998873,
+          "prompt_ids_sha256": "054ddb8e276e2a6bc587ee909390d57700dbba357f9917b5f0d9e90c899c63be",
+          "telemetry_sha256": "62d1325a936cd4afa828447a43d432660163d0ddf9693719e64c9486eaff5351",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 13.800445500004571,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 2401.0819071014066,
+              "requests_per_second": 37.100251582445686,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "4eaa1a021abb0421106d6a5cdb77971506d98ffd4eaa13992edd9b1029949a94",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2520.0,
+                  "min": 2400.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 99.625,
+                  "min": 93.22,
+                  "max": 242.21
+                },
+                "utilization.gpu": {
+                  "median": 2.0,
+                  "min": 0.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8420.0,
+                  "min": 8327.0,
+                  "max": 8466.0
+                },
+                "temperature.gpu": {
+                  "median": 51.0,
+                  "min": 51.0,
+                  "max": 58.0
+                },
+                "sample_count": 128
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 7.160844500001986,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4627.387174793534,
+              "requests_per_second": 71.4999466892289,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "4eaa1a021abb0421106d6a5cdb77971506d98ffd4eaa13992edd9b1029949a94",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2835.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 235.22,
+                  "min": 227.27,
+                  "max": 245.76
+                },
+                "utilization.gpu": {
+                  "median": 59.0,
+                  "min": 46.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8872.0,
+                  "min": 8872.0,
+                  "max": 8893.0
+                },
+                "temperature.gpu": {
+                  "median": 58.0,
+                  "min": 57.0,
+                  "max": 59.0
+                },
+                "sample_count": 65
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 6.96931419998873,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4754.556768304919,
+              "requests_per_second": 73.46490419399198,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "4eaa1a021abb0421106d6a5cdb77971506d98ffd4eaa13992edd9b1029949a94",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 238.77,
+                  "min": 232.4,
+                  "max": 254.83
+                },
+                "utilization.gpu": {
+                  "median": 57.0,
+                  "min": 44.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8893.0,
+                  "min": 8863.0,
+                  "max": 8893.0
+                },
+                "temperature.gpu": {
+                  "median": 59.0,
+                  "min": 59.0,
+                  "max": 60.0
+                },
+                "sample_count": 65
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 6.940684800007148,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4774.168681448533,
+              "requests_per_second": 73.767937134888,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "4eaa1a021abb0421106d6a5cdb77971506d98ffd4eaa13992edd9b1029949a94",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 241.49,
+                  "min": 235.94,
+                  "max": 255.97
+                },
+                "utilization.gpu": {
+                  "median": 59.0,
+                  "min": 41.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8883.0,
+                  "min": 8863.0,
+                  "max": 8903.0
+                },
+                "temperature.gpu": {
+                  "median": 60.0,
+                  "min": 59.0,
+                  "max": 61.0
+                },
+                "sample_count": 63
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "initialization_s": 28.779836100002285,
+          "preprocess_s": 0.06152190000284463,
+          "warm_median_tps": 4597.097543880343,
+          "warm_median_wall_s": 7.208026300009806,
+          "prompt_ids_sha256": "054ddb8e276e2a6bc587ee909390d57700dbba357f9917b5f0d9e90c899c63be",
+          "telemetry_sha256": "4505db0267ddb82f99e21694984f64dc15c7f0d605cce40a7f2d052da57f0b96",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 7.250024399982067,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4570.467376645238,
+              "requests_per_second": 70.62045198099835,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "a079d2c0fb1740151d8d6786b156a4c3c8b0b44a622a59d3ef535663df7d5a63",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2430.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 234.94,
+                  "min": 97.85,
+                  "max": 246.7
+                },
+                "utilization.gpu": {
+                  "median": 53.0,
+                  "min": 0.0,
+                  "max": 69.0
+                },
+                "memory.used": {
+                  "median": 8489.0,
+                  "min": 8424.0,
+                  "max": 8497.0
+                },
+                "temperature.gpu": {
+                  "median": 60.0,
+                  "min": 55.0,
+                  "max": 61.0
+                },
+                "sample_count": 67
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 7.291567399981432,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4544.427580835964,
+              "requests_per_second": 70.21809878645624,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "a079d2c0fb1740151d8d6786b156a4c3c8b0b44a622a59d3ef535663df7d5a63",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 237.55,
+                  "min": 225.33,
+                  "max": 253.36
+                },
+                "utilization.gpu": {
+                  "median": 53.0,
+                  "min": 36.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8976.0,
+                  "min": 8928.0,
+                  "max": 8995.0
+                },
+                "temperature.gpu": {
+                  "median": 61.0,
+                  "min": 60.0,
+                  "max": 62.0
+                },
+                "sample_count": 67
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 7.208026300009806,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4597.097543880343,
+              "requests_per_second": 71.03192728352052,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "a079d2c0fb1740151d8d6786b156a4c3c8b0b44a622a59d3ef535663df7d5a63",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2835.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 239.32,
+                  "min": 234.36,
+                  "max": 254.4
+                },
+                "utilization.gpu": {
+                  "median": 53.0,
+                  "min": 42.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8989.0,
+                  "min": 8745.0,
+                  "max": 8993.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 61.0,
+                  "max": 62.0
+                },
+                "sample_count": 66
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 7.139633600017987,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4641.134525435104,
+              "requests_per_second": 71.71236350261869,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "a079d2c0fb1740151d8d6786b156a4c3c8b0b44a622a59d3ef535663df7d5a63",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2842.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 243.29,
+                  "min": 233.46,
+                  "max": 254.6
+                },
+                "utilization.gpu": {
+                  "median": 52.0,
+                  "min": 39.0,
+                  "max": 61.0
+                },
+                "memory.used": {
+                  "median": 8758.0,
+                  "min": 8743.0,
+                  "max": 8766.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 61.0,
+                  "max": 63.0
+                },
+                "sample_count": 65
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "initialization_s": 28.96130580001045,
+          "preprocess_s": 0.06165210000472143,
+          "warm_median_tps": 4640.707870420858,
+          "warm_median_wall_s": 7.140289999981178,
+          "prompt_ids_sha256": "054ddb8e276e2a6bc587ee909390d57700dbba357f9917b5f0d9e90c899c63be",
+          "telemetry_sha256": "28ef1617e3960e5a7e05bdb9296d23b1c17db59af4213edcb3f56bddee0b4bc5",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 7.345685099979164,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4510.947522116622,
+              "requests_per_second": 69.70078257254076,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "672256d1b3b903806e34a25e79cadc9f951e8080277181a39cebb30afd8c732d",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2850.0,
+                  "min": 2437.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 240.37,
+                  "min": 99.68,
+                  "max": 243.3
+                },
+                "utilization.gpu": {
+                  "median": 54.0,
+                  "min": 1.0,
+                  "max": 66.0
+                },
+                "memory.used": {
+                  "median": 8220.0,
+                  "min": 8199.0,
+                  "max": 8441.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 57.0,
+                  "max": 63.0
+                },
+                "sample_count": 67
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 7.140289999981178,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4640.707870420858,
+              "requests_per_second": 71.70577105430587,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "672256d1b3b903806e34a25e79cadc9f951e8080277181a39cebb30afd8c732d",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2835.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 243.63,
+                  "min": 235.14,
+                  "max": 253.43
+                },
+                "utilization.gpu": {
+                  "median": 56.0,
+                  "min": 47.0,
+                  "max": 72.0
+                },
+                "memory.used": {
+                  "median": 8724.0,
+                  "min": 8671.0,
+                  "max": 8729.0
+                },
+                "temperature.gpu": {
+                  "median": 63.0,
+                  "min": 63.0,
+                  "max": 64.0
+                },
+                "sample_count": 66
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 7.114727600011975,
+              "completion_tokens": 33136,
+              "completion_tokens_per_second": 4657.381401354597,
+              "requests_per_second": 71.9634016626495,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "00aaf3e88f1f2e8cebc69126b129b9cbc026beb28a413d545d907862407bc034",
+              "source_report_sha256": "672256d1b3b903806e34a25e79cadc9f951e8080277181a39cebb30afd8c732d",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2835.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 244.26,
+                  "min": 240.1,
+                  "max": 256.13
+                },
+                "utilization.gpu": {
+                  "median": 56.0,
+                  "min": 43.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8734.0,
+                  "min": 8729.0,
+                  "max": 8739.0
+                },
+                "temperature.gpu": {
+                  "median": 64.0,
+                  "min": 63.0,
+                  "max": 64.0
+                },
+                "sample_count": 65
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 7.240450099983718,
+              "completion_tokens": 33123,
+              "completion_tokens_per_second": 4574.715596765798,
+              "requests_per_second": 70.71383587066657,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "8dbf616eae4d3259630e1d00e293a2b4f2692baeb58ee8b71018ade90a451168",
+              "source_report_sha256": "672256d1b3b903806e34a25e79cadc9f951e8080277181a39cebb30afd8c732d",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2835.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 243.15,
+                  "min": 239.38,
+                  "max": 257.95
+                },
+                "utilization.gpu": {
+                  "median": 54.0,
+                  "min": 42.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 8739.0,
+                  "min": 8730.0,
+                  "max": 8763.0
+                },
+                "temperature.gpu": {
+                  "median": 64.0,
+                  "min": 63.0,
+                  "max": 64.0
+                },
+                "sample_count": 67
+              }
+            }
+          ]
+        }
+      ],
+      "warm_tps_process_medians": {
+        "median": 4640.707870420858,
+        "min": 4597.097543880343,
+        "max": 4754.556768304919
+      },
+      "warm_wall_s_process_medians": {
+        "median": 7.140289999981178,
+        "min": 6.96931419998873,
+        "max": 7.208026300009806
+      },
+      "cold_tps": {
+        "median": 4510.947522116622,
+        "min": 2401.0819071014066,
+        "max": 4570.467376645238
+      },
+      "cold_wall_s": {
+        "median": 7.345685099979164,
+        "min": 7.250024399982067,
+        "max": 13.800445500004571
+      },
+      "initialization_s": {
+        "median": 28.96130580001045,
+        "min": 28.779836100002285,
+        "max": 125.4395530000038
+      },
+      "all_nine_warm_tps": {
+        "median": 4640.707870420858,
+        "min": 4544.427580835964,
+        "max": 4774.168681448533
+      }
+    },
+    {
+      "backend": "llama",
+      "parallel": 256,
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 0.8661702,
+          "preprocess_s": 0.5649966,
+          "warm_median_tps": 6044.374675904265,
+          "warm_median_wall_s": 5.5120673,
+          "prompt_ids_sha256": "eb6760d229ab56fc6c9e7210835846fe17d04b94d6c39ca3cf3cbab14fb33bb5",
+          "telemetry_sha256": "72b87780339e1b845f72d4bb9f67823a7ad21463066ed13aa75266d1183474ee",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 5.5071036,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 6049.822632717496,
+              "requests_per_second": 92.97083134590024,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "c501248f89b7b78e8877ebbba566f0c7db17ac976590dea8a3a028d0051e2e75",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2842.0,
+                  "min": 2820.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 265.49,
+                  "min": 114.73,
+                  "max": 289.98
+                },
+                "utilization.gpu": {
+                  "median": 48.0,
+                  "min": 0.0,
+                  "max": 64.0
+                },
+                "memory.used": {
+                  "median": 21356.0,
+                  "min": 21332.0,
+                  "max": 21380.0
+                },
+                "temperature.gpu": {
+                  "median": 61.0,
+                  "min": 56.0,
+                  "max": 64.0
+                },
+                "sample_count": 50
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 5.5910299000000006,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5959.009448330798,
+              "requests_per_second": 91.57525700229218,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "7e12c2bf0b0edff052aba8e65e19914f4a34f5911d6d2f486159ad546937884f",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2820.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 268.93,
+                  "min": 256.39,
+                  "max": 290.74
+                },
+                "utilization.gpu": {
+                  "median": 51.0,
+                  "min": 41.0,
+                  "max": 63.0
+                },
+                "memory.used": {
+                  "median": 21389.0,
+                  "min": 21149.0,
+                  "max": 21405.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 61.0,
+                  "max": 66.0
+                },
+                "sample_count": 52
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 5.5120673,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 6044.374675904265,
+              "requests_per_second": 92.88710970564529,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "ce5ecdeabcbc89009e9fc8a1803bb10370f70122091fa9d3a7081be2d0e64e4a",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2820.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 274.42,
+                  "min": 264.43,
+                  "max": 286.57
+                },
+                "utilization.gpu": {
+                  "median": 49.0,
+                  "min": 40.0,
+                  "max": 64.0
+                },
+                "memory.used": {
+                  "median": 21174.0,
+                  "min": 21172.0,
+                  "max": 21194.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 61.0,
+                  "max": 63.0
+                },
+                "sample_count": 51
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 5.4764495,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 6083.686154688361,
+              "requests_per_second": 93.49123003873221,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "54622b611254b2a3a78bf94786f19c65b87d8f8ef96282309b77c931d6e1118e",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2827.0,
+                  "min": 2820.0,
+                  "max": 2835.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 272.39,
+                  "min": 263.9,
+                  "max": 289.27
+                },
+                "utilization.gpu": {
+                  "median": 49.0,
+                  "min": 40.0,
+                  "max": 63.0
+                },
+                "memory.used": {
+                  "median": 21220.0,
+                  "min": 21198.0,
+                  "max": 21220.0
+                },
+                "temperature.gpu": {
+                  "median": 63.0,
+                  "min": 62.0,
+                  "max": 65.0
+                },
+                "sample_count": 50
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "initialization_s": 0.8712274,
+          "preprocess_s": 0.5740463,
+          "warm_median_tps": 5840.8936502419165,
+          "warm_median_wall_s": 5.7040929,
+          "prompt_ids_sha256": "eb6760d229ab56fc6c9e7210835846fe17d04b94d6c39ca3cf3cbab14fb33bb5",
+          "telemetry_sha256": "9951758c4f1e7a7e30e4c746d35657f9eb5e66f515d8a45241240b4938c4fd65",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 5.5461238999999996,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 6007.258510759199,
+              "requests_per_second": 92.31672592096257,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "552c160e689cedaac3f0d5202bd7bc30cb6260a31da637b832a319e010c8b900",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2842.0,
+                  "min": 2460.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 264.83,
+                  "min": 119.64,
+                  "max": 283.84
+                },
+                "utilization.gpu": {
+                  "median": 53.0,
+                  "min": 1.0,
+                  "max": 65.0
+                },
+                "memory.used": {
+                  "median": 21375.0,
+                  "min": 21352.0,
+                  "max": 21380.0
+                },
+                "temperature.gpu": {
+                  "median": 61.0,
+                  "min": 56.0,
+                  "max": 62.0
+                },
+                "sample_count": 51
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 5.5043726,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 6052.824258299665,
+              "requests_per_second": 93.01695891735235,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "222499adc0469a286cfc076e3418d156fabb991c7590282d1c02bc26438f3d1a",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2842.0,
+                  "min": 2820.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 272.62,
+                  "min": 263.49,
+                  "max": 287.64
+                },
+                "utilization.gpu": {
+                  "median": 53.0,
+                  "min": 42.0,
+                  "max": 64.0
+                },
+                "memory.used": {
+                  "median": 21515.0,
+                  "min": 21382.0,
+                  "max": 21542.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 60.0,
+                  "max": 65.0
+                },
+                "sample_count": 50
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 5.7040929,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5840.8936502419165,
+              "requests_per_second": 89.76010892108717,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "e9e6588db0b2201e1fa040bb1001c4f4b97cb1074bf82f65096e252659f4b226",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2820.0,
+                  "max": 2850.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 268.69,
+                  "min": 254.46,
+                  "max": 288.08
+                },
+                "utilization.gpu": {
+                  "median": 49.0,
+                  "min": 36.0,
+                  "max": 64.0
+                },
+                "memory.used": {
+                  "median": 21543.0,
+                  "min": 21199.0,
+                  "max": 21578.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 61.0,
+                  "max": 63.0
+                },
+                "sample_count": 53
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 5.732677000000001,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5811.769963666189,
+              "requests_per_second": 89.3125497913104,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "a76665bc21f2fa9e942a7d971b290bf1dc91adae2f0e00a3938a18e07c8bd977",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2820.0,
+                  "max": 2842.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 266.58,
+                  "min": 255.31,
+                  "max": 284.05
+                },
+                "utilization.gpu": {
+                  "median": 49.0,
+                  "min": 44.0,
+                  "max": 63.0
+                },
+                "memory.used": {
+                  "median": 21220.0,
+                  "min": 21220.0,
+                  "max": 21221.0
+                },
+                "temperature.gpu": {
+                  "median": 63.0,
+                  "min": 62.0,
+                  "max": 65.0
+                },
+                "sample_count": 53
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "initialization_s": 0.9346931,
+          "preprocess_s": 0.7452986,
+          "warm_median_tps": 5671.0299798624565,
+          "warm_median_wall_s": 5.874946899999999,
+          "prompt_ids_sha256": "eb6760d229ab56fc6c9e7210835846fe17d04b94d6c39ca3cf3cbab14fb33bb5",
+          "telemetry_sha256": "4a7fbd3a156ce5205319526e3553ac011e91aaf9ae0615ea9aa27cf78d799051",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 6.1427078999999996,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5423.829448247084,
+              "requests_per_second": 83.35086224757652,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "7be2b858e08d6663d16cf50ac277d6b0816f82c7193988ad8995da1a399ac0ff",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2857.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 258.19,
+                  "min": 125.09,
+                  "max": 284.83
+                },
+                "utilization.gpu": {
+                  "median": 46.0,
+                  "min": 1.0,
+                  "max": 63.0
+                },
+                "memory.used": {
+                  "median": 21323.0,
+                  "min": 21302.0,
+                  "max": 21330.0
+                },
+                "temperature.gpu": {
+                  "median": 64.0,
+                  "min": 60.0,
+                  "max": 66.0
+                },
+                "sample_count": 57
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 5.9699349,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5580.797874362081,
+              "requests_per_second": 85.76307925903848,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "27da77c5f42dcea5daa8644e40f157c7af093ff37e6a58af21cc698bd2a90201",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2835.0,
+                  "min": 2827.0,
+                  "max": 2835.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 261.44,
+                  "min": 254.98,
+                  "max": 285.34
+                },
+                "utilization.gpu": {
+                  "median": 48.0,
+                  "min": 42.0,
+                  "max": 64.0
+                },
+                "memory.used": {
+                  "median": 21196.0,
+                  "min": 21128.0,
+                  "max": 21325.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 64.0,
+                  "max": 65.0
+                },
+                "sample_count": 55
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 5.8594001,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5686.076975695856,
+              "requests_per_second": 87.3809590166065,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "3a37beffa130884dd56ec29db5d2e8fb6f61490942c551acceca7c990a36f8a1",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2827.0,
+                  "min": 2827.0,
+                  "max": 2835.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 268.25,
+                  "min": 260.38,
+                  "max": 285.37
+                },
+                "utilization.gpu": {
+                  "median": 46.0,
+                  "min": 40.0,
+                  "max": 64.0
+                },
+                "memory.used": {
+                  "median": 21204.0,
+                  "min": 21204.0,
+                  "max": 21327.0
+                },
+                "temperature.gpu": {
+                  "median": 66.0,
+                  "min": 65.0,
+                  "max": 67.0
+                },
+                "sample_count": 54
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 5.874946899999999,
+              "completion_tokens": 33317,
+              "completion_tokens_per_second": 5671.0299798624565,
+              "requests_per_second": 87.14972385537648,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2",
+              "source_report_sha256": "98fb609418afbc3362ed2cda51e211a4fb74e966edadac357d11aca83bebd703",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2827.0,
+                  "min": 2820.0,
+                  "max": 2835.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 271.07,
+                  "min": 258.01,
+                  "max": 290.16
+                },
+                "utilization.gpu": {
+                  "median": 47.5,
+                  "min": 40.0,
+                  "max": 61.0
+                },
+                "memory.used": {
+                  "median": 21215.0,
+                  "min": 21197.0,
+                  "max": 21220.0
+                },
+                "temperature.gpu": {
+                  "median": 66.0,
+                  "min": 65.0,
+                  "max": 67.0
+                },
+                "sample_count": 54
+              }
+            }
+          ]
+        }
+      ],
+      "warm_tps_process_medians": {
+        "median": 5840.8936502419165,
+        "min": 5671.0299798624565,
+        "max": 6044.374675904265
+      },
+      "warm_wall_s_process_medians": {
+        "median": 5.7040929,
+        "min": 5.5120673,
+        "max": 5.874946899999999
+      },
+      "cold_tps": {
+        "median": 6007.258510759199,
+        "min": 5423.829448247084,
+        "max": 6049.822632717496
+      },
+      "cold_wall_s": {
+        "median": 5.5461238999999996,
+        "min": 5.5071036,
+        "max": 6.1427078999999996
+      },
+      "initialization_s": {
+        "median": 0.8712274,
+        "min": 0.8661702,
+        "max": 0.9346931
+      },
+      "all_nine_warm_tps": {
+        "median": 5840.8936502419165,
+        "min": 5580.797874362081,
+        "max": 6083.686154688361
+      }
+    },
+    {
+      "backend": "vllm",
+      "parallel": 256,
+      "trials": [
+        {
+          "trial": 1,
+          "initialization_s": 51.47965200000908,
+          "preprocess_s": 0.059112099988851696,
+          "warm_median_tps": 22526.582777102994,
+          "warm_median_wall_s": 1.468309700023383,
+          "prompt_ids_sha256": "054ddb8e276e2a6bc587ee909390d57700dbba357f9917b5f0d9e90c899c63be",
+          "telemetry_sha256": "0920abd14d61aa3c123a61519a8f0da1367fd65dbddaa071a355abb821f24ac3",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 7.931963299983181,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 4169.585605630592,
+              "requests_per_second": 64.54896229803353,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "a411b094de22d870715400f6d699660068139a07d245f6d047a8b2fd0254d47b",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2415.0,
+                  "min": 2407.0,
+                  "max": 2745.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 96.73,
+                  "min": 95.17,
+                  "max": 314.18
+                },
+                "utilization.gpu": {
+                  "median": 1.0,
+                  "min": 0.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12260.0,
+                  "min": 12236.0,
+                  "max": 12288.0
+                },
+                "temperature.gpu": {
+                  "median": 54.0,
+                  "min": 53.0,
+                  "max": 65.0
+                },
+                "sample_count": 73
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 1.4700828000204638,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 22497.372256542025,
+              "requests_per_second": 348.27970233572756,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "a411b094de22d870715400f6d699660068139a07d245f6d047a8b2fd0254d47b",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2745.0,
+                  "min": 2715.0,
+                  "max": 2790.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 400.05,
+                  "min": 392.02,
+                  "max": 422.79
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 89.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12709.0,
+                  "min": 12709.0,
+                  "max": 12709.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 59.0,
+                  "max": 65.0
+                },
+                "sample_count": 13
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 1.468309700023383,
+              "completion_tokens": 33076,
+              "completion_tokens_per_second": 22526.582777102994,
+              "requests_per_second": 348.7002775993691,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "b042ff19cd9bb5095256b224ab75a972c32fb7bfc5e10e68f1196a0d26626e63",
+              "source_report_sha256": "a411b094de22d870715400f6d699660068139a07d245f6d047a8b2fd0254d47b",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2745.0,
+                  "min": 2722.0,
+                  "max": 2790.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 415.79,
+                  "min": 402.27,
+                  "max": 426.8
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 86.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12709.0,
+                  "min": 12572.0,
+                  "max": 12709.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 61.0,
+                  "max": 65.0
+                },
+                "sample_count": 13
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 1.4354486999800429,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 23040.182488207218,
+              "requests_per_second": 356.6828964400597,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "a411b094de22d870715400f6d699660068139a07d245f6d047a8b2fd0254d47b",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2745.0,
+                  "min": 2737.0,
+                  "max": 2790.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 424.58,
+                  "min": 412.62,
+                  "max": 432.88
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 88.0,
+                  "max": 94.0
+                },
+                "memory.used": {
+                  "median": 12582.0,
+                  "min": 12572.0,
+                  "max": 12593.0
+                },
+                "temperature.gpu": {
+                  "median": 66.0,
+                  "min": 61.0,
+                  "max": 66.0
+                },
+                "sample_count": 13
+              }
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "initialization_s": 29.815994900010992,
+          "preprocess_s": 0.062071099993772805,
+          "warm_median_tps": 22421.319459217233,
+          "warm_median_wall_s": 1.4750693000096362,
+          "prompt_ids_sha256": "054ddb8e276e2a6bc587ee909390d57700dbba357f9917b5f0d9e90c899c63be",
+          "telemetry_sha256": "6793ebe038fcf2672e79e152a8208f3124d3563b0ace130239bfc826aefa4af1",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 1.5691843000240624,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 21076.555506891604,
+              "requests_per_second": 326.2841719689324,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "df42d387f81b492a35ec2f93fd6bf81720900310ecebf4e670063be23ca9c3f0",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2535.0,
+                  "min": 2460.0,
+                  "max": 2775.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 152.49,
+                  "min": 96.93,
+                  "max": 441.26
+                },
+                "utilization.gpu": {
+                  "median": 90.0,
+                  "min": 0.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12273.0,
+                  "min": 12273.0,
+                  "max": 12280.0
+                },
+                "temperature.gpu": {
+                  "median": 62.0,
+                  "min": 53.0,
+                  "max": 64.0
+                },
+                "sample_count": 14
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 1.4750693000096362,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 22421.319459217233,
+              "requests_per_second": 347.1023361388209,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "df42d387f81b492a35ec2f93fd6bf81720900310ecebf4e670063be23ca9c3f0",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2775.0,
+                  "min": 2752.0,
+                  "max": 2812.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 399.81,
+                  "min": 389.05,
+                  "max": 441.26
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 84.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12611.0,
+                  "min": 12592.0,
+                  "max": 12711.0
+                },
+                "temperature.gpu": {
+                  "median": 63.5,
+                  "min": 63.0,
+                  "max": 64.0
+                },
+                "sample_count": 14
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 1.4612267999909818,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 22633.72119934025,
+              "requests_per_second": 350.3905074853266,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "df42d387f81b492a35ec2f93fd6bf81720900310ecebf4e670063be23ca9c3f0",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2767.0,
+                  "min": 2752.0,
+                  "max": 2797.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 416.48,
+                  "min": 398.24,
+                  "max": 440.25
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 92.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12639.0,
+                  "min": 12639.0,
+                  "max": 12639.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 64.0,
+                  "max": 66.0
+                },
+                "sample_count": 13
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 1.4862874999816995,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 22252.087836577528,
+              "requests_per_second": 344.48247731768197,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "df42d387f81b492a35ec2f93fd6bf81720900310ecebf4e670063be23ca9c3f0",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2760.0,
+                  "min": 2760.0,
+                  "max": 2775.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 415.05,
+                  "min": 405.66,
+                  "max": 440.25
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 94.0,
+                  "max": 96.0
+                },
+                "memory.used": {
+                  "median": 12638.0,
+                  "min": 12622.0,
+                  "max": 12642.0
+                },
+                "temperature.gpu": {
+                  "median": 65.0,
+                  "min": 64.0,
+                  "max": 67.0
+                },
+                "sample_count": 14
+              }
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "initialization_s": 32.71030140001676,
+          "preprocess_s": 0.0637494999973569,
+          "warm_median_tps": 21697.43865528518,
+          "warm_median_wall_s": 1.524281299993163,
+          "prompt_ids_sha256": "054ddb8e276e2a6bc587ee909390d57700dbba357f9917b5f0d9e90c899c63be",
+          "telemetry_sha256": "679705f2d5cb1555dc4dfcd18d969b1784aa33b19337ba051f8dc236a6d194d6",
+          "runs": [
+            {
+              "phase": "cold",
+              "core_wall_s": 1.6427631999831647,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 20132.542535856013,
+              "requests_per_second": 311.66999601966194,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "d8e226418ab5a7b39dd8f398e7c1da84ea15af396c01df5989d44d3d398e16eb",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2737.0,
+                  "min": 2415.0,
+                  "max": 2760.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 280.55,
+                  "min": 98.49,
+                  "max": 426.71
+                },
+                "utilization.gpu": {
+                  "median": 92.0,
+                  "min": 0.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 12053.0,
+                  "min": 12053.0,
+                  "max": 12055.0
+                },
+                "temperature.gpu": {
+                  "median": 67.0,
+                  "min": 57.0,
+                  "max": 67.0
+                },
+                "sample_count": 15
+              }
+            },
+            {
+              "phase": "warm-1",
+              "core_wall_s": 1.497479999990901,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 22085.77076168026,
+              "requests_per_second": 341.90773833581153,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "d8e226418ab5a7b39dd8f398e7c1da84ea15af396c01df5989d44d3d398e16eb",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2745.0,
+                  "min": 2737.0,
+                  "max": 2805.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 396.68,
+                  "min": 381.36,
+                  "max": 426.71
+                },
+                "utilization.gpu": {
+                  "median": 76.0,
+                  "min": 22.0,
+                  "max": 93.0
+                },
+                "memory.used": {
+                  "median": 12486.0,
+                  "min": 12486.0,
+                  "max": 12486.0
+                },
+                "temperature.gpu": {
+                  "median": 67.0,
+                  "min": 62.0,
+                  "max": 68.0
+                },
+                "sample_count": 14
+              }
+            },
+            {
+              "phase": "warm-2",
+              "core_wall_s": 1.6786445000034291,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 19702.20615498543,
+              "requests_per_second": 305.00799901286666,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "d8e226418ab5a7b39dd8f398e7c1da84ea15af396c01df5989d44d3d398e16eb",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2745.0,
+                  "min": 2707.0,
+                  "max": 2790.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 384.18,
+                  "min": 383.18,
+                  "max": 417.1
+                },
+                "utilization.gpu": {
+                  "median": 59.0,
+                  "min": 33.0,
+                  "max": 94.0
+                },
+                "memory.used": {
+                  "median": 12486.0,
+                  "min": 12486.0,
+                  "max": 12486.0
+                },
+                "temperature.gpu": {
+                  "median": 67.0,
+                  "min": 63.0,
+                  "max": 68.0
+                },
+                "sample_count": 16
+              }
+            },
+            {
+              "phase": "warm-3",
+              "core_wall_s": 1.524281299993163,
+              "completion_tokens": 33073,
+              "completion_tokens_per_second": 21697.43865528518,
+              "requests_per_second": 335.89600554851427,
+              "requests": 512,
+              "errors": 0,
+              "empty_outputs": 0,
+              "truncated": 0,
+              "stopped": 512,
+              "output_jsonl_sha256": "afd3bc3e3fea45cd4dcab3833876092e01703f961cac73c098d15ca445ad0c06",
+              "source_report_sha256": "d8e226418ab5a7b39dd8f398e7c1da84ea15af396c01df5989d44d3d398e16eb",
+              "gpu": {
+                "clocks.sm": {
+                  "median": 2760.0,
+                  "min": 2737.0,
+                  "max": 2775.0
+                },
+                "clocks.mem": {
+                  "median": 13801.0,
+                  "min": 13801.0,
+                  "max": 13801.0
+                },
+                "power.draw": {
+                  "median": 402.55,
+                  "min": 387.54,
+                  "max": 432.53
+                },
+                "utilization.gpu": {
+                  "median": 94.0,
+                  "min": 84.0,
+                  "max": 95.0
+                },
+                "memory.used": {
+                  "median": 12504.0,
+                  "min": 12486.0,
+                  "max": 12509.0
+                },
+                "temperature.gpu": {
+                  "median": 68.0,
+                  "min": 67.0,
+                  "max": 68.0
+                },
+                "sample_count": 14
+              }
+            }
+          ]
+        }
+      ],
+      "warm_tps_process_medians": {
+        "median": 22421.319459217233,
+        "min": 21697.43865528518,
+        "max": 22526.582777102994
+      },
+      "warm_wall_s_process_medians": {
+        "median": 1.4750693000096362,
+        "min": 1.468309700023383,
+        "max": 1.524281299993163
+      },
+      "cold_tps": {
+        "median": 20132.542535856013,
+        "min": 4169.585605630592,
+        "max": 21076.555506891604
+      },
+      "cold_wall_s": {
+        "median": 1.6427631999831647,
+        "min": 1.5691843000240624,
+        "max": 7.931963299983181
+      },
+      "initialization_s": {
+        "median": 32.71030140001676,
+        "min": 29.815994900010992,
+        "max": 51.47965200000908
+      },
+      "all_nine_warm_tps": {
+        "median": 22421.319459217233,
+        "min": 19702.20615498543,
+        "max": 23040.182488207218
+      }
+    }
+  ],
+  "validation": {
+    "passes": 48,
+    "requests_per_pass": 512,
+    "all_prompt_token_ids_equal": true,
+    "native_all_24_passes_match_uninstrumented_outputs": true,
+    "historical_and_current_ab_all_six_outputs_match": true,
+    "errors": 0,
+    "empty_outputs": 0,
+    "truncated": 0,
+    "production_service_restored_and_healthy": true
+  },
+  "instrumentation": {
+    "original_source_sha256": "f8a8af5e8ce3792cd4b592a4586cf1dbe0dd64e85a1dfb095173d3da2f3ec4af",
+    "patch_sha256": "3c766e92e14096a59212032188ce8eca53df9fa8823e3cbcae040c888fcab402",
+    "instrumented_source_sha256": "c9b4b524019a4cb5b49d0e81653cf4fdb021b5275610f98fb8f6fe488d1526e6",
+    "executable_sha256": "2a6b8700b65965d81f9b3e138c2c628128a59a25a015e66ce18b79deb576aa24"
+  },
+  "inference_dll_sha256": {
+    "ggml-cuda.dll": "a25c2a0fce756ea08fff18d3f149dcefdccce022de5b92d6920c47d9bca23eed",
+    "ggml-base.dll": "dbb76160f30dc73bc05f9cfc77977ec2e438785e23525c03814118fbf6235dc4",
+    "ggml-cpu.dll": "364aad4d5c98ca56fbd0d5e6d151107b2bca7394ce260147dc7f17359f8ded2b",
+    "llama.dll": "47608497d44d66842a7ad91dbe8f17b9f1e8732cde98d52677f48f427932153d",
+    "llama-common.dll": "3b21329c650aed144e22984ec55ce250e7a7a8ef43de7da84f9a494a40bea673"
+  },
+  "weights_sha256": {
+    "native_gguf": "2203f9b20b56e6039d1f5728db2705cbc25a8c75e9cb17a652d37c8786af3560",
+    "vllm_safetensors": "b4ae2931e9b24d6e0209d9062d6ec08767e61a7eaab6dff7d9fd5cd99000987e"
+  },
+  "historical_binary_control": {
+    "metric": "Original full hy-batch wall, includes tokenization/output I/O/first graph preparation; model init excluded.",
+    "parallel": 256,
+    "runs": [
+      {
+        "variant": "historical",
+        "executable_sha256": "940c3667305e0d4c7c2426a319c7f734f4b7e087cfbf5a39ca728e3b7b2c7c2b",
+        "runs": [
+          {
+            "trial": 1,
+            "completion_tokens_per_second": 4946.506406807385,
+            "wall_s": 6.7354608,
+            "completion_tokens": 33317,
+            "source_report_sha256": "b657d59d1176483a384cf6370f3f69229a9f10ce5cdd5f8d44dba779421a75db",
+            "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2"
+          },
+          {
+            "trial": 2,
+            "completion_tokens_per_second": 4929.168702363384,
+            "wall_s": 6.7591519,
+            "completion_tokens": 33317,
+            "source_report_sha256": "4d00a5d6ad333adfb94b4a2609f7d37a3c2e793991e150b2ee3b463a8ed1cedf",
+            "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2"
+          },
+          {
+            "trial": 3,
+            "completion_tokens_per_second": 4951.949870577787,
+            "wall_s": 6.7280568,
+            "completion_tokens": 33317,
+            "source_report_sha256": "bff3a105deefcbb6c28157abea06c9ede11e7df3df640cc14f8fbcabc43bff94",
+            "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2"
+          }
+        ],
+        "median_tps": 4946.506406807385
+      },
+      {
+        "variant": "current",
+        "executable_sha256": "7562a581e7e2e35dfbe4107d78cf0d2c7bc94c7427b5c4758dd15bd93f490c2b",
+        "runs": [
+          {
+            "trial": 1,
+            "completion_tokens_per_second": 4810.483107821874,
+            "wall_s": 6.9259156,
+            "completion_tokens": 33317,
+            "source_report_sha256": "eaa5023f575587b7dabd5566fa82ffbf555f1558388d0efc2caf4680215f9e5a",
+            "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2"
+          },
+          {
+            "trial": 2,
+            "completion_tokens_per_second": 5033.5969214577435,
+            "wall_s": 6.6189249,
+            "completion_tokens": 33317,
+            "source_report_sha256": "466b37c63be6084b4d75047ac5ca85cd8adb2f72f34d9b9b26909f50ae2af4fb",
+            "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2"
+          },
+          {
+            "trial": 3,
+            "completion_tokens_per_second": 5017.139622341016,
+            "wall_s": 6.6406364,
+            "completion_tokens": 33317,
+            "source_report_sha256": "a15864faeeb198fddda732cc41459a06c88352014264ba282bb1b99592f75a96",
+            "output_jsonl_sha256": "06157b780716bd1ccede3b45b8d5320be251a4334fabed501e31ba9c7c16ced2"
+          }
+        ],
+        "median_tps": 5017.139622341016
+      }
+    ],
+    "current_over_historical_ratio": 1.0142794145452687,
+    "finding": "The prior approximately 20 percent old-to-current regression was not reproduced using exact historical/current EXEs with identical inference DLLs. Historic 5426.65 versus present values remains unexplained without historic clock/load telemetry."
+  },
+  "limitations": [
+    "Quantization/calibration and embedding precision differ; this compares the two complete engine configurations, not identical weights or GPU kernels.",
+    "Native fixed waves and vLLM continuous batching retain each backend scheduling behavior.",
+    "GPU clocks not locked; telemetry uses 100 ms receive timestamps and phase bounds. Native telemetry windows include small output gaps excluded from core wall.",
+    "No isolated prefill/decode GPU timing: llama_perf batched decode is classified as p_eval and cannot provide that split.",
+    "CUTLASS quality result remains chrF++ 52.0639 versus native 52.5523 on the separate holdout; not lossless.",
+    "Short fixed workload on one GPU; not a universal gain or optimality proof."
+  ],
+  "related_evidence": "vllm-windows-migration.json retains quality, HTTP and earlier tuning experiments; it is supplemental to this matched core comparison."
+}

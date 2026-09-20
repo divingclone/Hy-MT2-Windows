@@ -1,90 +1,67 @@
 # Hy-MT2-Windows
 
-基于腾讯 **Hy-MT2-1.8B** 和 llama.cpp 的原生 Windows 翻译推理。提供 4 位量化、专用批量翻译程序和兼容 OpenAI 的本地 API，重点优化多条翻译的总吞吐。
+腾讯 Hy-MT2-1.8B 的 **Windows 原生 vLLM 翻译后端**，提供本地 OpenAI 兼容 API、离线 JSONL 批量翻译及 Tauri 桌面服务管理。无需 WSL2、Docker 或云端推理。
 
-项目直接修改了推理源码：合并模型投影、融合 RoPE 与归一化、稀疏重复惩罚、GPU 批量候选筛选，以及复用 CUDA Graph 的批处理调度。无需 WSL、Docker 或云端 API。见 [源码优化说明](docs/OPTIMIZATIONS.md)。
+默认按显卡选择 **RTX 50：NVFP4 / CUTLASS W4A4；RTX 30/40：GPTQ INT4 / Marlin W4A16**，均使用动态 INT8 KV。模型的共享 embedding/head 保留 BF16；BF16 源模型只用于校准和保真度评测，不是部署模型。
 
-## 快速开始
+## 启动
 
-### 桌面端（Tauri 2 + Svelte）
-
-桌面端用于管理本地翻译 API：模型下载/导入、显存预算、启动参数、托盘、开机/静默自启、进程绑定清理和签名更新，不包含文本翻译界面。支持 NSIS 安装包与免安装 ZIP；其他应用填入桌面端显示的 Base URL、API Key 和模型名即可调用。构建与使用见 [桌面端说明](docs/DESKTOP.md)。
-
-| Windows x64 下载 | 使用方式 |
-| --- | --- |
-| [0.1.3 安装包](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.1.3/HyMT_0.1.3_x64-setup.exe) | 安装后启动，缺少 WebView2 时自动安装依赖。 |
-| [0.1.3 免安装版](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.1.3/HyMT-0.1.3-windows-x64-portable.zip) | 完整解压后双击 `hymt-desktop.exe`，不要只复制 EXE。 |
-
-首次打开，在「模型管理」下载或导入模型，然后启动服务。默认 **2K 上下文、Q8 KV、总显存 30% 的估算预算**，自动选择并发；修改配置后点击「重新部署 · 应用更改」。免安装版优先将模型放在程序旁的 `models`，安装版使用固定用户目录；已有模型校验后自动复用。模型不随安装包分发。
-
-[发布说明与全部附件](https://github.com/divingclone/Hy-MT2-Windows/releases/tag/desktop-v0.1.3) · [SHA-256 校验清单](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.1.3/SHA256SUMS.txt)
-
-### 命令行运行包
-
-1. 从 [最新 Release](https://github.com/divingclone/Hy-MT2-Windows/releases/latest) 下载 [Windows 运行包](https://github.com/divingclone/Hy-MT2-Windows/releases/latest/download/HyMT-Windows-NVIDIA-runtime.zip) 并解压。GitHub 的源码 ZIP 不包含运行环境。
-2. 安装适合显卡的 NVIDIA 驱动 **580.88 或更新版本**。运行包自带 Python 和 CUDA/MSVC 运行库，无需另装 Python、CUDA Toolkit 或 Visual Studio。
-3. 在解压目录打开终端，下载模型并翻译：
+完整 vLLM 便携包包含 Python、推理依赖、MSVC 运行库、Triton TinyCC/PTXAS、预编译 FlashInfer 采样内核。界面优先使用系统 WebView2，缺失时自动下载应用本地版本。用户无需手动安装 Python、MSVC、CUDA Toolkit 或 WebView2；需要已有 NVIDIA 驱动 596.36 或更新。RTX 50 已在 RTX 5090 实测；RTX 30/40 使用 INT4 兼容路径，运行库含对应架构，但尚待实卡验证。GTX 10/16、RTX 20 不在当前运行包支持范围。详见 [免安装与显卡兼容](docs/PORTABLE_RUNTIME.md)。
 
 ```powershell
 .\setup-model.cmd
-.\translate-batch.cmd examples\input.jsonl output.jsonl
+.\start-server.cmd -Background
+# http://127.0.0.1:18080/v1，模型名 hy-mt2
+.\stop-server.cmd
 ```
 
-首次下载需要联网，模型保存在 `models`，之后可离线推理。模型独立托管于 [Hugging Face](https://huggingface.co/divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF)，不放进 Git 仓库或运行环境 ZIP。
+首次启动需要 JIT 编译；正常使用应保持服务常驻。服务日志位于 `results/server.stdout.log` 和 `results/server.stderr.log`。后台启动等待健康检查通过后才报告就绪，停止命令核对进程路径与创建时间并结束整个 vLLM 子进程树。
 
-输入是 UTF-8 JSONL，每行一条，输出保持输入顺序和 ID：
-
-```json
-{"id":"1","text":"Please keep your ticket.","target_lang":"Chinese"}
-{"id":"2","text":"请在出发前确认天气。","target_lang":"English"}
-```
-
-需要网页或 API 时运行 `start-server.cmd`，访问 <http://127.0.0.1:18080>；API 路径为 `/v1/chat/completions`，模型名 `hy-mt2`。停止服务运行 `stop-server.cmd`。
-
-## 显卡与配置
-
-- Windows x64，覆盖 GTX 16、RTX 20/30/40/50 对应的 CUDA 架构；**只有 RTX 5090 做过实机验证**，其余是编译覆盖。
-- 自动模式在本包支持的 RTX 50 架构上使用 NVFP4，其他支持架构使用腾讯 Q4_K_M。两者都是 4 位量化，并使用本工程专用的无损权重重排布局。
-- 命令行默认根据启动时的**可用显存**选择并发：文件翻译最高 256，API 最高 128，每条上下文 1024 token。桌面端默认 2K 上下文、Q8 KV 和总显存 30% 的估算预算。`gpu-info.cmd` 可查看检测结果。
-- GTX 1650 等 4 GB 显卡可从低并发尝试，具体取决于可用显存；自动预算是估计，不是其他显卡的实测承诺。
+源代码环境先安装运行时：
 
 ```powershell
-# 使用腾讯官方量化
-.\setup-model.cmd --profile official
-.\translate-batch.cmd input.jsonl output.jsonl --profile official
-
-# 长文本：增大每条上下文，同时降低并发
-.\translate-batch.cmd input.jsonl output.jsonl --parallel 32 --context 2048
+# 已有经验证的开发环境时可直接整理为可搬移运行时
+.\setup-runtime.cmd --from-environment .local/vllm-win
+# 或在具备 uv、CPython 3.12 和编译工具时安装固定依赖
+.\setup-runtime.cmd
 ```
 
-完整硬件范围、显存建议、长文本、API 和常见问题见 [使用说明](docs/USAGE.md)。
+程序包不包含模型权重。[NVFP4](https://huggingface.co/divingclone/Hy-MT2-1.8B-NVFP4-vLLM) 和 [INT4](https://huggingface.co/divingclone/Hy-MT2-1.8B-INT4-vLLM) 分别托管在 Hugging Face 独立仓库，根目录直接提供 `model.safetensors`、配置和 tokenizer，无需登录。首次通过模型页或 `setup-model.cmd` 按显卡下载一个模型；按固定提交逐文件校验 SHA-256，支持断点续传和已有模型复用。ZIP 仅作为可选离线导入格式。详见 [模型说明](models/README.md)。
 
-NVFP4 模型使用公开中英语料校准和局部 MSE 尺度搜索，推理程序支持 Q8 缓存写入融合。命令行默认使用 F16 KV（桌面端默认 Q8）；需要减少显存时，批量命令增加 `--cache-type-k q8_0 --cache-type-v q8_0`，API 启动命令增加 `-CacheTypeK q8_0 -CacheTypeV q8_0`。方法与复现见 [量化与 KV 缓存](docs/QUANTIZATION.md)，质量、速度及显存结果见 [性能报告](docs/PERFORMANCE.md)。
+## 批量翻译与配置
 
-## 实测加速
+```powershell
+.\translate-batch.cmd examples/input.jsonl output.jsonl --parallel 32
+.\start-server.cmd -Background -Parallel 256 -ContextPerSlot 2048
+# 保真优先：权重仍为 4 位，使用 Marlin 16 位激活
+.\start-server.cmd -Background -Profile quality -KVCacheDtype bfloat16
+```
 
-**对比未修改的官方 llama.cpp：本项目 F16 KV 吞吐为官方对照的 7.91 倍，Q8 KV 为 6.83 倍。** 2026-09-18 在 RTX 5090 32 GB / Windows 11 上测量当前程序和模型。沿用原表的 512 条固定翻译、256 并发、每条上下文 1024、最大生成 512；每项三次新进程运行，交错执行，以下均取中位数：
+上述服务器命令分别使用，重启前先停止旧服务。批量入口直接调用 vLLM 引擎，排除 HTTP；运行时应停止其他 GPU 推理服务。默认 32 并发、2K 上下文、2048 调度 token、总显存 75% 的估算预算。KV 是共享 token 池，不为每个请求预留完整上下文；长文本可调整上下文与 `-KVGib`。输出和旁路文件不覆盖已有文件。
 
-| 方案 | 权重量化 | KV 缓存 | completion token/s | 512 条推理墙钟 | 峰值显存增量估计 |
-| --- | --- | --- | ---: | ---: | ---: |
-| 官方 llama.cpp `b11029`，HTTP 服务 | 腾讯 Q4_K_M | F16 | 685.67 | 48.907 s | 17.84 GiB |
-| 本项目，原生批量 | OPUS 校准 NVFP4 | F16 | **5426.65** | **6.140 s** | 17.72 GiB |
-| 本项目，原生批量 | OPUS 校准 NVFP4 | **Q8_0** | 4686.10 | 7.097 s | **10.54 GiB** |
+输入每行：`{"id":"1","text":"Hello.","target_lang":"Chinese"}`。输出保留 ID、译文、结束状态及 token 计数。HTTP 客户端为 `scripts/translate.py`。详见 [使用说明](docs/USAGE.md) 和 [桌面端](docs/DESKTOP.md)。
 
-量化也是本项目优化的一部分：这组比较包含量化、推理代码、调度和接口的整体收益，**不是单一内核或纯源码的加速倍数**。官方对照使用未经修改的发布二进制，Q4_K_M 文件 SHA-256 与腾讯原文件完全一致。官方包使用 CUDA 13.4 / Clang，本包使用 CUDA 13.0 / MSVC，构建差异也包含在对照中。
+## 实测依据
 
-本项目两行使用**同一五架构程序、同一 OPUS 公开语料局部校准 NVFP4 权重**，仅切换 K/V 缓存类型，Q8 启用写入融合。相比 F16，Q8 的显存增量约减少 **40.5%（7.17 GiB）**，吞吐约降低 **13.6%**。默认使用 F16 KV，Q8_0 是同一程序的正式选项。测量后仅为批量程序补充了可控诊断日志；模型和推理 DLL 未变，没有再次重测。
+主对照使用**未修改的官方 llama.cpp 发布包 + 腾讯官方 Q4_K_M**，与本项目 vLLM 比较。双方使用同一 aiohttp 异步连接池客户端，通过 `POST /v1/chat/completions`、`stream: false` 翻译；计时包含请求处理、HTTP、服务端排队、推理和完整 JSON 响应解析。
 
-显存列为 `nvidia-smi` 设定 100 ms 间隔采样的设备峰值减去各次启动前基线，包含权重、KV、工作区及初始化分配；受桌面占用波动影响，是增量估计。每行均有三次同期显存记录。
+2026-09-20–21，RTX 5090 / Windows 原生，固定 512 条中英双向请求；每种配置 3 个独立服务进程，每个进程先跑一轮负载，再测 3 轮。TPS 为逐级中位数，排除服务启动和结果写盘；显存为三个进程的峰值增量中位数。
 
-九次运行均完整完成 512 条，无错误、截断或空输出。计数包含真实结束 token、排除填充 token；墙钟排除模型初始化，包含首次推理与图准备。两种量化及不同 KV 的输出与质量不保证相同，原生批量吞吐也不是本项目 HTTP API 的速度。
+| 并发 | 部署方案 | TPS（输出 token/s） | 显存峰值增量（GiB） |
+| --- | --- | ---: | ---: |
+| 32 | 官方 llama.cpp + Q4_K_M / F16 KV | 1,258.52 | 5.13 |
+| 32 | 本项目 vLLM + NVFP4 / INT8 KV | 4,061.30 | 4.12 |
+| 256 | 官方 llama.cpp + Q4_K_M / F16 KV | 1,418.02 | 8.21 |
+| 256 | 本项目 vLLM + NVFP4 / INT8 KV | 18,315.16 | 5.91 |
 
-逐次范围、计时边界、复现命令及历史记录见 [性能报告](docs/PERFORMANCE.md)，本表证据见 [三方案重测摘要](benchmarks/readme-kv-comparison.json)。固定素材用于延续原表对照；生产优化另用 [公开语料随机长短评测](benchmarks/nvfp4-q8-mixed-evaluation.json) 验证，不据此缩短生产上下文或生成预算。
+显存每 100 ms 采样，以整段服务生命周期的设备已用显存峰值减去启动前基线，包含初始化、CUDA Graph、KV 和工作区，存在桌面噪声，不能视为精确的进程独占显存。官方程序为稳定版 v0.4.1 指定的 b10964，二进制及腾讯量化权重均校验哈希且未修改。双方上下文上限均为 2048，共享 KV token 容量相同，KV 精度如表。
 
-## 源码与模型
+优化采用异步客户端及连接池，保留单 API 前端和 2048 调度 token，模型、KV 精度和采样参数未为速度降低。结果包含量化、调度和接口差异，不代表纯内核收益或质量等效；客户端并发也不等于 GPU 实际批大小。vLLM 启动较慢，TPS 适用于服务常驻场景。完整配置、波动、延迟、启动成本和复现命令见 [API 优化报告](docs/API_OPTIMIZATION.md)，机器可读数据见 [基准摘要](benchmarks/official-nonstream-api-async.json)。
 
-本仓库保留完整源码补丁、固定版本复现脚本，以及启动、下载和测试代码；模型、运行库、SDK、构建缓存及本机运行记录不提交 Git。基于上游提交 `bdcbaaf6e7520b68c8c60ff724c67409970d70e1`。开发者见 [源码构建](docs/BUILD.md)，维护者见 [发布流程](docs/RELEASE.md)。
+以原始 BF16 输出为参考的独立消融显示，INT8 KV 额外偏离较小，主要偏离来自权重及激活计算；文本一致性不是语义正确率，见 [BF16 参考保真度](docs/TEACHER_FIDELITY.md)。[历史同步客户端结果](docs/OFFICIAL_API_BENCHMARK.md)和[核心引擎结果](docs/VLLM_KV.md)分别保留，不与本表混算。
 
-`*-fused.gguf` 需要本工程修改后的加载器。重排保留原始量化权重字节，但量化本身有精度损失，计算形状变化也可能改变浮点结果。NVFP4 的速度选择不等于质量优于 Q4_K_M；对数字、否定和专业术语等内容，应按实际用途检查译文。
+## 开发与历史
 
-上游来源：[腾讯 Hy-MT2-1.8B](https://huggingface.co/tencent/Hy-MT2-1.8B)、[腾讯 GGUF](https://huggingface.co/tencent/Hy-MT2-1.8B-GGUF)、[llama.cpp](https://github.com/ggml-org/llama.cpp)。代码和模型分别遵循仓库所附许可证及上游模型许可。
+当前发布构建使用社区 Windows vLLM wheel 0.29.0+cu132、PyTorch 2.11.0+cu130 和本地 Hunyuan 兼容插件。固定依赖、MSVC 日志兼容补丁及构建见 [BUILD](docs/BUILD.md)。完整便携包体积较大，本轮提供便携发行流程；旧 0.1.3 安装包仍是 llama.cpp，不是此迁移结果。
+
+旧引擎实现、GGUF 工具和原有文档归档在 [archive/llama-cpp](archive/llama-cpp/README.md)，历史源码补丁保留在 `patches/`，均不进入当前运行包。原始实验输出保留在忽略的 `results/`。模型独立发布到 Hugging Face，程序发行流程见 [RELEASE](docs/RELEASE.md)。

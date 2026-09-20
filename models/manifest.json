@@ -1,24 +1,94 @@
 {
-  "schema_version": 1,
-  "repo_id": "divingclone/Hy-MT2-1.8B-NVFP4-Q4_K_M-GGUF",
+  "schema_version": 2,
+  "backend": "vllm",
+  "repo_id": null,
   "revision": "main",
   "base_model": "tencent/Hy-MT2-1.8B",
   "license": "apache-2.0",
+  "checkpoint_dir": "Hy-MT2-1.8B-NVFP4-vllm",
+  "checkpoint_size_bytes": 1373024141,
+  "checkpoint_files": {
+    "config.json": {
+      "size_bytes": 2879,
+      "sha256": "c328a3d73e112cddce69af51c83e3ae69f35c83365b563fca5e984c3d4884e86"
+    },
+    "generation_config.json": {
+      "size_bytes": 232,
+      "sha256": "ec37b818b1bd539ca96a07da52a60630ecba2550ab8ed5d783c490880a8286a9"
+    },
+    "tokenizer_config.json": {
+      "size_bytes": 369,
+      "sha256": "578b75d18d5041b2b3bfbeca014ae27e48d7661e2a1e7786c773811901c522a5"
+    },
+    "tokenizer.json": {
+      "size_bytes": 9527287,
+      "sha256": "b475bbef1b0b2fd57dcb865332b546475bd1ede2deb3bb91bafd0c047a8a530a"
+    },
+    "chat_template.jinja": {
+      "size_bytes": 654,
+      "sha256": "b7491ec0e9c869dfce20f2176758099bf248d979dd05530ede99deb21698acee"
+    },
+    "model.safetensors": {
+      "size_bytes": 1363492720,
+      "sha256": "b4ae2931e9b24d6e0209d9062d6ec08767e61a7eaab6dff7d9fd5cd99000987e"
+    }
+  },
   "files": {
     "fast": {
-      "filename": "Hy-MT2-1.8B-NVFP4-fused.gguf",
-      "size_bytes": 1013054240,
-      "sha256": "2203f9b20b56e6039d1f5728db2705cbc25a8c75e9cb17a652d37c8786af3560",
+      "filename": "Hy-MT2-1.8B-NVFP4-vllm.zip",
+      "size_bytes": 1373024827,
+      "sha256": "f236baf16b1fa69951878cec043ee30aa1f99fbcf286a62e57d7072d8930922c",
       "quantization": "NVFP4",
-      "layout": "hy-mt2-fused-projections",
-      "quantization_method": "NVFP4 local weighted MSE scale search with OPUS-100 translation calibration"
+      "layout": "compressed-tensors"
     },
-    "official": {
-      "filename": "Hy-MT2-1.8B-Q4_K_M-fused.gguf",
-      "size_bytes": 1133075680,
-      "sha256": "79b8013e7f9ce6448fa18ea17ca4021ca69dc4dbc9ed047e72791d7b1a287bb0",
-      "quantization": "Q4_K_M",
-      "layout": "hy-mt2-fused-projections"
+    "compat": {
+      "filename": "Hy-MT2-1.8B-INT4-vllm.zip",
+      "size_bytes": 1300648827,
+      "sha256": "8cca140cca9d6781acf2e254ebd2e6d36e4e0559a9320a0a04f1a5e737a880a0",
+      "quantization": "INT4 W4A16 GPTQ",
+      "layout": "compressed-tensors"
+    }
+  },
+  "checkpoints": {
+    "compat": {
+      "checkpoint_dir": "Hy-MT2-1.8B-INT4-vllm",
+      "checkpoint_size_bytes": 1300648141,
+      "checkpoint_files": {
+        "config.json": {
+          "size_bytes": 2439,
+          "sha256": "243e71a58ccf2275b2126363d1e3f264f2ca326ff76b24730672c71aec3aac0f"
+        },
+        "generation_config.json": {
+          "size_bytes": 232,
+          "sha256": "ec37b818b1bd539ca96a07da52a60630ecba2550ab8ed5d783c490880a8286a9"
+        },
+        "tokenizer_config.json": {
+          "size_bytes": 369,
+          "sha256": "578b75d18d5041b2b3bfbeca014ae27e48d7661e2a1e7786c773811901c522a5"
+        },
+        "tokenizer.json": {
+          "size_bytes": 9527287,
+          "sha256": "b475bbef1b0b2fd57dcb865332b546475bd1ede2deb3bb91bafd0c047a8a530a"
+        },
+        "chat_template.jinja": {
+          "size_bytes": 654,
+          "sha256": "b7491ec0e9c869dfce20f2176758099bf248d979dd05530ede99deb21698acee"
+        },
+        "model.safetensors": {
+          "size_bytes": 1291117160,
+          "sha256": "c1ba8070cbd2fef8a07895354ed64ea707f41b4e8551ea5c1e0341ad5f48671d"
+        }
+      }
+    }
+  },
+  "repositories": {
+    "fast": {
+      "repo_id": "divingclone/Hy-MT2-1.8B-NVFP4-vLLM",
+      "revision": "2fa2734cffce6dbea70e442095ba1c0f539d23e5"
+    },
+    "compat": {
+      "repo_id": "divingclone/Hy-MT2-1.8B-INT4-vLLM",
+      "revision": "ae89a0912cccff3f8b045c98b83682dceed3bf3d"
     }
   }
 }

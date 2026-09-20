@@ -1,0 +1,3402 @@
+{
+  "schema_version": 1,
+  "hardware": "RTX 5090 / AMD Ryzen 7 9800X3D / Windows native",
+  "protocol": "non_streaming_json",
+  "context": 2048,
+  "requests_per_pass": 512,
+  "sampling": "Unchanged: temperature .7, top_p .6, top_k 20, repetition_penalty 1.05, max_tokens 512, seed 42 + index",
+  "selected": "aiohttp + asyncio pooled client; existing single vLLM API frontend; batch_tokens 2048",
+  "notes": [
+    "Screens compare multiple clients in one server process, with order reversed in the second round.",
+    "Each round has a first workload pass followed by 3 warm passes. Selection is exploratory, not a confidence interval.",
+    "Final official baseline comparison uses separate independent processes and is published separately.",
+    "Core rerun uses the same 2048-context runtime/configuration; historical 1024-context TPS is not the denominator.",
+    "No changes to model weights, KV precision, sampling or maximum output length."
+  ],
+  "screens": [
+    {
+      "name": "api-opt-screen-p256",
+      "concurrency": 256,
+      "batch_tokens": 2048,
+      "summary": [
+        {
+          "client": "urllib",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 7.139108600036707,
+              "completion_tokens_per_second": 4614.44164049145,
+              "requests_per_second": 71.71763712872605,
+              "latency_p95_s": 5.257544299995061
+            },
+            {
+              "trial": 2,
+              "wall_s": 7.220022799971048,
+              "completion_tokens_per_second": 4554.140743174918,
+              "requests_per_second": 70.91390348546449,
+              "latency_p95_s": 5.616202500008512
+            }
+          ],
+          "median": {
+            "wall_s": 7.179565700003877,
+            "completion_tokens_per_second": 4584.291191833184,
+            "requests_per_second": 71.31577030709528,
+            "latency_p95_s": 5.436873400001787
+          }
+        },
+        {
+          "client": "aiohttp",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 1.6934675999800675,
+              "completion_tokens_per_second": 19400.4302180843,
+              "requests_per_second": 302.3382319248543,
+              "latency_p95_s": 1.1896867000032216
+            },
+            {
+              "trial": 2,
+              "wall_s": 1.611601900018286,
+              "completion_tokens_per_second": 20385.927814820287,
+              "requests_per_second": 317.6963243802273,
+              "latency_p95_s": 1.0821910999948159
+            }
+          ],
+          "median": {
+            "wall_s": 1.6525347499991767,
+            "completion_tokens_per_second": 19893.179016452294,
+            "requests_per_second": 310.0172781525408,
+            "latency_p95_s": 1.1359388999990188
+          }
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 1.6476840999675915,
+              "completion_tokens_per_second": 19942.5363154541,
+              "requests_per_second": 310.73917628389484,
+              "latency_p95_s": 1.1572440000018105
+            },
+            {
+              "trial": 2,
+              "wall_s": 1.9342040000483394,
+              "completion_tokens_per_second": 16985.281800254234,
+              "requests_per_second": 264.7083761522591,
+              "latency_p95_s": 1.384678400005214
+            }
+          ],
+          "median": {
+            "wall_s": 1.7909440500079654,
+            "completion_tokens_per_second": 18463.909057854165,
+            "requests_per_second": 287.723776218077,
+            "latency_p95_s": 1.2709612000035122
+          }
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 1.7522223999840207,
+              "completion_tokens_per_second": 18751.615091953874,
+              "requests_per_second": 292.2003508257109,
+              "latency_p95_s": 1.2237873000558466
+            },
+            {
+              "trial": 2,
+              "wall_s": 1.6192861000308767,
+              "completion_tokens_per_second": 20289.18793249293,
+              "requests_per_second": 316.1887204430626,
+              "latency_p95_s": 1.120939599990379
+            }
+          ],
+          "median": {
+            "wall_s": 1.6857542500074487,
+            "completion_tokens_per_second": 19520.4015122234,
+            "requests_per_second": 304.19453563438674,
+            "latency_p95_s": 1.1723634500231128
+          }
+        }
+      ],
+      "passes": [
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 13.89389140001731,
+            "completion_tokens": 32883,
+            "completion_tokens_per_second": 2366.7235516148507,
+            "requests_per_second": 36.8507270755954,
+            "latency_s": {
+              "p50": 3.763450200029183,
+              "p95": 12.1991890000063,
+              "p99": 12.782049399975222
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 13.031623399991076,
+              "p95": 13.844099699985236,
+              "p99": 13.868134299991652
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "03a77df4f1e73b4ff0a3a21a9a3467e7744613c05aff605e6ea328fb56783929"
+        },
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.139108600036707,
+            "completion_tokens": 32943,
+            "completion_tokens_per_second": 4614.44164049145,
+            "requests_per_second": 71.71763712872605,
+            "latency_s": {
+              "p50": 2.8004452000022866,
+              "p95": 5.257544299995061,
+              "p99": 6.187629099993501
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 6.223494800040498,
+              "p95": 7.104990300023928,
+              "p99": 7.124517999996897
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "599f38742454fb71519f985204f2e938efaf6be7f6b5a488e483a375f094c511"
+        },
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 6.838912799954414,
+            "completion_tokens": 32861,
+            "completion_tokens_per_second": 4805.003508776868,
+            "requests_per_second": 74.86570087622887,
+            "latency_s": {
+              "p50": 2.7161425999947824,
+              "p95": 5.156441700004507,
+              "p99": 5.893243700033054
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 6.011564999993425,
+              "p95": 6.784700999967754,
+              "p99": 6.812482199980877
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "80808a6f9d1e1b5e8db792dfe0e4f1e4e78c18b2f494a95cca19ce32b3a76481"
+        },
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 8.368642799963709,
+            "completion_tokens": 32885,
+            "completion_tokens_per_second": 3929.549962407597,
+            "requests_per_second": 61.18076876243545,
+            "latency_s": {
+              "p50": 3.2960479999892414,
+              "p95": 6.987251400016248,
+              "p99": 7.8413847999763675
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 7.476629199984018,
+              "p95": 8.319309899990913,
+              "p99": 8.351714299991727
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "306744a752801f3ffa5a743f09d8df4c8834f0eb1e67ca1b8859c782af55f862"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.759968200000003,
+            "completion_tokens": 32860,
+            "completion_tokens_per_second": 18670.79189271712,
+            "requests_per_second": 290.9143472024092,
+            "latency_s": {
+              "p50": 0.7581498000072315,
+              "p95": 1.237766400037799,
+              "p99": 1.3101923000067472
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.4054343000170775,
+              "p95": 1.6914962999871932,
+              "p99": 1.7286346000037156
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "22c6f6cdbe6f0e127c7aac58200860b3012eed480203fa61c45d20587360ccf7"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6301600000006147,
+            "completion_tokens": 32863,
+            "completion_tokens_per_second": 20159.37085929455,
+            "requests_per_second": 314.07959954839214,
+            "latency_s": {
+              "p50": 0.6934753000386991,
+              "p95": 1.125490800011903,
+              "p99": 1.1780025999760255
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2746949000284076,
+              "p95": 1.5653578999917954,
+              "p99": 1.602555299992673
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "621e734447e0eba41493af5a7793b8f4b3c3d86f3d661787e17e9f2a84de5dba"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6934675999800675,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 19400.4302180843,
+            "requests_per_second": 302.3382319248543,
+            "latency_s": {
+              "p50": 0.723660200019367,
+              "p95": 1.1896867000032216,
+              "p99": 1.2464432999840938
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3403768999851309,
+              "p95": 1.6293715999927372,
+              "p99": 1.6594712999649346
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "b9ae260cff3481c87d138f85ab54bb99619420c8a80741a8232c2b49fde8ddce"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.7373154999804683,
+            "completion_tokens": 32857,
+            "completion_tokens_per_second": 18912.511861184335,
+            "requests_per_second": 294.7075531219034,
+            "latency_s": {
+              "p50": 0.752515800006222,
+              "p95": 1.2268591999891214,
+              "p99": 1.2824512000079267
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3822188999620266,
+              "p95": 1.6701437999727204,
+              "p99": 1.7033368999836966
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "30cf602135dac7e867b2a81ad812962513a9d7e208071937c61f219717533660"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6915081000188366,
+            "completion_tokens": 32852,
+            "completion_tokens_per_second": 19421.72195311046,
+            "requests_per_second": 302.6884707169291,
+            "latency_s": {
+              "p50": 0.7335463000345044,
+              "p95": 1.1574252999853343,
+              "p99": 1.2483037000056356
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3337929000263102,
+              "p95": 1.620558800001163,
+              "p99": 1.6540370000293478
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "40e3cf16419979efc02ec30b3163b89c4c27ff100f1cbddc00be4bbccd450263"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.7488701000111178,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 18785.271701878344,
+            "requests_per_second": 292.760451446191,
+            "latency_s": {
+              "p50": 0.7612241999595426,
+              "p95": 1.2630983999697492,
+              "p99": 1.3357363999821246
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3930647000088356,
+              "p95": 1.684707000036724,
+              "p99": 1.7178515000268817
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "ccad807b7c07a5553c9f6684c05a10b60556a8c59644d621e6a87d36519a5680"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6476840999675915,
+            "completion_tokens": 32859,
+            "completion_tokens_per_second": 19942.5363154541,
+            "requests_per_second": 310.73917628389484,
+            "latency_s": {
+              "p50": 0.7170777000137605,
+              "p95": 1.1572440000018105,
+              "p99": 1.2020032000145875
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2931097999680787,
+              "p95": 1.586776199983433,
+              "p99": 1.623852299991995
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "d496789fca8b5c8d958baf5c2d94b6e1a416d7de004e75829aff345e63ac26d0"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6172484999988228,
+            "completion_tokens": 32859,
+            "completion_tokens_per_second": 20317.842310581163,
+            "requests_per_second": 316.58709221271357,
+            "latency_s": {
+              "p50": 0.7002466000267304,
+              "p95": 1.1200629000086337,
+              "p99": 1.1867301000165753
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2544813999556936,
+              "p95": 1.5452472000033595,
+              "p99": 1.5893956999643706
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "df48187c2b63a3cca32746962a3ee607450c2b045bf9d6544e0c19425f44e791"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9310144999762997,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 17013.33677214916,
+            "requests_per_second": 265.1456009296067,
+            "latency_s": {
+              "p50": 0.8692119999905117,
+              "p95": 1.4066940000047907,
+              "p99": 1.4892059999983758
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5529311999562196,
+              "p95": 1.8731706999824382,
+              "p99": 1.9055811999714933
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "021da9a48a2b64f71fa025bb49d83a6e5e6724f5c98574ce28013a3c8985632c"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.8002337999641895,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 18249.851769616555,
+            "requests_per_second": 284.4075030755365,
+            "latency_s": {
+              "p50": 0.7896374000119977,
+              "p95": 1.2750537000247277,
+              "p99": 1.3638249000068754
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.446167299989611,
+              "p95": 1.74308749998454,
+              "p99": 1.7800102999899536
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "18ada375e043db8235fbe419eb1fd073158c66696bbce6bef869cc68c0b2c5ac"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.7522223999840207,
+            "completion_tokens": 32857,
+            "completion_tokens_per_second": 18751.615091953874,
+            "requests_per_second": 292.2003508257109,
+            "latency_s": {
+              "p50": 0.7719854000024498,
+              "p95": 1.2237873000558466,
+              "p99": 1.3202070000115782
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3808793000061996,
+              "p95": 1.6866965999943204,
+              "p99": 1.7318039999809116
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "58f397dab5a9f09052eb9279935a00e6988b227383eb23ef01eaa48328983d84"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6834543999866582,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 19515.82412939749,
+            "requests_per_second": 304.1365421029864,
+            "latency_s": {
+              "p50": 0.7434751999680884,
+              "p95": 1.1982127000228502,
+              "p99": 1.2651850000256673
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3280534999794327,
+              "p95": 1.6264161000144668,
+              "p99": 1.6560126999975182
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "6843c75399aed994d621404c20814d2661b1a4d0e67c71d70f2443b444468aa7"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.530288899957668,
+            "completion_tokens": 32856,
+            "completion_tokens_per_second": 21470.455677296548,
+            "requests_per_second": 334.5773468095883,
+            "latency_s": {
+              "p50": 0.6515724999480881,
+              "p95": 1.0401707999990322,
+              "p99": 1.0971646000398323
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.176632599963341,
+              "p95": 1.4628308999817818,
+              "p99": 1.5033493000082672
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "e478aa0ff615beb8288201277c38e33e2cad74a7ca30ed56d3dc41dd9025beba"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.469542300037574,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 22355.940349018874,
+            "requests_per_second": 348.40780016125353,
+            "latency_s": {
+              "p50": 0.6268172999843955,
+              "p95": 0.9993325999821536,
+              "p99": 1.0690997999627143
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.1222207000246271,
+              "p95": 1.4124303000280634,
+              "p99": 1.4426280000479892
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "96e9b2ce7de55fe6364cfd977c155d269a44f5f0f7484d3b3babf92b72fcd2b9"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6192861000308767,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 20289.18793249293,
+            "requests_per_second": 316.1887204430626,
+            "latency_s": {
+              "p50": 0.7078480999916792,
+              "p95": 1.120939599990379,
+              "p99": 1.1879487999831326
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2514334000297822,
+              "p95": 1.558335400011856,
+              "p99": 1.5883084000088274
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "9a1d2952f724f93bcc7a5e839f2558201201b3dba6cb7ef0f01314cab4518d05"
+        },
+        {
+          "client": "aiohttp-winloop-close",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.7759323000209406,
+            "completion_tokens": 32858,
+            "completion_tokens_per_second": 18501.831404053275,
+            "requests_per_second": 288.2992780715587,
+            "latency_s": {
+              "p50": 0.7653932999819517,
+              "p95": 1.1926270000403747,
+              "p99": 1.302016299974639
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.349879699992016,
+              "p95": 1.696744300017599,
+              "p99": 1.7378365999902599
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "722a42c073171416d83e1bc1157be303384c03cab1eaf61b95b25e5fedb34433"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.045086900005117,
+            "completion_tokens": 32852,
+            "completion_tokens_per_second": 16063.865061146204,
+            "requests_per_second": 250.35610956127044,
+            "latency_s": {
+              "p50": 0.8889947999850847,
+              "p95": 1.4501587999984622,
+              "p99": 1.532142699987162
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.612736999988556,
+              "p95": 1.96004700002959,
+              "p99": 2.0016788000357337
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "e4a8138a5db51e843c8b02f88bdb1026451908baebe7541cec632e7e80807581"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.0361361000104807,
+            "completion_tokens": 32864,
+            "completion_tokens_per_second": 16140.37489921761,
+            "requests_per_second": 251.45666834224124,
+            "latency_s": {
+              "p50": 0.8884539999999106,
+              "p95": 1.449602699954994,
+              "p99": 1.5457940000342205
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.6215543000143953,
+              "p95": 1.9534891999792308,
+              "p99": 1.9980816000024788
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "d165eeb2345b91e378f0dbd1f15507b8cba13193eb404420b648c0611c1c7bea"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9245059000095353,
+            "completion_tokens": 32862,
+            "completion_tokens_per_second": 17075.55170386185,
+            "requests_per_second": 266.04231246963866,
+            "latency_s": {
+              "p50": 0.8537276000133716,
+              "p95": 1.384678400005214,
+              "p99": 1.4632601999910548
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5442186999716796,
+              "p95": 1.8541826999862678,
+              "p99": 1.896192100015469
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "94d43f1d42deae4630c88a0725bc4149708d15254e40ee6ecb65dd3787524100"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9342040000483394,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 16985.281800254234,
+            "requests_per_second": 264.7083761522591,
+            "latency_s": {
+              "p50": 0.8484838999575004,
+              "p95": 1.3810310999979265,
+              "p99": 1.4793137999949977
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5684666000306606,
+              "p95": 1.869428700010758,
+              "p99": 1.911709600011818
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "549d58df49d48410a62f0dd0bf54a096e820a456efefdac4f79ebc0ffaa7a627"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.8625095000024885,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 17639.6415695899,
+            "requests_per_second": 274.89792669477174,
+            "latency_s": {
+              "p50": 0.7963101000059396,
+              "p95": 1.3300738000543788,
+              "p99": 1.3852031999849714
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.4895348999998532,
+              "p95": 1.7963949000113644,
+              "p99": 1.8274069000035524
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "18a424301c56d9cd49b16c9f3310382b12c2d6155ea9125d84f562c3511f34fa"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.626650799997151,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 20196.713394207007,
+            "requests_per_second": 314.75716853358864,
+            "latency_s": {
+              "p50": 0.6838580999756232,
+              "p95": 1.0937529999646358,
+              "p99": 1.1578573999577202
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.255277100019157,
+              "p95": 1.5606611000257544,
+              "p99": 1.5905954000190832
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "7723495d990769f450e6fc5036fefd5a4218ad01440c0c9ee1d2b145d494f1c0"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.611601900018286,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 20385.927814820287,
+            "requests_per_second": 317.6963243802273,
+            "latency_s": {
+              "p50": 0.673180699988734,
+              "p95": 1.0821910999948159,
+              "p99": 1.1370074999867938
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.23544670001138,
+              "p95": 1.5449304999783635,
+              "p99": 1.576697900018189
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "a99b86b5da0e1c485fa480a5886852ba3f9e5f1e0b9ef38faaba4bed28a5f1ef"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.570305900007952,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 20922.03818366449,
+            "requests_per_second": 326.05112163012774,
+            "latency_s": {
+              "p50": 0.6572912000119686,
+              "p95": 1.0613965000375174,
+              "p99": 1.1098009999841452
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2036898999940604,
+              "p95": 1.5052298000082374,
+              "p99": 1.5352447000332177
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "cc46c65b2dd95826b43f8664655895037d2dbb3c77370e7debe10b86b259ca09"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.294086300011259,
+            "completion_tokens": 32873,
+            "completion_tokens_per_second": 4506.801626401001,
+            "requests_per_second": 70.19385005071982,
+            "latency_s": {
+              "p50": 3.0365411000093445,
+              "p95": 5.684450900007505,
+              "p99": 6.141970700002275
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 6.448012400011066,
+              "p95": 7.259121000010055,
+              "p99": 7.279896599997301
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "04783bd9510a11b25bd9be42898b613ea2a4bd8bcbfe1417fc268bce0e35d0a4"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 6.967813999974169,
+            "completion_tokens": 32907,
+            "completion_tokens_per_second": 4722.7150437887685,
+            "requests_per_second": 73.480721500588,
+            "latency_s": {
+              "p50": 2.7227306999848224,
+              "p95": 5.616202500008512,
+              "p99": 6.410085599985905
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 6.162552000023425,
+              "p95": 6.928754499997012,
+              "p99": 6.961087999981828
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "7775290ac1447fd647b642f4cbda865e01043c7cec9a91cba0e156a991ff1fdb"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.220022799971048,
+            "completion_tokens": 32881,
+            "completion_tokens_per_second": 4554.140743174918,
+            "requests_per_second": 70.91390348546449,
+            "latency_s": {
+              "p50": 2.974636700004339,
+              "p95": 5.463435999990907,
+              "p99": 6.570858100021724
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 6.296331299992744,
+              "p95": 7.164981100009754,
+              "p99": 7.196463299973402
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "1f0679b70ca531d0bdefbfd5349be15f64b47d073fa23f98f2a162a71f60f0af"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 8.343048300012015,
+            "completion_tokens": 32886,
+            "completion_tokens_per_second": 3941.7247530441173,
+            "requests_per_second": 61.36845689833327,
+            "latency_s": {
+              "p50": 3.273703300044872,
+              "p95": 6.988486899994314,
+              "p99": 7.758354599995073
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 7.387818899995182,
+              "p95": 8.286129600019194,
+              "p99": 8.318272200005595
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "18b1ab56fd76b90bc81a0a04ccc1af3a3a82bc887eae857344e6608ec1cccd9d"
+        }
+      ],
+      "matrix_sha256": "45b0a8a068f53cb20de5abbe3d141f63ef59170844424b92e179b093b6876010",
+      "matched_core": {
+        "wall_s": 1.6949218999943696,
+        "completion_tokens_per_second": 19383.19399856072,
+        "requests_per_second": 302.0788155499677
+      },
+      "core_passes": [
+        {
+          "phase": "cold",
+          "wall_s": 1.6026989999809302,
+          "completion_tokens": 32853,
+          "phase_start_unix_s": 1789919317.5068955,
+          "phase_end_unix_s": 1789919319.1095946,
+          "completion_tokens_per_second": 20498.54651459251,
+          "requests_per_second": 319.4611090454864,
+          "errors": 0,
+          "truncated": 0,
+          "terminal_eos_count": 512,
+          "valid": true,
+          "output_sha256": "7a24cffcc973279d1844599ac74c90dbd59fc115288c91a5c9f570c7ce296170"
+        },
+        {
+          "phase": "warm-1",
+          "wall_s": 1.5727416999870911,
+          "completion_tokens": 32853,
+          "phase_start_unix_s": 1789919319.116974,
+          "phase_end_unix_s": 1789919320.6897159,
+          "completion_tokens_per_second": 20888.999128254596,
+          "requests_per_second": 325.5461465822407,
+          "errors": 0,
+          "truncated": 0,
+          "terminal_eos_count": 512,
+          "valid": true,
+          "output_sha256": "7a24cffcc973279d1844599ac74c90dbd59fc115288c91a5c9f570c7ce296170"
+        },
+        {
+          "phase": "warm-2",
+          "wall_s": 1.8904135000193492,
+          "completion_tokens": 32853,
+          "phase_start_unix_s": 1789919320.6969419,
+          "phase_end_unix_s": 1789919322.5873554,
+          "completion_tokens_per_second": 17378.737508838007,
+          "requests_per_second": 270.84021564316987,
+          "errors": 0,
+          "truncated": 0,
+          "terminal_eos_count": 512,
+          "valid": true,
+          "output_sha256": "7a24cffcc973279d1844599ac74c90dbd59fc115288c91a5c9f570c7ce296170"
+        },
+        {
+          "phase": "warm-3",
+          "wall_s": 1.6949218999943696,
+          "completion_tokens": 32853,
+          "phase_start_unix_s": 1789919322.5928113,
+          "phase_end_unix_s": 1789919324.2877333,
+          "completion_tokens_per_second": 19383.19399856072,
+          "requests_per_second": 302.0788155499677,
+          "errors": 0,
+          "truncated": 0,
+          "terminal_eos_count": 512,
+          "valid": true,
+          "output_sha256": "7a24cffcc973279d1844599ac74c90dbd59fc115288c91a5c9f570c7ce296170"
+        }
+      ]
+    },
+    {
+      "name": "api-opt-front2",
+      "concurrency": 256,
+      "batch_tokens": 2048,
+      "summary": [],
+      "passes": [],
+      "matrix_sha256": "a76e7438ad7837d145219633c5f2ad81b9c88c552c278b8af3c0bebb9aa5e3f3",
+      "failure": "Windows frontend scale-out startup requires missing socket.SO_REUSEPORT; no valid performance result.",
+      "failure_log_sha256": "e1c35f406c5cae7ddecde3f4a60ad530346fa8ac91305217c58c555a0835e234"
+    },
+    {
+      "name": "api-opt-batch4096",
+      "concurrency": 256,
+      "batch_tokens": 4096,
+      "summary": [
+        {
+          "client": "aiohttp",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 1.6091808999772184,
+              "completion_tokens_per_second": 20420.326888335057,
+              "requests_per_second": 318.1742960081421,
+              "latency_p95_s": 1.0814947999897413
+            },
+            {
+              "trial": 2,
+              "wall_s": 1.722957799967844,
+              "completion_tokens_per_second": 19067.7914459734,
+              "requests_per_second": 297.1634012217569,
+              "latency_p95_s": 1.0737393000163138
+            }
+          ],
+          "median": {
+            "wall_s": 1.6660693499725312,
+            "completion_tokens_per_second": 19744.059167154228,
+            "requests_per_second": 307.6688486149495,
+            "latency_p95_s": 1.0776170500030275
+          }
+        }
+      ],
+      "passes": [
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.7472157999873161,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 18803.05798530353,
+            "requests_per_second": 293.0376430912065,
+            "latency_s": {
+              "p50": 0.7331590999965556,
+              "p95": 1.1892940999823622,
+              "p99": 1.2402388000045903
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3370143999927677,
+              "p95": 1.6826483000186272,
+              "p99": 1.7144986999919638
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "e752f0c50095308d6c26febbcd3549d8ef1dc01e6c259f825d6f9273dcb177aa"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6772863999940455,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 19586.99480310377,
+            "requests_per_second": 305.25496420993915,
+            "latency_s": {
+              "p50": 0.7120241000084206,
+              "p95": 1.127653300005477,
+              "p99": 1.1917386999703012
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2826234999811277,
+              "p95": 1.614034099970013,
+              "p99": 1.6448076000087894
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "1f29997d8a93703258d37dc1bd2c0938bc6b4a86c35571fe8422ac0a963dd01b"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6091808999772184,
+            "completion_tokens": 32860,
+            "completion_tokens_per_second": 20420.326888335057,
+            "requests_per_second": 318.1742960081421,
+            "latency_s": {
+              "p50": 0.6803959000390023,
+              "p95": 1.0814947999897413,
+              "p99": 1.1449960000463761
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2302240999997593,
+              "p95": 1.5455294999992475,
+              "p99": 1.5803572000004351
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "88ce6700fe3516e274d01ddd18a4a8b38f43e23c85191bebbf2a8cc453004138"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.5309886999893934,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 21458.682222950178,
+            "requests_per_second": 334.424414761224,
+            "latency_s": {
+              "p50": 0.6373886999790557,
+              "p95": 0.967151399992872,
+              "p99": 1.0287859000382014
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.1167858999688178,
+              "p95": 1.4668948999606073,
+              "p99": 1.506601499975659
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "ab105b5890ba03f7c6af5ff7de69dc8df99269d4cd58370906818ed4f77fbf55"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.6020284999976866,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 20507.125809589183,
+            "requests_per_second": 319.59481370071717,
+            "latency_s": {
+              "p50": 0.6579206000315025,
+              "p95": 1.0369038000353612,
+              "p99": 1.0838552999775857
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.1778695000102744,
+              "p95": 1.530944800004363,
+              "p99": 1.5654862999799661
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "38aa2d79a476706c5a440cf965ddcb379fb681a45eab5ff03208026be64bfe9c"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.722957799967844,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 19067.7914459734,
+            "requests_per_second": 297.1634012217569,
+            "latency_s": {
+              "p50": 0.7368496000417508,
+              "p95": 1.0737393000163138,
+              "p99": 1.1614878000109456
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.2812463999725878,
+              "p95": 1.653018599958159,
+              "p99": 1.6874640999594703
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "bc83d1c2974216800660b3696a144add9c884b7fe4857aa04536a91d0ea4ad1c"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.5879380999831483,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 20689.09361161411,
+            "requests_per_second": 322.43070432369717,
+            "latency_s": {
+              "p50": 0.6702537999954075,
+              "p95": 1.0289922999800183,
+              "p99": 1.0845458999974653
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.1727256000158377,
+              "p95": 1.5174631000263616,
+              "p99": 1.550484100007452
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "3650f1b87e2ac68dbc8114f5a88cfae474b7718481cb3d5a461ec1bf849a7670"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.7326656999648549,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 18960.95709672465,
+            "requests_per_second": 295.49843343143766,
+            "latency_s": {
+              "p50": 0.7368214000016451,
+              "p95": 1.1652881000190973,
+              "p99": 1.2343056999961846
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.3456910999957472,
+              "p95": 1.6669083999586292,
+              "p99": 1.6977650999906473
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "3a02118e18211368b23c03af3a3d08970cc5b54231e58fafdef62da7fe4a4260"
+        }
+      ],
+      "matrix_sha256": "68bb253ab141824c42acefc9668f71b4bcbea6073c1fa3d74c7a4afc9f2bc37d"
+    },
+    {
+      "name": "api-opt-batch1024",
+      "concurrency": 256,
+      "batch_tokens": 1024,
+      "summary": [
+        {
+          "client": "aiohttp",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 2.247051400016062,
+              "completion_tokens_per_second": 14620.938354932672,
+              "requests_per_second": 227.8541558935146,
+              "latency_p95_s": 1.6552329999976791
+            },
+            {
+              "trial": 2,
+              "wall_s": 1.9812696000444703,
+              "completion_tokens_per_second": 16582.29652302876,
+              "requests_per_second": 258.4201564433775,
+              "latency_p95_s": 1.4243113999837078
+            }
+          ],
+          "median": {
+            "wall_s": 2.114160500030266,
+            "completion_tokens_per_second": 15601.617438980717,
+            "requests_per_second": 243.13715616844604,
+            "latency_p95_s": 1.5397721999906935
+          }
+        }
+      ],
+      "passes": [
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.1887482999591157,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 15010.40571938477,
+            "requests_per_second": 233.92365399418645,
+            "latency_s": {
+              "p50": 0.953366499976255,
+              "p95": 1.6139697000035085,
+              "p99": 1.708590299997013
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.7966735999798402,
+              "p95": 2.1186902999761514,
+              "p99": 2.162047799967695
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "df2826bff1ea60dc7cfb9710ce615bb68c55985fbd071a12e8b4a5c346181214"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.247051400016062,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 14620.938354932672,
+            "requests_per_second": 227.8541558935146,
+            "latency_s": {
+              "p50": 0.9759817000012845,
+              "p95": 1.6552329999976791,
+              "p99": 1.7687157000182196
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.8549810000113212,
+              "p95": 2.1784157999791205,
+              "p99": 2.221895400027279
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "7b62ff0c67ac7db390cf42bb080370912661fc4778fc2e9d7da14ceb8695733a"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.2454490999807604,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 14631.371515070861,
+            "requests_per_second": 228.0167472976283,
+            "latency_s": {
+              "p50": 0.9714910999755375,
+              "p95": 1.6175091000040993,
+              "p99": 1.7241954000201076
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.8297644999693148,
+              "p95": 2.171065600006841,
+              "p99": 2.217730699980166
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "1153bd48ae49ca025cd76e44c8d5b26ee02521da2c6f229d38a341ee162b86eb"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.331967700039968,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 14088.53132890173,
+            "requests_per_second": 219.55707190593796,
+            "latency_s": {
+              "p50": 1.0042724999948405,
+              "p95": 1.659145699988585,
+              "p99": 1.7838274000096135
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.8712448000442237,
+              "p95": 2.2523800000199117,
+              "p99": 2.302523500053212
+            },
+            "valid": true,
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "93c81514bdbec77bb3ae11b041e2a63fe303aa35892a969d37d7839857c369b2"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.2997054000152275,
+            "completion_tokens": 32858,
+            "completion_tokens_per_second": 14287.9170522374,
+            "requests_per_second": 222.63721257366694,
+            "latency_s": {
+              "p50": 0.9994970999541692,
+              "p95": 1.6708891000016592,
+              "p99": 1.7892967000370845
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.8678191999788396,
+              "p95": 2.225661400007084,
+              "p99": 2.272029099985957
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.034033100004307926,
+              "p95": 0.06968079996295273,
+              "p99": 0.07210130000021309
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.09502529999008402,
+              "p95": 0.10074530000565574,
+              "p99": 0.10106359998462722
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "fbdab72cb6cd670d83c91e0fc33a26dfb1810819e17c0cfbb37a3896f23794b0"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.2540258999797516,
+            "completion_tokens": 32857,
+            "completion_tokens_per_second": 14577.028595942558,
+            "requests_per_second": 227.14912016077517,
+            "latency_s": {
+              "p50": 0.9873356999596581,
+              "p95": 1.6783064999617636,
+              "p99": 1.7949229000369087
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.866792400018312,
+              "p95": 2.1842999000218697,
+              "p99": 2.229035999975167
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.031176999968010932,
+              "p95": 0.06506150000495836,
+              "p99": 0.0674146999954246
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.08672349998960271,
+              "p95": 0.09184589999495074,
+              "p99": 0.09215769998263568
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "6b28cca5ddf92ef1aa87cb3efdf8fcff9c6135cde2e41b86eb1dd3c28f98ef6b"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9812696000444703,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 16582.29652302876,
+            "requests_per_second": 258.4201564433775,
+            "latency_s": {
+              "p50": 0.8431008000043221,
+              "p95": 1.4235790999955498,
+              "p99": 1.515917900018394
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5925008000340313,
+              "p95": 1.9140113000175916,
+              "p99": 1.9604579000151716
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.036769800004549325,
+              "p95": 0.06968250003410503,
+              "p99": 0.07257170003140345
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.09444610000355169,
+              "p95": 0.0988931999891065,
+              "p99": 0.09919959999388084
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "bb009392099094bebe0dcd7caf9ea738c52735ba5a2f5443d8a423179c3235bb"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9592527999775484,
+            "completion_tokens": 32858,
+            "completion_tokens_per_second": 16770.679108064323,
+            "requests_per_second": 261.32411295054277,
+            "latency_s": {
+              "p50": 0.8461924999719486,
+              "p95": 1.4243113999837078,
+              "p99": 1.501225899963174
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5864375999663025,
+              "p95": 1.8937201999942772,
+              "p99": 1.9351115999743342
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.04117799998493865,
+              "p95": 0.07919429999310523,
+              "p99": 0.0824865999747999
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.10607759997947142,
+              "p95": 0.11214290000498295,
+              "p99": 0.11266389995580539
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "20fad956e8023e10ed66d55f184146e464ad413e2ee9f3692cc7ad894913fcf4"
+        }
+      ],
+      "matrix_sha256": "e26532c40b142c3102217e87da7ab7aec8724e28ac086c18267ba1ffab999ef3",
+      "excluded_from_selection": "CPU unit tests overlapped this exploratory run; use the isolated recheck."
+    },
+    {
+      "name": "api-opt-batch1024-recheck",
+      "concurrency": 256,
+      "batch_tokens": 1024,
+      "summary": [
+        {
+          "client": "aiohttp",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 1.9335291999741457,
+              "completion_tokens_per_second": 16991.726838384086,
+              "requests_per_second": 264.8007591542172,
+              "latency_p95_s": 1.3889808999956585
+            },
+            {
+              "trial": 2,
+              "wall_s": 1.9887558000045829,
+              "completion_tokens_per_second": 16519.373570110667,
+              "requests_per_second": 257.44739499883303,
+              "latency_p95_s": 1.450002699973993
+            }
+          ],
+          "median": {
+            "wall_s": 1.9611424999893643,
+            "completion_tokens_per_second": 16755.550204247374,
+            "requests_per_second": 261.1240770765251,
+            "latency_p95_s": 1.4194917999848258
+          }
+        }
+      ],
+      "passes": [
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9811216000234708,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 16583.535306268313,
+            "requests_per_second": 258.43946176445417,
+            "latency_s": {
+              "p50": 0.8515955999610014,
+              "p95": 1.455360899970401,
+              "p99": 1.5487695999909192
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.6099356000195257,
+              "p95": 1.9149230999755673,
+              "p99": 1.9559533999999985
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.029255100002046674,
+              "p95": 0.05405039998004213,
+              "p99": 0.05609249998815358
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.07581999996909872,
+              "p95": 0.07999920001020655,
+              "p99": 0.08035210001980886
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "59d6750dce03ab825f1ccbad0f57bcd676ad10bc16f830e48c4bd3c9b8ac981b"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9557558000087738,
+            "completion_tokens": 32859,
+            "completion_tokens_per_second": 16801.17732482378,
+            "requests_per_second": 261.7913749751902,
+            "latency_s": {
+              "p50": 0.8430238000000827,
+              "p95": 1.4400757999974303,
+              "p99": 1.5285702000255696
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.592983499984257,
+              "p95": 1.8900209999992512,
+              "p99": 1.93008809996536
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.026506799971684813,
+              "p95": 0.056838200020138174,
+              "p99": 0.05879310000455007
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.07651139999506995,
+              "p95": 0.08015120000345632,
+              "p99": 0.08042730001034215
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "9607f2813302dbd2203893afa6077eb026fec0f9ac95e51d0c9a6c88ffd8b902"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9303975999937393,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 17019.29177704456,
+            "requests_per_second": 265.230333896841,
+            "latency_s": {
+              "p50": 0.8397254000301473,
+              "p95": 1.3889808999956585,
+              "p99": 1.4925025000120513
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5651080000097863,
+              "p95": 1.8686635000049137,
+              "p99": 1.9050209000124596
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.03461640002205968,
+              "p95": 0.06577659997856244,
+              "p99": 0.068505399976857
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.08876979997148737,
+              "p95": 0.09506209997925907,
+              "p99": 0.09555289999116212
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "262bb00e473cb6838c3a5eec903317cc8fc36e1aa9fbcd7ce865ff97b13ca33e"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9335291999741457,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 16991.726838384086,
+            "requests_per_second": 264.8007591542172,
+            "latency_s": {
+              "p50": 0.8213223000057042,
+              "p95": 1.3255700999870896,
+              "p99": 1.4244571999879554
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.50037899997551,
+              "p95": 1.856462099996861,
+              "p99": 1.9077498999540694
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.035806699946988374,
+              "p95": 0.06819689995609224,
+              "p99": 0.07077259995276108
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.09120339999208227,
+              "p95": 0.09525489999214187,
+              "p99": 0.09570720000192523
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "7d0fab21a8b17804a77508104399eb653e11d6026ad58a34ddba2b3143f00e04"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.8371001000050455,
+            "completion_tokens": 32856,
+            "completion_tokens_per_second": 17884.708623068367,
+            "requests_per_second": 278.70011002590104,
+            "latency_s": {
+              "p50": 0.7985300999716856,
+              "p95": 1.3119983000215143,
+              "p99": 1.4009960999828763
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.4789045000215992,
+              "p95": 1.7733110000262968,
+              "p99": 1.8128559999749996
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.03566679998766631,
+              "p95": 0.06787400000030175,
+              "p99": 0.07043339998926967
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.09262170002330095,
+              "p95": 0.09696880000410601,
+              "p99": 0.09729499998502433
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "84cd6be79e3ca7ff3badbb0043b8c32e372a529cfb68ab506d9ccd7b12edb18c"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.9887558000045829,
+            "completion_tokens": 32853,
+            "completion_tokens_per_second": 16519.373570110667,
+            "requests_per_second": 257.44739499883303,
+            "latency_s": {
+              "p50": 0.8724828999838792,
+              "p95": 1.450002699973993,
+              "p99": 1.5452160999993794
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.6177070999983698,
+              "p95": 1.9240861000143923,
+              "p99": 1.9610914000077173
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.027964200009591877,
+              "p95": 0.059659200021997094,
+              "p99": 0.062154199986252934
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.08068030001595616,
+              "p95": 0.08415040001273155,
+              "p99": 0.08455089997733012
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "695b246a8752722af298632cec9e966723e6fbe41a27e35f834a0c7da9f73982"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 2.101824500015937,
+            "completion_tokens": 32857,
+            "completion_tokens_per_second": 15632.608716736753,
+            "requests_per_second": 243.59788364638334,
+            "latency_s": {
+              "p50": 0.9162224000319839,
+              "p95": 1.5644788999925368,
+              "p99": 1.6624664000119083
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.7396456999704242,
+              "p95": 2.0369184999726713,
+              "p99": 2.0771062999847345
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.03286589996423572,
+              "p95": 0.06364040001062676,
+              "p99": 0.06644819997018203
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.08668229996692389,
+              "p95": 0.09227149997605011,
+              "p99": 0.09276169998338446
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "061a03babfaaba77c0179240d3990ad142d23d12dfdab7eb19a1e52030b35d1b"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 1.8797885999665596,
+            "completion_tokens": 32854,
+            "completion_tokens_per_second": 17477.49720398584,
+            "requests_per_second": 272.3710527923769,
+            "latency_s": {
+              "p50": 0.8039442999870516,
+              "p95": 1.3484500999911688,
+              "p99": 1.430802599992603
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 1.5139186999876983,
+              "p95": 1.8178732999949716,
+              "p99": 1.8550109999487177
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.03846789995441213,
+              "p95": 0.07722259999718517,
+              "p99": 0.08031239995034412
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.1004638999584131,
+              "p95": 0.1051416999544017,
+              "p99": 0.10547289997339249
+            },
+            "observed_peak_in_flight": 256
+          },
+          "output_sha256": "7c4c1e7e5d994236899487ef39690a909ed88708cb6d19fe3163bf2b3a5ac453"
+        }
+      ],
+      "matrix_sha256": "a79a8a435dfa4cb020ea0667aa8589a624da6c1c96dc6fd18fe5215520b9a844"
+    },
+    {
+      "name": "api-opt-screen-p32",
+      "concurrency": 32,
+      "batch_tokens": 2048,
+      "summary": [
+        {
+          "client": "urllib",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 9.017193000006955,
+              "completion_tokens_per_second": 3652.35611569749,
+              "requests_per_second": 56.78041936105893,
+              "latency_p95_s": 0.7797238000202924
+            },
+            {
+              "trial": 2,
+              "wall_s": 8.674895300006028,
+              "completion_tokens_per_second": 3800.7375143740455,
+              "requests_per_second": 59.02088524338089,
+              "latency_p95_s": 0.7824911000207067
+            }
+          ],
+          "median": {
+            "wall_s": 8.846044150006492,
+            "completion_tokens_per_second": 3726.546815035768,
+            "requests_per_second": 57.90065230221991,
+            "latency_p95_s": 0.7811074500204995
+          }
+        },
+        {
+          "client": "aiohttp",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 7.199038100021426,
+              "completion_tokens_per_second": 4571.444065548431,
+              "requests_per_second": 71.1206126271892,
+              "latency_p95_s": 0.579009999986738
+            },
+            {
+              "trial": 2,
+              "wall_s": 7.260162999969907,
+              "completion_tokens_per_second": 4535.02214759317,
+              "requests_per_second": 70.52183263683229,
+              "latency_p95_s": 0.6287921000039205
+            }
+          ],
+          "median": {
+            "wall_s": 7.229600549995666,
+            "completion_tokens_per_second": 4553.2331065708,
+            "requests_per_second": 70.82122263201074,
+            "latency_p95_s": 0.6039010499953292
+          }
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trials": [
+            {
+              "trial": 1,
+              "wall_s": 7.486520399979781,
+              "completion_tokens_per_second": 4401.510747247679,
+              "requests_per_second": 68.38958189459855,
+              "latency_p95_s": 0.6196475000469945
+            },
+            {
+              "trial": 2,
+              "wall_s": 7.416429100034293,
+              "completion_tokens_per_second": 4432.5914205595245,
+              "requests_per_second": 69.03591918617985,
+              "latency_p95_s": 0.5955440999823622
+            }
+          ],
+          "median": {
+            "wall_s": 7.451474750007037,
+            "completion_tokens_per_second": 4417.0510839036015,
+            "requests_per_second": 68.71275054038921,
+            "latency_p95_s": 0.6075958000146784
+          }
+        }
+      ],
+      "passes": [
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 9.509344200021587,
+            "completion_tokens": 32911,
+            "completion_tokens_per_second": 3460.9116367798833,
+            "requests_per_second": 53.841778069074174,
+            "latency_s": {
+              "p50": 0.5460795999970287,
+              "p95": 0.9572105000261217,
+              "p99": 1.286415999988094
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 5.34914150001714,
+              "p95": 9.207662600034382,
+              "p99": 9.313355200050864
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0038347000372596085,
+              "p95": 0.007178700005169958,
+              "p99": 0.007341000018641353
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "e341a59c3b01e1973a49b9e7e1916448ed5604a18f9d51da1707bc812675e591"
+        },
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 9.017193000006955,
+            "completion_tokens": 32934,
+            "completion_tokens_per_second": 3652.35611569749,
+            "requests_per_second": 56.78041936105893,
+            "latency_s": {
+              "p50": 0.5442175000207499,
+              "p95": 0.8097378999809735,
+              "p99": 0.8963718000450172
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.735052700038068,
+              "p95": 8.868193600035738,
+              "p99": 8.989428200002294
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0025696000084280968,
+              "p95": 0.3225253000273369,
+              "p99": 0.3765351000474766
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "314db899dca4488efe50f0646d15f857714ccb80554e26bfc79a935b429f1d3b"
+        },
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 8.688632799952757,
+            "completion_tokens": 33016,
+            "completion_tokens_per_second": 3799.9073916646034,
+            "requests_per_second": 58.92756798316807,
+            "latency_s": {
+              "p50": 0.5094811000162736,
+              "p95": 0.7381731999921612,
+              "p99": 0.8532798000378534
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.669926199945621,
+              "p95": 8.427934499981347,
+              "p99": 8.55527259997325
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.04859699995722622,
+              "p95": 0.31042269995668903,
+              "p99": 0.33539789996575564
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "ee158ff475ceeeb581c9c1290fd9a40ce35d3291223bd86992958cc5318a74df"
+        },
+        {
+          "client": "urllib",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 9.018437399994582,
+            "completion_tokens": 32860,
+            "completion_tokens_per_second": 3643.646736409097,
+            "requests_per_second": 56.77258457216852,
+            "latency_s": {
+              "p50": 0.5391546000028029,
+              "p95": 0.7797238000202924,
+              "p99": 0.9183606999577023
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.8889743000036106,
+              "p95": 8.765720599971246,
+              "p99": 8.870807999977842
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0656697999802418,
+              "p95": 0.2749048999976367,
+              "p99": 0.35532999999122694
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "23ae64940eea219cf41da0613cc732a4178559e728128dd532b618e146f53ecf"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.67054660001304,
+            "completion_tokens": 33010,
+            "completion_tokens_per_second": 4303.474279126846,
+            "requests_per_second": 66.74882856446366,
+            "latency_s": {
+              "p50": 0.46273670002119616,
+              "p95": 0.6493779000011273,
+              "p99": 0.703504899982363
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.7685241000144742,
+              "p95": 7.450475200021174,
+              "p99": 7.595241100003477
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.005576999974437058,
+              "p95": 0.009508699993602931,
+              "p99": 0.009769500000402331
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.012841599993407726,
+              "p95": 0.013327400025445968,
+              "p99": 0.013357800024095923
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "a80c93feeac89fdda1a34536c39fa7f17b53e39655777a194ae649f8b0c7144c"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.199038100021426,
+            "completion_tokens": 32910,
+            "completion_tokens_per_second": 4571.444065548431,
+            "requests_per_second": 71.1206126271892,
+            "latency_s": {
+              "p50": 0.43532330001471564,
+              "p95": 0.579009999986738,
+              "p99": 0.6050150000373833
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.8237710000248626,
+              "p95": 6.965505500033032,
+              "p99": 7.125672800000757
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.004716099996585399,
+              "p95": 0.008789200044702739,
+              "p99": 0.009228800015989691
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.012273100030142814,
+              "p95": 0.012702300038654357,
+              "p99": 0.012729100009892136
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "ad5e0dc7e5d842ba46c890d214560d973708665ede69da28c790072dbdeaec05"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 6.700986600015312,
+            "completion_tokens": 32918,
+            "completion_tokens_per_second": 4912.410957503598,
+            "requests_per_second": 76.40665928190784,
+            "latency_s": {
+              "p50": 0.4098329999833368,
+              "p95": 0.5290147000341676,
+              "p99": 0.5788133000023663
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.5343845000024885,
+              "p95": 6.469318000017665,
+              "p99": 6.632019900018349
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.004699600045569241,
+              "p95": 0.008790599997155368,
+              "p99": 0.009044700011145324
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.011778600048273802,
+              "p95": 0.012230100051965564,
+              "p99": 0.012259800045285374
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "8491cd0f2b32179e1ecc21d6289a90227f54f31e27206e44ef33a513caac7b76"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.883493200002704,
+            "completion_tokens": 32947,
+            "completion_tokens_per_second": 4179.238716155511,
+            "requests_per_second": 64.94582883636208,
+            "latency_s": {
+              "p50": 0.4764634000021033,
+              "p95": 0.6789228999987245,
+              "p99": 0.7211078000254929
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.475299299985636,
+              "p95": 7.656399699975736,
+              "p99": 7.808002799982205
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.005047899961937219,
+              "p95": 0.008879299974069,
+              "p99": 0.009148199984338135
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.011865100008435547,
+              "p95": 0.012313099985476583,
+              "p99": 0.012343999987933785
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "927015e07d50537416eb2e0ac561a49ba38e77af14a5b70519b76b013c8168a1"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 6.750084700004663,
+            "completion_tokens": 32962,
+            "completion_tokens_per_second": 4883.197984164143,
+            "requests_per_second": 75.85090006346829,
+            "latency_s": {
+              "p50": 0.4088138000224717,
+              "p95": 0.5359914999571629,
+              "p99": 0.5691354000009596
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.555821499961894,
+              "p95": 6.517848199990112,
+              "p99": 6.677944299997762
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0037272999761626124,
+              "p95": 0.004587600007653236,
+              "p99": 0.004639199993107468
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.012401899963151664,
+              "p95": 0.012569400016218424,
+              "p99": 0.012579299975186586
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "ef0feb433f061ae56115d0c1b1847a3de204cf12d9c03dbf0b1477b8844f4ca1"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.596155099978205,
+            "completion_tokens": 32981,
+            "completion_tokens_per_second": 4341.80181498593,
+            "requests_per_second": 67.40252052008114,
+            "latency_s": {
+              "p50": 0.46017849998315796,
+              "p95": 0.657938499993179,
+              "p99": 0.7072575999773107
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.4729626999469474,
+              "p95": 7.3567254999652505,
+              "p99": 7.512749299989082
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0015449999482370913,
+              "p95": 0.002315899997483939,
+              "p99": 0.00239719997625798
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.008749899978283793,
+              "p95": 0.008900199958588928,
+              "p99": 0.008909699972718954
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "40e4010ec3e67cdc97d03d2a71ed137e48881604337d5c03f35d6cb45b59187d"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.486520399979781,
+            "completion_tokens": 32952,
+            "completion_tokens_per_second": 4401.510747247679,
+            "requests_per_second": 68.38958189459855,
+            "latency_s": {
+              "p50": 0.4552875999943353,
+              "p95": 0.6196475000469945,
+              "p99": 0.6868811000022106
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.990721800015308,
+              "p95": 7.240011300018523,
+              "p99": 7.414325799967628
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0016541999648325145,
+              "p95": 0.0024443999864161015,
+              "p99": 0.002520599984563887
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.008348300005309284,
+              "p95": 0.008494500012602657,
+              "p99": 0.008504599973093718
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "5cb08ae5d20c882d6888e5c943185820e0fd1ff842078006831b9027a453e10b"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 1,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 6.784725899982732,
+            "completion_tokens": 32913,
+            "completion_tokens_per_second": 4851.043429784506,
+            "requests_per_second": 75.46362337221362,
+            "latency_s": {
+              "p50": 0.41426400002092123,
+              "p95": 0.5366035000188276,
+              "p99": 0.5746685999911278
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.521975999989081,
+              "p95": 6.554542399942875,
+              "p99": 6.708766199997626
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.001658499997574836,
+              "p95": 0.0024014999507926404,
+              "p99": 0.002475599991157651
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.008358999970369041,
+              "p95": 0.008509399951435626,
+              "p99": 0.008518799964804202
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "9178bf342ca32cd481e6d06a71d8672b30a969d2186a8d12696e459c8ff87abb"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 8.159496799984481,
+            "completion_tokens": 32906,
+            "completion_tokens_per_second": 4032.8467314384616,
+            "requests_per_second": 62.74896755900116,
+            "latency_s": {
+              "p50": 0.4925463999970816,
+              "p95": 0.6893678000196815,
+              "p99": 0.7446743999607861
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.55735519999871,
+              "p95": 7.923514999973122,
+              "p99": 8.0836311999592
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0034270999603904784,
+              "p95": 0.004296500002965331,
+              "p99": 0.0043450999655760825
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.011252299998886883,
+              "p95": 0.011419799993745983,
+              "p99": 0.011429500009398907
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "699624e2632aba3184a1526c83e322e394bf6b6c85b5c07df57e9c96e0847fdb"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.105162499996368,
+            "completion_tokens": 32937,
+            "completion_tokens_per_second": 4635.64344939568,
+            "requests_per_second": 72.06028011326437,
+            "latency_s": {
+              "p50": 0.43441609997535124,
+              "p95": 0.5815720000537112,
+              "p99": 0.6438183999853209
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.6917261999915354,
+              "p95": 6.867837600002531,
+              "p99": 7.032593699987046
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.001761399966198951,
+              "p95": 0.002549599972553551,
+              "p99": 0.0026262999745085835
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.00890149996848777,
+              "p95": 0.009052500012330711,
+              "p99": 0.009062499972060323
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "cdf53080c323bd9828188764b323152dc36ae5f3cb428c7b25012eb6a78f1882"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.436183199984953,
+            "completion_tokens": 32847,
+            "completion_tokens_per_second": 4417.185418463932,
+            "requests_per_second": 68.8525263876011,
+            "latency_s": {
+              "p50": 0.44724379997933283,
+              "p95": 0.6435503999819048,
+              "p99": 0.7039970000041649
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.4758607000112534,
+              "p95": 7.195720300020184,
+              "p99": 7.358984199992847
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0020214999676682055,
+              "p95": 0.002806300006341189,
+              "p99": 0.0028855999698862433
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.009099200018681586,
+              "p95": 0.009250900009647012,
+              "p99": 0.009260699967853725
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "29e92e9efe93bdc187f1bce58b6aa3bf062896d2b01e3e2982ef2712a8720617"
+        },
+        {
+          "client": "aiohttp-winloop",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.416429100034293,
+            "completion_tokens": 32874,
+            "completion_tokens_per_second": 4432.5914205595245,
+            "requests_per_second": 69.03591918617985,
+            "latency_s": {
+              "p50": 0.4549410000327043,
+              "p95": 0.5955440999823622,
+              "p99": 0.6697242999798618
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.9631302000489086,
+              "p95": 7.197069100046065,
+              "p99": 7.344188800023403
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0017596000107005239,
+              "p95": 0.002550800039898604,
+              "p99": 0.0026291999965906143
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.008674600045196712,
+              "p95": 0.008818400034215301,
+              "p99": 0.008828400052152574
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "236228d4f01354c4146795c7efbd2845dfc186cb881c8284f3db297c22145789"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 6.935387899982743,
+            "completion_tokens": 32910,
+            "completion_tokens_per_second": 4745.228453635865,
+            "requests_per_second": 73.82427737045163,
+            "latency_s": {
+              "p50": 0.41856290004216135,
+              "p95": 0.5578339999774471,
+              "p99": 0.5915347000118345
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.5779181999969296,
+              "p95": 6.706737699976657,
+              "p99": 6.8691704999655485
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.00612199999159202,
+              "p95": 0.00958439998794347,
+              "p99": 0.00994889996945858
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.013033900002483279,
+              "p95": 0.013494999962858856,
+              "p99": 0.01352539996150881
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "a3f4a9dd9967a0abaf44ed94340b06a7103d475310ef48edb8b5605d5328d464"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.828515500004869,
+            "completion_tokens": 32917,
+            "completion_tokens_per_second": 4204.756316823991,
+            "requests_per_second": 65.40192709584359,
+            "latency_s": {
+              "p50": 0.4763682000339031,
+              "p95": 0.656482300022617,
+              "p99": 0.7293475000187755
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.31865969998762,
+              "p95": 7.587332499970216,
+              "p99": 7.755678199988324
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.004135600000154227,
+              "p95": 0.007300500001292676,
+              "p99": 0.007530200004111975
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.010423399973660707,
+              "p95": 0.01096689997939393,
+              "p99": 0.010994100011885166
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "2806995b56229d7954b09c29ae8bec4b9d85f8e4dbb397a324fbb38445bcda58"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.099376700003631,
+            "completion_tokens": 32929,
+            "completion_tokens_per_second": 4638.2945139371395,
+            "requests_per_second": 72.1190072925329,
+            "latency_s": {
+              "p50": 0.4301315000047907,
+              "p95": 0.5696052000275813,
+              "p99": 0.6115657999762334
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.7615824000095017,
+              "p95": 6.849461300007533,
+              "p99": 7.01727710000705
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.004228100006002933,
+              "p95": 0.007898899959400296,
+              "p99": 0.00809099996695295
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.010675799974706024,
+              "p95": 0.011098299990408123,
+              "p99": 0.011125999968498945
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "e0e4d346cb48ed6414165f358f158f0ea1d0c8303992f09d0a4abaf50e16dc6d"
+        },
+        {
+          "client": "aiohttp",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 7.260162999969907,
+            "completion_tokens": 32925,
+            "completion_tokens_per_second": 4535.02214759317,
+            "requests_per_second": 70.52183263683229,
+            "latency_s": {
+              "p50": 0.4384983999771066,
+              "p95": 0.6287921000039205,
+              "p99": 0.6994532000389881
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 3.4263609999907203,
+              "p95": 7.032703599950764,
+              "p99": 7.18465989996912
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0041188999894075096,
+              "p95": 0.007621700002346188,
+              "p99": 0.00782419997267425
+            },
+            "first_group_headers_ready_s": {
+              "p50": 0.01080669998191297,
+              "p95": 0.011357099981978536,
+              "p99": 0.011397700000088662
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "74fad3ddbfeab78a0aa839805303855fec4b84fe1a9d3b87b134da3804690027"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "cold",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 9.114766300015617,
+            "completion_tokens": 32979,
+            "completion_tokens_per_second": 3618.194796716126,
+            "requests_per_second": 56.17258667390328,
+            "latency_s": {
+              "p50": 0.5453411999624223,
+              "p95": 0.8167067000176758,
+              "p99": 0.8688843999989331
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.995569499966223,
+              "p95": 8.847360900021158,
+              "p99": 9.024891200009733
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.003081900009419769,
+              "p95": 0.32500850001815706,
+              "p99": 0.36139179999008775
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "37abd178f4b7012af8d3f2f91a66c8fc28822cd195342b4b1a0df933160b0126"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "warm-1",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 8.625468500016723,
+            "completion_tokens": 32929,
+            "completion_tokens_per_second": 3817.6477022594377,
+            "requests_per_second": 59.359094523272255,
+            "latency_s": {
+              "p50": 0.5066088999737985,
+              "p95": 0.7824911000207067,
+              "p99": 0.8837855000165291
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.607980200031307,
+              "p95": 8.363116700027604,
+              "p99": 8.500036800047383
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.013760300003923476,
+              "p95": 0.30940389999886975,
+              "p99": 0.3383635000209324
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "81a0c48b8177120e0ff31901b3c9b4ad85c4f217798fa2eb5514d76ad19d3e6f"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "warm-2",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 9.02555520000169,
+            "completion_tokens": 32970,
+            "completion_tokens_per_second": 3652.960872699978,
+            "requests_per_second": 56.72781215718498,
+            "latency_s": {
+              "p50": 0.5353832999826409,
+              "p95": 0.7769314000033773,
+              "p99": 0.8699199000257067
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.964260099979583,
+              "p95": 8.729049700021278,
+              "p99": 8.919081699976232
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.023347900016233325,
+              "p95": 0.3260387000045739,
+              "p99": 0.3678805999807082
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "b01afcbf5eea6eb2904108eebb11833e39baf2920a8f8093cec2029f352b791f"
+        },
+        {
+          "client": "urllib",
+          "trial": 2,
+          "phase": "warm-3",
+          "metrics": {
+            "requests": 512,
+            "completed": 512,
+            "errors": 0,
+            "truncated": 0,
+            "wall_s": 8.674895300006028,
+            "completion_tokens": 32971,
+            "completion_tokens_per_second": 3800.7375143740455,
+            "requests_per_second": 59.02088524338089,
+            "latency_s": {
+              "p50": 0.5113532000104897,
+              "p95": 0.8174203999806195,
+              "p99": 0.907279999984894
+            },
+            "ttft_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "end_to_end_s": {
+              "p50": 4.508848100027535,
+              "p95": 8.416062600037549,
+              "p99": 8.509228600014467
+            },
+            "valid": true,
+            "first_group_client_start_s": {
+              "p50": 0.0023003999958746135,
+              "p95": 0.014707399997860193,
+              "p99": 0.07890090002911165
+            },
+            "first_group_headers_ready_s": {
+              "p50": null,
+              "p95": null,
+              "p99": null
+            },
+            "observed_peak_in_flight": 32
+          },
+          "output_sha256": "debcbd00de08c1ecd08d0b46bedb5146f8c678653569ced78a7419b3f0152552"
+        }
+      ],
+      "matrix_sha256": "c70d69f89cf23cc9514c8989304bbf6e8b7b4d80a755e3dd38e54be7459e6b86"
+    }
+  ],
+  "packaged_client_smoke": {
+    "runtime": "release staging runtime and scripts",
+    "concurrency": 32,
+    "requests": 512,
+    "errors": 0,
+    "truncated": 0,
+    "ids_and_order_and_seeds_verified": true,
+    "output_sha256": "eeb85d3a7352179c25d9372058f311b4e09ea8a91dd5075da2b76b633e7f3ce5",
+    "note": "Functional validation after service restoration, not part of throughput comparison."
+  }
+}

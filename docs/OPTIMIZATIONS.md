@@ -1,34 +1,8 @@
-# 实现与数值边界
+# 推理优化
 
-本项目基于 llama.cpp 固定提交 `bdcbaaf6e7520b68c8c60ff724c67409970d70e1`。所有推理改动保存在 [补丁](../patches/hy-mt2.patch)，[清单](../patches/hy-mt2.manifest.json) 记录被修改文件及哈希。[构建说明](BUILD.md) 提供干净检出和补丁应用流程。
+当前后端为 Windows 原生 vLLM，默认 NVFP4 W4A4 + INT8 KV。
 
-## 源码优化
-
-| 改动 | 作用 |
-| --- | --- |
-| 投影张量重排 | 合并 QKV/QK 与 FFN gate/up，减少独立矩阵乘法；保留量化数据字节 |
-| NVFP4 校准 | 使用 OPUS 翻译模板统计和局部加权 MSE 尺度搜索，离线改善权重重建；推理块格式和计算形状不变 |
-| 128 维 head 专用 CUDA kernel | 融合 RoPE、RMSNorm 与缩放，条件允许时直接写入 KV cache；默认严格归约顺序 |
-| Q8 KV 写入融合 | 在融合 RoPE/归一化后直接量化写入 K 缓存；与独立 Q8 写入保持相同舍入规则，减少中间写回 |
-| 稀疏重复惩罚 | 根据历史 token 更新受影响项，保留原公式与异常回退 |
-| 固定波次 C++ 批量调度 | 短请求结束后仍保持序列槽宽，减少图形状变化；填充 token 不计入吞吐 |
-| GPU 采样前缀 | 在 GPU 完成批量惩罚与 Top-K+1，只把少量候选传回 CPU 完成 Top-P、温度与独立随机采样 |
-| 标量候选收集与 CUDA Graph | 专用 gather kernel、提前捕获/更新图，减少重复启动与传输开销 |
-
-候选边界并列或非有限值等异常行回退原 CPU 采样链。没有投机解码，也没有用更短输出、丢弃结束 token 或减少采样步骤来提高 TPS。API 方便应用接入；最高吞吐路径是 `translate-batch.cmd` 的原生文件批处理。
-
-## 验证
-
-当前构建在 RTX 5090 上通过 102/102 项定向 CUDA 算子检查（其中 15 项覆盖 Q8 KV 写入与布局边界）、8/8 项 Q8 attention 检查，以及 4 组采样配置下的 364 次 GPU 前缀与 CPU 采样对照：338 次使用前缀、26 次回退。采样对照覆盖候选顺序、概率、多步 RNG 和并列回退后的 RNG；NaN 检查只验证回退触发，不声称抽样分布一致。
-
-CPU 量化数值测试为 0 失败，NVFP4 尺度搜索与独立穷举 oracle 一致。当前 `bin` 的 EXE/DLL 已与受测构建逐文件核对 SHA256；五种 CUDA 架构中仅 RTX 5090 / CC12.0 经过本轮实机验证，其余仅核验编译产物。计数、配置及日志哈希见[当前构建验收](../benchmarks/current-build-validation.json)。
-
-这些是有限测试，不等于所有模型、GPU 和输入上的形式证明。重排不改权重字节，矩阵形状与浮点归约变化仍可能影响生成结果。NVFP4 是四位浮点数据加分组尺度；Q4_K_M 是混合量化，均保留部分高精度张量。没有宣称量化无损，也没有未经测量的 COMET/BLEU 成绩。
-
-主要证据与测试口径见 [性能报告](PERFORMANCE.md) 及 [基准摘要](../benchmarks/)。完整历史实验、重复权重、编译缓存和机器私有路径不随 Git 仓库发布。
-
-## 性能分析开关
-
-批量命令可用 `--cpu-sampling` 对照 CPU 采样路径；此时模型推理仍运行在 GPU。完整消融由 `scripts/run_native_experiment.py --help` 提供，包括投影、RoPE、稀疏惩罚、采样快照与图优化开关。连续补位调度是已验证但未在当前素材上提速的实验选项，不是发布默认。
-
-`*-fused.gguf` 必须配合本项目加载器；不保证标准第三方运行器兼容，也不支持直接挂载原始 LoRA 到重排后的投影。
+- [构建与开发](BUILD.md)
+- [KV 与核心吞吐对照](VLLM_KV.md)
+- [未量化模型参照评测](TEACHER_FIDELITY.md)
+- [历史 llama.cpp 文档](../archive/llama-cpp/docs/OPTIMIZATIONS.md)

@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod job;
+mod webview;
 
 use serde_json::{json, Value};
 use std::{
@@ -114,7 +115,7 @@ impl Runtime {
             .data
             .join(format!("tasks/{}-{id}.json", std::process::id()));
         let mut child = Command::new(python)
-            .args(["-E", "-s", "-B", "-u"])
+            .args(["-E", "-s", "-B", "-u", "-X", "utf8"])
             .arg(self.root.join("scripts/desktop_bridge.py"))
             .current_dir(&self.data)
             .creation_flags(CREATE_NO_WINDOW)
@@ -193,7 +194,7 @@ impl Runtime {
                 .map(Worker::status)
                 .unwrap_or(Value::Null);
             let mut check = self.spawn_context("validate_deploy", args.clone(), snapshot)?;
-            let deadline = Instant::now() + Duration::from_secs(180);
+            let deadline = Instant::now() + Duration::from_secs(600);
             while check.alive() {
                 if Instant::now() > deadline {
                     return Err("配置检查超时，原服务继续运行。".into());
@@ -369,15 +370,28 @@ fn status(app: tauri::AppHandle) -> Value {
             let mut values = serde_json::Map::new();
             if let Some(files) = manifest["files"].as_object() {
                 for (profile, item) in files {
-                    if let Some(name) = item["filename"].as_str() {
-                        let bytes = fs::metadata(
-                            runtime
-                                .models
-                                .join(item["sha256"].as_str().unwrap_or(""))
-                                .join(format!("{name}.part")),
-                        )
-                        .map(|s| s.len())
-                        .unwrap_or(0);
+                    let spec = if profile == "fast" {
+                        &manifest
+                    } else {
+                        &manifest["checkpoints"][profile]
+                    };
+                    if let (Some(directory), Some(checkpoint_files)) = (
+                        spec["checkpoint_dir"].as_str(),
+                        spec["checkpoint_files"].as_object(),
+                    ) {
+                        let base = runtime.models.join(item["sha256"].as_str().unwrap_or(""));
+                        let staging = base.join(format!("{directory}.download"));
+                        let completed = base.join(directory);
+                        let mut bytes = 0u64;
+                        for (name, metadata) in checkpoint_files {
+                            let size = metadata["size_bytes"].as_u64().unwrap_or(0);
+                            let received = fs::metadata(completed.join(name))
+                                .or_else(|_| fs::metadata(staging.join(name)))
+                                .or_else(|_| fs::metadata(staging.join(format!("{name}.part"))))
+                                .map(|s| s.len())
+                                .unwrap_or(0);
+                            bytes += received.min(size);
+                        }
                         values.insert(profile.clone(), json!(bytes));
                     }
                 }
@@ -559,11 +573,12 @@ fn show(app: &tauri::AppHandle) {
 }
 
 fn main() {
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(directory) = exe.parent() {
-            if directory.join("portable.json").is_file() {
-                std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", directory.join("data/webview"));
-            }
+    match webview::prepare() {
+        Ok(true) => (),
+        Ok(false) => return,
+        Err(error) => {
+            webview::show_error(&error);
+            return;
         }
     }
     tauri::Builder::default()
@@ -783,7 +798,7 @@ mod integration_tests {
         let data = root.join(format!(".local/desktop-gpu-test-{}", std::process::id()));
         fs::create_dir_all(data.join("models")).unwrap();
         fs::create_dir_all(data.join("tasks")).unwrap();
-        let name = "Hy-MT2-1.8B-Q4_K_M-fused.gguf";
+        let name = "Hy-MT2-1.8B-NVFP4-vllm.zip";
         if !data.join("models").join(name).exists() {
             fs::hard_link(
                 root.join("models").join(name),
@@ -806,15 +821,36 @@ mod integration_tests {
             logs: Arc::new(Mutex::new(VecDeque::new())),
             logging_enabled: AtomicBool::new(true),
         };
-        let mut worker = runtime.spawn("service", json!({"profile":"official", "parallel":1, "context":1024,"cache":"q8_0","port":19876})).unwrap();
-        let deadline = Instant::now() + Duration::from_secs(180);
+        let mut worker = runtime.spawn("service", json!({"profile":"fast", "parallel":1, "context":1024,"cache":"int8_per_token_head","port":19876})).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(600);
+        let mut next_log = Instant::now() + Duration::from_secs(30);
         let status = loop {
             let status = worker.status();
             assert_ne!(status["phase"], "error", "{status}");
             if status["phase"] == "ready" {
                 break status;
             }
-            assert!(Instant::now() < deadline, "GPU startup timed out: {status}");
+            if Instant::now() >= next_log {
+                for line in runtime
+                    .logs
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .rev()
+                    .take(12)
+                    .collect::<Vec<_>>()
+                    .into_iter()
+                    .rev()
+                {
+                    eprintln!("{line}");
+                }
+                next_log = Instant::now() + Duration::from_secs(30);
+            }
+            assert!(
+                Instant::now() < deadline,
+                "GPU startup timed out: {status}\n{:?}",
+                runtime.logs.lock().unwrap()
+            );
             std::thread::sleep(Duration::from_millis(250));
         };
         let private: Value =
@@ -885,7 +921,7 @@ mod integration_tests {
         );
         *runtime.service.lock().unwrap() = Some(worker);
         fn wait_ready(runtime: &Runtime) -> Value {
-            let deadline = Instant::now() + Duration::from_secs(180);
+            let deadline = Instant::now() + Duration::from_secs(600);
             loop {
                 let status = runtime.service.lock().unwrap().as_mut().unwrap().status();
                 assert_ne!(status["phase"], "error", "{status}");
@@ -896,7 +932,7 @@ mod integration_tests {
                 std::thread::sleep(Duration::from_millis(250));
             }
         }
-        let config = json!({"profile":"official", "parallel":1, "context":1537, "cache":"q8_0", "port":19876, "apiKeyEnabled":false, "logMode":"off"});
+        let config = json!({"profile":"fast", "parallel":1, "context":1537, "cache":"int8_per_token_head", "port":19876, "apiKeyEnabled":false, "logMode":"off"});
         runtime.deploy(config.clone()).unwrap();
         let next = wait_ready(&runtime);
         assert_eq!(next["plan"]["context"], 1537);

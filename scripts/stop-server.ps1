@@ -12,7 +12,7 @@ if (!(Test-Path -LiteralPath $configFile -PathType Leaf)) { throw 'Missing manag
 $config = Get-Content -LiteralPath $configFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($config.mode -ne 'server' -or ($null -ne $config.label -and $config.label -cne $Label) -or
     $config.executable -isnot [string] -or $config.executable -notmatch '^(?:[A-Za-z]:[\\/]|\\\\[^\\/]+[\\/][^\\/]+[\\/])' -or
-    [IO.Path]::GetFileName($config.executable) -ine 'llama-server.exe' -or
+    ($config.backend -ne 'vllm' -or [IO.Path]::GetFileName($config.executable) -ine 'python.exe') -or
     $config.command -isnot [array] -or $config.command.Count -eq 0 -or
     $config.command[0] -cne $config.executable -or !$process.Path) {
     throw 'Invalid managed server executable in config; refusing to stop it.'
@@ -29,6 +29,7 @@ if ($null -ne $config.process_creation_filetime -and
     [string]$config.process_creation_filetime -cne [string]$process.StartTime.ToUniversalTime().ToFileTimeUtc()) {
     throw 'Process creation time differs from the managed server config; refusing to stop a reused PID.'
 }
-Stop-Process -InputObject $process
+& taskkill.exe /PID $serverProcessId /T /F | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'Could not stop the owned vLLM process tree.' }
 Remove-Item -LiteralPath $pidFile
 Write-Output "Stopped managed server PID $serverProcessId."

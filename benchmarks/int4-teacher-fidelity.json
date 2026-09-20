@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "reference": "Unquantized BF16 model greedy outputs at concurrency 32",
+  "dataset_sha256": "4e033c7cd2ee71930dc9ba3ca01ac5587900999af554971275574e70491a6e82",
+  "requests": 256,
+  "sacrebleu_version": "2.6.0",
+  "notes": [
+    "chrF++ measures wording fidelity, not semantic correctness or a quality-retention percentage.",
+    "Exact match ignores only leading/trailing whitespace.",
+    "Teacher-forced NLL and top1 use raw logits on identical teacher prefixes including EOS; prefill diagnostic, not decode throughput.",
+    "Greedy free generation retains repetition_penalty=1.05; prompt logprobs exclude this penalty.",
+    "Paired 95% percentile intervals use 1000 target-language-stratified bootstrap draws; no multiple-comparison correction.",
+    "llama.cpp also changes weight quantization and embedding precision; its gap is not pure engine error."
+  ],
+  "strategies": {
+    "teacher-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "c8d2a4b7bd7b2a94c2d5ee9b89544249b970287e742239b7bbbfa7d55e055b57"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "c8d2a4b7bd7b2a94c2d5ee9b89544249b970287e742239b7bbbfa7d55e055b57"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 100.0,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 100.0,
+          "exact_matches": 256,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 100.0,
+          "exact_matches": 128,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 100.0,
+          "exact_matches": 128,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 100.0,
+          "exact_matches": 64,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 100.0,
+          "exact_matches": 64,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 100.0,
+          "exact_matches": 128,
+          "character_edit_rate": 0.0,
+          "length_ratio": 1.0
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "582b16e8697bacbd6b173c950ad07e4480104eb7c666cf264eb0f7185af93db7"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.13898396933643714,
+        "raw_top1_agreement_with_teacher": 1.0,
+        "teacher_token_is_raw_top1": 0.9773522180281885,
+        "teacher_token_in_top5": 1.0
+      }
+    },
+    "w4a4-int8-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "743d4acbe383efd5b550a1b2c6d919bd1b743fcb7c3bed0dc7256dc79a87d87c"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "743d4acbe383efd5b550a1b2c6d919bd1b743fcb7c3bed0dc7256dc79a87d87c"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 79.59828026679128,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 79.59828026679128,
+          "exact_matches": 29,
+          "character_edit_rate": 0.18636991619858212,
+          "length_ratio": 0.9923459354799673
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 56.703108884103834,
+          "exact_matches": 16,
+          "character_edit_rate": 0.21952991452991452,
+          "length_ratio": 0.9766239316239316
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 83.20986146202452,
+          "exact_matches": 13,
+          "character_edit_rate": 0.17612818922165174,
+          "length_ratio": 0.9972018003510948
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 78.83725629543683,
+          "exact_matches": 0,
+          "character_edit_rate": 0.19636397654983162,
+          "length_ratio": 0.9892260197081203
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 80.72581501012593,
+          "exact_matches": 0,
+          "character_edit_rate": 0.1735214279838776,
+          "length_ratio": 0.9988072715308053
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 81.61449785207614,
+          "exact_matches": 29,
+          "character_edit_rate": 0.15569868384206104,
+          "length_ratio": 0.9963595631475777
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "ec3464f09146a12a3ca9cff790592ab41f6e2b101f992de913f3a2ee05cc0001"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.34842903343294046,
+        "raw_top1_agreement_with_teacher": 0.8934099802611074,
+        "teacher_token_is_raw_top1": 0.884544793434221,
+        "teacher_token_in_top5": 0.992416109706687
+      }
+    },
+    "int4-teacher-p32": {
+      "output": {
+        "file": "warm-1.jsonl",
+        "sha256": "2864d26cd5531e9d1e0abaa03fc2ef64a31c872117c5023055853933dd299d69"
+      },
+      "earlier_output": {
+        "file": "cold.jsonl",
+        "sha256": "2864d26cd5531e9d1e0abaa03fc2ef64a31c872117c5023055853933dd299d69"
+      },
+      "repeat_exact_matches": 256,
+      "earlier_chrf_pp": 84.96544045379892,
+      "valid": true,
+      "failed": 0,
+      "empty": 0,
+      "truncated": 0,
+      "groups": {
+        "overall": {
+          "count": 256,
+          "chrf_pp": 84.96544045379892,
+          "exact_matches": 41,
+          "character_edit_rate": 0.13767231729576557,
+          "length_ratio": 0.9997882274638726
+        },
+        "target_lang:Chinese": {
+          "count": 128,
+          "chrf_pp": 63.70432302823653,
+          "exact_matches": 20,
+          "character_edit_rate": 0.16504273504273503,
+          "length_ratio": 0.9952136752136752
+        },
+        "target_lang:English": {
+          "count": 128,
+          "chrf_pp": 87.8233023056193,
+          "exact_matches": 21,
+          "character_edit_rate": 0.12921874793764768,
+          "length_ratio": 1.0012011140002375
+        },
+        "bucket:long": {
+          "count": 64,
+          "chrf_pp": 84.65976417665108,
+          "exact_matches": 0,
+          "character_edit_rate": 0.1380503929150555,
+          "length_ratio": 0.9943869277784707
+        },
+        "bucket:medium": {
+          "count": 64,
+          "chrf_pp": 84.78737671122668,
+          "exact_matches": 0,
+          "character_edit_rate": 0.15361520111869706,
+          "length_ratio": 1.011598256148721
+        },
+        "bucket:single": {
+          "count": 128,
+          "chrf_pp": 87.2472058394153,
+          "exact_matches": 41,
+          "character_edit_rate": 0.0992252403621768,
+          "length_ratio": 1.0053206384766171
+        }
+      },
+      "teacher_forced": {
+        "source": {
+          "file": "teacher-forced.jsonl",
+          "sha256": "f1f1d12fe9c3d8e129fc8d70c180da921278023530fbad7136bb3ba2440c47fa"
+        },
+        "tokens": 28877,
+        "nll_nats_per_token": 0.2311223062159479,
+        "raw_top1_agreement_with_teacher": 0.9293555424732486,
+        "teacher_token_is_raw_top1": 0.9178931329431728,
+        "teacher_token_in_top5": 0.9976451847491082
+      }
+    }
+  },
+  "paired_differences": {
+    "w4a4-int8-p32 minus teacher-p32": {
+      "delta_chrf_pp": -20.401719733208722,
+      "ci95_chrf_pp": [
+        -21.588175534717067,
+        -19.221982962389337
+      ],
+      "delta_nll_nats_per_token": 0.20944506409650337,
+      "ci95_nll": [
+        0.19806463558664542,
+        0.2207400453857529
+      ]
+    },
+    "int4-teacher-p32 minus teacher-p32": {
+      "delta_chrf_pp": -15.03455954620108,
+      "ci95_chrf_pp": [
+        -16.031511478910655,
+        -14.01395101893437
+      ],
+      "delta_nll_nats_per_token": 0.09213833687951084,
+      "ci95_nll": [
+        0.08586919971953239,
+        0.09847640156193567
+      ]
+    },
+    "int4-teacher-p32 minus w4a4-int8-p32": {
+      "delta_chrf_pp": 5.3671601870076415,
+      "ci95_chrf_pp": [
+        4.485082823596136,
+        6.266751956302179
+      ],
+      "delta_nll_nats_per_token": -0.11730672721699253,
+      "ci95_nll": [
+        -0.12721500707252067,
+        -0.10699305487051448
+      ]
+    }
+  },
+  "chrf_signature": "nrefs:1|case:mixed|eff:yes|nc:6|nw:2|space:no|version:2.6.0"
+}
