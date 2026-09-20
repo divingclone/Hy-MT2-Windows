@@ -68,7 +68,7 @@ P95 为客户端任务获得并发名额后的完整响应时间，包含服务�
 
 `scripts/translate.py` 默认批量路径使用异步连接池，并提供 `translate_many_async` 给已有异步程序。结果保持输入顺序和逐条种子，HTTP 错误、超时、截断不会计作成功。修正了旧客户端发送 llama.cpp `repeat_penalty` 字段的问题，改用 vLLM 的 `repetition_penalty`；默认仍为 1.05。鉴权通过进程环境变量 `VLLM_API_KEY` 放入请求头，不写入译文或日志。
 
-`http_transport.py` 已加入便携包文件清单，aiohttp/Winloop 原本就在 vLLM 运行时中，本轮固定其依赖版本，没有引入另一套大型运行环境。用法见 [API 翻译说明](USAGE.md)。已有发行 ZIP 不会因修改源代码而自动改变。
+`http_transport.py` 已加入便携包文件清单，aiohttp/Winloop 原本就在 vLLM 运行时中，本轮固定其依赖版本，没有引入另一套大型运行环境。用法见 [API 翻译说明](USAGE.md)。0.2.2 正式便携包重新构建并包含这些客户端改动；发布前的 cuDNN 依赖裁剪回归另见 [运行包精简](RUNTIME_SIZE.md)。
 
 ```powershell
 # 先停止其他 GPU 推理服务；脚本只管理自己启动的服务。

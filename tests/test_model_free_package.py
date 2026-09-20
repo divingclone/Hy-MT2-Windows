@@ -25,6 +25,10 @@ class ModelFreePackageTests(unittest.TestCase):
                 payload/'runtime/webview2/msedgewebview2.exe': b'browser',
                 payload/'runtime/vllm/Lib/site-packages/torch/lib/cusolverMg64_12.dll': b'optional',
                 payload/'runtime/vllm/Lib/site-packages/torch/lib/cusolver64_12.dll': b'required',
+                payload/'runtime/vllm/Lib/site-packages/torch/lib/cudnn_engines_precompiled64_9.dll': b'full-only',
+                payload/'runtime/vllm/Lib/site-packages/torch/lib/cudnn64_9.dll': b'dispatcher',
+                payload/'runtime/vllm/Lib/site-packages/torch/lib/cudnn_graph64_9.dll': b'graph',
+                payload/'runtime/vllm/Lib/site-packages/torch/lib/cudnn_engines_runtime_compiled64_9.dll': b'jit',
                 payload/'runtime/vllm/Lib/site-packages/tilelang/__init__.py': b'optional',
             }
             for name in build_desktop.ROOT_DLLS:
@@ -42,6 +46,9 @@ class ModelFreePackageTests(unittest.TestCase):
                 self.assertIn('hymt-desktop.exe', names)
                 self.assertFalse(any('webview2' in n or 'tilelang' in n or 'cusolverMg' in n for n in names))
                 self.assertIn('payload/runtime/vllm/Lib/site-packages/torch/lib/cusolver64_12.dll',names)
+                self.assertNotIn('payload/runtime/vllm/Lib/site-packages/torch/lib/cudnn_engines_precompiled64_9.dll',names)
+                for library in ('cudnn64_9.dll','cudnn_graph64_9.dll','cudnn_engines_runtime_compiled64_9.dll'):
+                    self.assertIn('payload/runtime/vllm/Lib/site-packages/torch/lib/'+library,names)
             self.assertEqual((payload/'models/model.zip').read_bytes(), b'large weights')
 
 

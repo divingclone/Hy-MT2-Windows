@@ -36,6 +36,7 @@ def environment(root=ROOT, *, cache=None, gpu='0'):
     # Triton ships TinyCC + PTXAS. FlashInfer uses our fat AOT DLL, never NVCC.
     env.update(CC=str(compiler), CXX=str(runtime/'no-host-cpp-compiler.exe'),
                CUDA_PATH=str(cuda), CUDA_HOME=str(cuda), FLASHINFER_DISABLE_JIT='1',
+               CUDNN_LIB_CONFIG='GRAPH_JIT_ONLY',
                VLLM_USE_FLASHINFER_SAMPLER='1', VLLM_NO_USAGE_STATS='1', DO_NOT_TRACK='1')
     cache=Path(cache or root/'cache/vllm').resolve()
     cache.mkdir(parents=True,exist_ok=True)

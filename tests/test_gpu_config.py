@@ -119,8 +119,9 @@ class PortableEnvironmentTests(unittest.TestCase):
                          'Lib/site-packages/triton/backends/nvidia/bin/cudart64_13.dll',
                          'Lib/site-packages/flashinfer/data/aot/sampling/sampling.dll'):
                 p=runtime/name;p.parent.mkdir(parents=True,exist_ok=True);p.touch()
-            with patch.dict(os.environ,{'PATH':'host-compiler','CC':'cl.exe','CUDA_PATH':'host-cuda','INCLUDE':'host-sdk','PYTHONPATH':'host-python','FLASHINFER_DISABLE_JIT':'0'}):
+            with patch.dict(os.environ,{'PATH':'host-compiler','CC':'cl.exe','CUDA_PATH':'host-cuda','INCLUDE':'host-sdk','PYTHONPATH':'host-python','FLASHINFER_DISABLE_JIT':'0','CUDNN_LIB_CONFIG':'FULL'}):
                 env=environment(root)
+            self.assertEqual(env['CUDNN_LIB_CONFIG'],'GRAPH_JIT_ONLY')
             self.assertNotIn('host-',env['PATH'])
             self.assertNotIn('INCLUDE',env)
             self.assertNotIn('PYTHONPATH',env)

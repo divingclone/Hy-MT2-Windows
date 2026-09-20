@@ -6,6 +6,8 @@
 
 ## 启动
 
+下载 [0.2.2 完整便携 ZIP](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.2.2/HyMT-0.2.2-windows-x64-portable.zip)，解压后双击 `hymt-desktop.exe`。模型在应用内单独下载；命令行入口位于 `payload/`。
+
 完整 vLLM 便携包包含 Python、推理依赖、MSVC 运行库、Triton TinyCC/PTXAS、预编译 FlashInfer 采样内核。界面优先使用系统 WebView2，缺失时自动下载应用本地版本。用户无需手动安装 Python、MSVC、CUDA Toolkit 或 WebView2；需要已有 NVIDIA 驱动 596.36 或更新。RTX 50 已在 RTX 5090 实测；RTX 30/40 使用 INT4 兼容路径，运行库含对应架构，但尚待实卡验证。GTX 10/16、RTX 20 不在当前运行包支持范围。详见 [免安装与显卡兼容](docs/PORTABLE_RUNTIME.md)。
 
 ```powershell

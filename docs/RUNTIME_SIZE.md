@@ -1,6 +1,29 @@
 # 0.2.2 运行包精简
 
-默认 ZIP 从 0.2.1 的约 2.85 GiB 降至约 2.16 GiB，减少约 702 MiB（24%）；解压文件减少约 1.56 GiB。模型仍从 Hugging Face 的原始 checkpoint 仓库单独下载，不在此体积中。
+默认 ZIP 首轮从 0.2.1 的约 2.85 GiB 降至约 2.16 GiB；发布前再裁剪 cuDNN 可选子库，降至约 **1.99 GB（1.85 GiB）**。使用相同的普通 ZIP / Deflate 级别 5，无需分卷或额外解压软件。模型仍从 Hugging Face 的原始 checkpoint 仓库单独下载，不在此体积中。
+
+## 发布前的 cuDNN 裁剪
+
+采用 NVIDIA 官方支持的 [`GRAPH_JIT_ONLY`](https://docs.nvidia.com/deeplearning/cudnn/v1.11.0/developer/misc.html#cudnn-library-configuration) 配置。保留 `cudnn64_9.dll`、`cudnn_graph64_9.dll`、`cudnn_engines_runtime_compiled64_9.dll`，移除 `adv`、`cnn`、`ops`、`heuristic`、`engines_precompiled` 五个子库，减少 410,738,736 字节解压内容，原 ZIP 中对应压缩数据为 335,748,865 字节。启动环境强制设置该配置，避免继承宿主机的 FULL 配置。
+
+此配置支持 Ampere 及更新架构，匹配本项目 RTX 30/40/50 范围。它不保留完整 cuDNN 的旧式卷积等接口，因此该运行包仍专用于当前 HyMT 文本翻译。项目继续使用 Triton attention、CUTLASS/Marlin 和原有 GPU 架构内核；未改动模型、KV 精度或计算代码。
+
+2026-09-21，RTX 5090；同一组 512 请求，2K 上下文、2048 调度 token、INT8 KV。每格一个独立进程，先跑一轮再测三轮，以下为核心推理 TPS 中位数，排除 HTTP 和启动：
+
+| 模式 | 并发 | 裁剪前 TPS | 裁剪后 TPS |
+| --- | ---: | ---: | ---: |
+| NVFP4 | 32 | 3,851.43 | 4,404.58 |
+| NVFP4 | 256 | 23,574.81 | 23,609.69 |
+| INT4 | 32 | 4,470.79 | 4,819.33 |
+| INT4 | 256 | 16,131.92 | 16,106.43 |
+
+32 轮共 16,384 请求全部成功，8,192 组配对结果的译文、token ID、token 数和结束状态全部一致。NVFP4、INT4 另外通过独立空缓存、非 greedy 采样和宿主编译工具隔离检查。未发现可重复的性能回退；单进程样本不用于宣称裁剪带来加速，也不替换 README 的多进程 API 对照数据。数据见 [裁剪回归摘要](../benchmarks/cudnn-runtime-pruning.json)。
+
+复现时准备裁剪前后两个独立便携目录，使用相同模型：
+
+```powershell
+runtime/vllm/python.exe scripts/benchmark_runtime_pruning.py --baseline-root dist/before --candidate-root dist/after --model-root . --output results/pruning-recheck
+```
 
 ## WebView2
 

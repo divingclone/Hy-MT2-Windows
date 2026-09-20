@@ -9,6 +9,13 @@ from pathlib import PurePosixPath
 # Optional video/TileLang backends and Numba's optional speculative decoder.
 OPTIONAL_PACKAGES = ('tilelang', 'torchcodec', 'pynvvideocodec', 'numba', 'llvmlite')
 OPTIONAL_BINARIES = {
+    # NVIDIA's GRAPH_JIT_ONLY configuration retains only the dispatcher, graph
+    # and runtime-compiled engines. vllm_runtime.environment selects that mode.
+    'torch/lib/cudnn_adv64_9.dll',
+    'torch/lib/cudnn_cnn64_9.dll',
+    'torch/lib/cudnn_engines_precompiled64_9.dll',
+    'torch/lib/cudnn_heuristic64_9.dll',
+    'torch/lib/cudnn_ops64_9.dll',
     'torch/lib/cusolverMg64_12.dll',  # multi-GPU solver, no PE consumers
     'torch/lib/nvrtc64_130_0.alt.dll',  # unused alternate compiler, keep normal NVRTC
     'vllm/_moe_C.pyd',
