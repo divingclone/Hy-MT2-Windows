@@ -61,7 +61,7 @@ class WebViewTests(unittest.TestCase):
             stale.mkdir();(stale/'unfinished.dll').write_bytes(b'partial')
             unrelated=target.parent/'keep.txt';unrelated.write_bytes(b'keep')
             with patch.object(browser,'download',side_effect=AssertionError('Unexpected download')):
-                self.assertEqual(browser.ensure_runtime(target),target)
+                self.assertEqual(browser.ensure_runtime(target),target.resolve())
             self.assertFalse(stale.exists());self.assertEqual(unrelated.read_bytes(),b'keep')
 
 
