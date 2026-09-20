@@ -1,5 +1,7 @@
 # vLLM 便携发布
 
+0.2.3 使用已验收的定制 PyTorch payload，构建流程见 [定制后端](PYTORCH_CUSTOM_BUILD.md)。发布新版本时同步 package.json/package-lock.json、Cargo.toml/Cargo.lock 和 tauri.conf.json，重建桌面 EXE，再用 `scripts/pytorch/package_backend.py` 打包该 payload；不要重新从完整开发运行时 staging 覆盖定制后端。签名、更新清单和 Release 标签均须指向同一版本与提交。该版本沿用已有 GPU 验证记录，仅做必要的构建、签名、归档和发布校验，不重复 GPU 请求矩阵；验证限制须写入发布说明。
+
 运行 Python/前端/Rust 测试和真实 GPU 鉴权、流式、重启、进程树清理测试，校验模型清单，再运行 `scripts/build_desktop.py`。当前大体积 vLLM 运行时使用 Zip64 便携包；旧 NSIS 小运行时流程不再用于本版本。
 
 签名仍只使用用户已有的 `TAURI_SIGNING_PRIVATE_KEY` 和 `HYMT_UPDATER_PUBLIC_KEY`；构建脚本不生成私钥。`--signed` 只签名便携 ZIP 并生成对应平台的更新描述。没有密钥时生成本地未签名包，不自动发布。

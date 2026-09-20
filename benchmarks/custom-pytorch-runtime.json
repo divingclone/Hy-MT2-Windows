@@ -1,0 +1,271 @@
+{
+  "profile": "hymt-cuda-delay-v1",
+  "custom_dll_sha256": "53ce23444795d7118d99f9231567e7f264ff4cac4bb714584454f84cd1bf3f02",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "requests_per_pass": 32,
+  "context": 2048,
+  "parallel": 32,
+  "kv_cache_dtype": "int8_per_token_head",
+  "production_configuration_changed": false,
+  "default_multiprocessing_nvfp4": {
+    "baseline": {
+      "warm_median": {
+        "wall_s": 0.35520099999848753,
+        "completion_tokens_per_second": 5760.660388785687,
+        "requests_per_second": 90.09830520094917
+      },
+      "valid_requests": 96
+    },
+    "candidate": {
+      "warm_median": {
+        "wall_s": 0.3444703500135802,
+        "completion_tokens_per_second": 5926.758652671928,
+        "requests_per_second": 92.902077396049
+      },
+      "valid_requests": 96
+    },
+    "identical_token_pairs": {
+      "cold": 32,
+      "warm-1": 32,
+      "warm-2": 13
+    }
+  },
+  "controlled_offline_comparison": {
+    "requests_per_pass": 32,
+    "warm_passes": 2,
+    "profiles": {
+      "fast-baseline": {
+        "warm_median": {
+          "wall_s": 0.3278316000069026,
+          "completion_tokens_per_second": 6234.948984876119,
+          "requests_per_second": 97.61172579062416
+        },
+        "runs": [
+          {
+            "phase": "cold",
+            "wall_s": 7.415033299999777,
+            "completion_tokens": 2044,
+            "phase_start_unix_s": 1789934297.8988204,
+            "phase_end_unix_s": 1789934305.3138537,
+            "completion_tokens_per_second": 275.65621316900376,
+            "requests_per_second": 4.315557153330783,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "ad145ac86535f90f678f36840f03d1736bcab309c602963b3ea69bced1257c48"
+          },
+          {
+            "phase": "warm-1",
+            "wall_s": 0.32699530001264066,
+            "completion_tokens": 2044,
+            "phase_start_unix_s": 1789934305.3152292,
+            "phase_end_unix_s": 1789934305.6422246,
+            "completion_tokens_per_second": 6250.854369836463,
+            "requests_per_second": 97.86073377434775,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "ad145ac86535f90f678f36840f03d1736bcab309c602963b3ea69bced1257c48"
+          },
+          {
+            "phase": "warm-2",
+            "wall_s": 0.3286679000011645,
+            "completion_tokens": 2044,
+            "phase_start_unix_s": 1789934305.6444755,
+            "phase_end_unix_s": 1789934305.9731433,
+            "completion_tokens_per_second": 6219.043599915774,
+            "requests_per_second": 97.36271780690058,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "ad145ac86535f90f678f36840f03d1736bcab309c602963b3ea69bced1257c48"
+          }
+        ],
+        "host_build_tools_excluded": true,
+        "cold_cache": true
+      },
+      "fast-candidate": {
+        "warm_median": {
+          "wall_s": 0.3277927500021178,
+          "completion_tokens_per_second": 6235.655400495903,
+          "requests_per_second": 97.6227851349652
+        },
+        "runs": [
+          {
+            "phase": "cold",
+            "wall_s": 7.2935213999589905,
+            "completion_tokens": 2044,
+            "phase_start_unix_s": 1789934375.5731945,
+            "phase_end_unix_s": 1789934382.866716,
+            "completion_tokens_per_second": 280.24871497758176,
+            "requests_per_second": 4.387455420392669,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "ad145ac86535f90f678f36840f03d1736bcab309c602963b3ea69bced1257c48"
+          },
+          {
+            "phase": "warm-1",
+            "wall_s": 0.3281647000112571,
+            "completion_tokens": 2044,
+            "phase_start_unix_s": 1789934382.867536,
+            "phase_end_unix_s": 1789934383.195701,
+            "completion_tokens_per_second": 6228.579734291606,
+            "requests_per_second": 97.51201149575898,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "ad145ac86535f90f678f36840f03d1736bcab309c602963b3ea69bced1257c48"
+          },
+          {
+            "phase": "warm-2",
+            "wall_s": 0.3274207999929786,
+            "completion_tokens": 2044,
+            "phase_start_unix_s": 1789934383.1988108,
+            "phase_end_unix_s": 1789934383.5262315,
+            "completion_tokens_per_second": 6242.7310667002,
+            "requests_per_second": 97.73355877417143,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "ad145ac86535f90f678f36840f03d1736bcab309c602963b3ea69bced1257c48"
+          }
+        ],
+        "host_build_tools_excluded": true,
+        "cold_cache": true
+      },
+      "fast-comparison": {
+        "identical_token_pairs": 96
+      },
+      "compat-baseline": {
+        "warm_median": {
+          "wall_s": 0.29272209998453036,
+          "completion_tokens_per_second": 7180.920843507288,
+          "requests_per_second": 109.3194419563431
+        },
+        "runs": [
+          {
+            "phase": "cold",
+            "wall_s": 7.076950800023042,
+            "completion_tokens": 2102,
+            "phase_start_unix_s": 1789934452.8982983,
+            "phase_end_unix_s": 1789934459.975249,
+            "completion_tokens_per_second": 297.0205755836477,
+            "requests_per_second": 4.5217214170679005,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "e3d4b2b82c848065daae566c6336fffc3f534462cae85b00f30d87de266fdb35"
+          },
+          {
+            "phase": "warm-1",
+            "wall_s": 0.2919605000060983,
+            "completion_tokens": 2102,
+            "phase_start_unix_s": 1789934459.977363,
+            "phase_end_unix_s": 1789934460.2693236,
+            "completion_tokens_per_second": 7199.604055877746,
+            "requests_per_second": 109.60386764419023,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "e3d4b2b82c848065daae566c6336fffc3f534462cae85b00f30d87de266fdb35"
+          },
+          {
+            "phase": "warm-2",
+            "wall_s": 0.2934836999629624,
+            "completion_tokens": 2102,
+            "phase_start_unix_s": 1789934460.270418,
+            "phase_end_unix_s": 1789934460.5639017,
+            "completion_tokens_per_second": 7162.23763113683,
+            "requests_per_second": 109.03501626849598,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "e3d4b2b82c848065daae566c6336fffc3f534462cae85b00f30d87de266fdb35"
+          }
+        ],
+        "host_build_tools_excluded": true,
+        "cold_cache": true
+      },
+      "compat-candidate": {
+        "warm_median": {
+          "wall_s": 0.3008220000192523,
+          "completion_tokens_per_second": 6988.162352218205,
+          "requests_per_second": 106.38496444861207
+        },
+        "runs": [
+          {
+            "phase": "cold",
+            "wall_s": 7.394067700020969,
+            "completion_tokens": 2102,
+            "phase_start_unix_s": 1789934529.2761352,
+            "phase_end_unix_s": 1789934536.670203,
+            "completion_tokens_per_second": 284.28195213766287,
+            "requests_per_second": 4.32779375280933,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "e3d4b2b82c848065daae566c6336fffc3f534462cae85b00f30d87de266fdb35"
+          },
+          {
+            "phase": "warm-1",
+            "wall_s": 0.2979398000170477,
+            "completion_tokens": 2102,
+            "phase_start_unix_s": 1789934536.6726005,
+            "phase_end_unix_s": 1789934536.9705403,
+            "completion_tokens_per_second": 7055.116502997339,
+            "requests_per_second": 107.40424742907463,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "e3d4b2b82c848065daae566c6336fffc3f534462cae85b00f30d87de266fdb35"
+          },
+          {
+            "phase": "warm-2",
+            "wall_s": 0.3037042000214569,
+            "completion_tokens": 2102,
+            "phase_start_unix_s": 1789934536.9720967,
+            "phase_end_unix_s": 1789934537.275801,
+            "completion_tokens_per_second": 6921.208201439072,
+            "requests_per_second": 105.36568146814952,
+            "errors": 0,
+            "truncated": 0,
+            "terminal_eos_count": 32,
+            "valid": true,
+            "output_sha256": "e3d4b2b82c848065daae566c6336fffc3f534462cae85b00f30d87de266fdb35"
+          }
+        ],
+        "host_build_tools_excluded": true,
+        "cold_cache": true
+      },
+      "compat-comparison": {
+        "identical_token_pairs": 96
+      }
+    },
+    "valid": true,
+    "scope": "Two configurations, 32 requests per pass, deterministic offline scheduling (VLLM_ENABLE_V1_MULTIPROCESSING=0) for output comparison only; production settings unchanged."
+  },
+  "limitations": [
+    "Default multiprocessing NVFP4 produced 19 differing outputs in the final pass; all requests were valid. Evidence retained.",
+    "Deterministic offline scheduling is used only for the controlled comparison. It does not establish a definitive cause for the earlier variation.",
+    "Two short warm passes are a smoke comparison, not a statistically conclusive performance study.",
+    "RTX 30/40 have not been tested on physical hardware."
+  ],
+  "evidence_sha256": {
+    "results/pytorch-slim-controlled/summary.json": "fe0e21d1cb7a2c3afdad528be18effffd87fe1f2ceea30510e76fbe97d5f376f",
+    "results/pytorch-slim-binary-audit.json": "3e37bdbf1a461f6748a8ee48d381ed4cdf8f094a282ab43d7cae2c46f5c5f300",
+    "results/pytorch-slim-acceptance/fast-baseline/report.json": "4780ae7b8d6902f9a75e0e4736950e1ee422494260d2a50f8c76b84e092c48b5",
+    "results/pytorch-slim-acceptance/fast-candidate/report.json": "aabe75093224ca8fadb1d76a8cf5771855c151071950d8f886b9f9db6568e498"
+  }
+}

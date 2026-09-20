@@ -6,7 +6,7 @@
 
 ## 启动
 
-下载 [0.2.2 完整便携 ZIP](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.2.2/HyMT-0.2.2-windows-x64-portable.zip)，解压后双击 `hymt-desktop.exe`。模型在应用内单独下载；命令行入口位于 `payload/`。
+下载 [0.2.3 完整便携 ZIP](https://github.com/divingclone/Hy-MT2-Windows/releases/download/desktop-v0.2.3/HyMT-0.2.3-windows-x64-portable.zip)，解压后双击 `hymt-desktop.exe`。模型在应用内单独下载；命令行入口位于 `payload/`。
 
 完整 vLLM 便携包包含 Python、推理依赖、MSVC 运行库、Triton TinyCC/PTXAS、预编译 FlashInfer 采样内核。界面优先使用系统 WebView2，缺失时自动下载应用本地版本。用户无需手动安装 Python、MSVC、CUDA Toolkit 或 WebView2；需要已有 NVIDIA 驱动 596.36 或更新。RTX 50 已在 RTX 5090 实测；RTX 30/40 使用 INT4 兼容路径，运行库含对应架构，但尚待实卡验证。GTX 10/16、RTX 20 不在当前运行包支持范围。详见 [免安装与显卡兼容](docs/PORTABLE_RUNTIME.md)。
 
@@ -42,6 +42,8 @@
 上述服务器命令分别使用，重启前先停止旧服务。批量入口直接调用 vLLM 引擎，排除 HTTP；运行时应停止其他 GPU 推理服务。默认 32 并发、2K 上下文、2048 调度 token、总显存 75% 的估算预算。KV 是共享 token 池，不为每个请求预留完整上下文；长文本可调整上下文与 `-KVGib`。输出和旁路文件不覆盖已有文件。
 
 输入每行：`{"id":"1","text":"Hello.","target_lang":"Chinese"}`。输出保留 ID、译文、结束状态及 token 计数。HTTP 客户端为 `scripts/translate.py`。详见 [使用说明](docs/USAGE.md) 和 [桌面端](docs/DESKTOP.md)。
+
+0.2.3 使用 HyMT 专用 PyTorch CUDA 后端，便携包约 **966 MB**，相比 0.2.2 缩小约 **51.4%**。NVFP4/INT4 受控输出对照一致；RTX 5090 短测 NVFP4 持平、INT4 约低 2.7%，尚不能保证所有场景性能不变。构建方法、默认采样差异和验证范围见 [定制后端说明](docs/PYTORCH_CUSTOM_BUILD.md)。
 
 ## 实测依据
 

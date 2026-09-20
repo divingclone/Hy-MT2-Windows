@@ -4,6 +4,7 @@ import argparse,hashlib,json,shutil,subprocess,zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from runtime_filter import excluded
+from runtime_patches import VISION_ATTENTION, patch_release_runtime
 ROOT=Path(__file__).resolve().parents[1]
 SCRIPTS=('serve.py','serve_vllm.py','serve.ps1','stop-server.ps1','run-python.cmd','gpu_config.py',
     'vllm_runtime.py','http_transport.py','translate.py','translate_batch.py','vllm_batch_worker.py','setup_model.py',
@@ -19,14 +20,39 @@ class Entry:
 def sha256(path):
     with Path(path).open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
 
-def make_plan(root,binary_dir=None,python_dir=None,include_models=False,include_webview2=False):
-    root=Path(root).resolve(); entries=[]; problems=[]
+def runtime_problems(root):
+    """Guard exclusions even when the caller reuses an older staging tree."""
     try:
-        runtime=json.loads((root/'runtime/vllm/hymt-runtime.json').read_text(encoding='utf-8'))
+        runtime=json.loads((Path(root)/'runtime/vllm/hymt-runtime.json').read_text(encoding='utf-8'))
+        if not isinstance(runtime,dict):
+            return ['Missing or invalid vLLM runtime provenance']
         if (runtime.get('vllm'),runtime.get('torch'))!=('0.29.0+cu132','2.11.0+cu130'):
-            problems.append('Runtime exclusions require revalidation for these vLLM/PyTorch versions')
+            return ['Runtime exclusions require revalidation for these vLLM/PyTorch versions']
     except (OSError,ValueError):
-        problems.append('Missing or invalid vLLM runtime provenance')
+        return ['Missing or invalid vLLM runtime provenance']
+    torch_root=Path(root)/'runtime/vllm/Lib/site-packages/torch'
+    custom_path=torch_root/'hymt-build.json'
+    if custom_path.exists() or runtime.get('torch_custom_build'):
+        try:
+            custom=json.loads(custom_path.read_text(encoding='utf-8'))
+            if (custom.get('profile')!='hymt-cuda-delay-v1' or
+                    custom.get('binary_compatibility_checked') is not True or
+                    custom.get('inference_validated') is not True):
+                return ['Custom PyTorch requires completed binary and inference validation']
+            if sha256(torch_root/'lib/torch_cuda.dll')!=custom['custom_dll_sha256']:
+                return ['Custom PyTorch CUDA DLL differs from the validated build']
+            if sha256(torch_root/'cuda/__init__.py')!=custom['cuda_python_sha256']:
+                return ['Custom PyTorch architecture metadata differs from the validated build']
+            for name,expected in custom['build_provenance']['base_libraries'].items():
+                if sha256(torch_root/'lib'/name)!=expected:
+                    return ['Custom PyTorch requires the original matching CPU/c10/Python libraries']
+        except (OSError,ValueError,KeyError,TypeError,AttributeError):
+            return ['Missing or invalid custom PyTorch provenance']
+    return []
+
+
+def make_plan(root,binary_dir=None,python_dir=None,include_models=False,include_webview2=False):
+    root=Path(root).resolve(); entries=[]; problems=runtime_problems(root)
     def add(source,destination,component):
         if excluded(destination,include_webview2=include_webview2):return
         source=Path(source)
@@ -93,6 +119,12 @@ def main():
     for entry in entries:
         path=target/entry.relative;path.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(entry.source,path)
         records.append({'path':entry.relative,'bytes':path.stat().st_size,'sha256':sha256(path)})
+    patch_release_runtime(target)
+    # The release import patch changes one staged Python file after copying.
+    for record in records:
+        if record['path']==VISION_ATTENTION:
+            path=target/record['path']
+            record.update(bytes=path.stat().st_size,sha256=sha256(path))
     verify_python(target)
     (target/'manifest.sha256.json').write_text(json.dumps({'backend':'vllm','files':records},indent=2),encoding='utf-8')
     if not args.no_zip:

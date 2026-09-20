@@ -1,0 +1,104 @@
+{
+  "baseline_release": "desktop-v0.2.2",
+  "scope": "Pinned Windows HyMT text runtime; no model, KV precision, kernel or scheduling changes",
+  "removed_files": 8741,
+  "removed_bytes": 828181698,
+  "removed_compressed_data_bytes": 303856282,
+  "groups": {
+    "python-developer-tools": {
+      "files": 2796,
+      "bytes": 27871766,
+      "compressed_bytes": 11992498
+    },
+    "optional-package": {
+      "files": 176,
+      "bytes": 146222381,
+      "compressed_bytes": 54460723
+    },
+    "aot-build-sources": {
+      "files": 3472,
+      "bytes": 53616105,
+      "compressed_bytes": 8720702
+    },
+    "other-model-tokenizers": {
+      "files": 7,
+      "bytes": 36925748,
+      "compressed_bytes": 6514423
+    },
+    "package-tests": {
+      "files": 1619,
+      "bytes": 20297984,
+      "compressed_bytes": 4764298
+    },
+    "developer-assets": {
+      "files": 652,
+      "bytes": 28346714,
+      "compressed_bytes": 14765822
+    },
+    "torch-link-libraries": {
+      "files": 16,
+      "bytes": 48968624,
+      "compressed_bytes": 8040867
+    },
+    "optional-binary": {
+      "files": 3,
+      "bytes": 465932376,
+      "compressed_bytes": 194596949
+    }
+  },
+  "source_patch": {
+    "path": "vllm/model_executor/layers/attention/mm_encoder_attention.py",
+    "change": "Defer FA import until a vision model selects that backend",
+    "normalized_before_sha256": "8dffe42a5e6bc49eac62ca22b677833541c1338d9f4b91abbb4fe19d9d04b031",
+    "normalized_after_sha256": "2441425532cd0ca156b2ce7a82a659ad065b1a9749229b7c580f810b32c0030d"
+  },
+  "final_validation": {
+    "imports": [
+      "hymt_vllm_model",
+      "vllm.entrypoints.openai.api_server",
+      "flashinfer.sampling.get_sampling_module"
+    ],
+    "flash_attention_2_not_loaded": true,
+    "cold_gpu_smoke": {
+      "passed": true,
+      "gpu": "NVIDIA GeForce RTX 5090",
+      "profile": "fast",
+      "cold_cache": true,
+      "host_build_tools_excluded": true,
+      "requests": 3,
+      "failed": 0,
+      "truncated": 0
+    },
+    "new_throughput_matrix_run": false
+  },
+  "initial_asset_only_validation": {
+    "candidate_sha256": "d1123b554976e1d240349d40d3cd6fd06d86ad4531697ca1fb959aa4ac66fd95",
+    "unit_tests_passed": 82,
+    "requests": 24576,
+    "paired_outputs_identical": 12288,
+    "valid": true,
+    "scope_warning": "These throughput data cover the initial developer-asset pass, not the final optional-dependency exclusions. The first NVFP4 p32 baseline overlapped ZIP compression; do not infer a speedup."
+  },
+  "limitations": [
+    "RTX 30/40 not physically validated",
+    "Generic audio/video models and profiling metrics are outside this release scope",
+    "Local unsigned candidate; published Release unchanged"
+  ],
+  "artifact": {
+    "name": "HyMT-0.2.2-windows-x64-portable.zip",
+    "baseline_bytes": 1987537972,
+    "bytes": 1681567029,
+    "reduction_bytes": 305970943,
+    "reduction_percent": 15.394470310024344,
+    "sha256": "92b99dedcba607413b3cb651630817058cb67709cab8705e0607bbedca937b4f",
+    "files": 38088,
+    "removed_files": 8741,
+    "changed_retained_files": [
+      "payload/docs/RUNTIME_SIZE.md",
+      "payload/runtime/vllm/Lib/site-packages/vllm/model_executor/layers/attention/mm_encoder_attention.py"
+    ],
+    "retained_native_files": 357,
+    "retained_native_crc_and_size_identical": true,
+    "zip_integrity": "passed by package_portable testzip"
+  }
+}

@@ -14,9 +14,10 @@ import subprocess
 import sys
 import zipfile
 
-from package_windows import ROOT, make_plan, verify_python, sha256
+from package_windows import ROOT, make_plan, verify_python, sha256, runtime_problems
 from desktop_update import ROOT_DLLS
 from runtime_filter import excluded
+from runtime_patches import patch_release_runtime
 
 DESKTOP = ROOT / 'desktop'
 PAYLOAD = DESKTOP / 'src-tauri/resources/payload'
@@ -63,11 +64,15 @@ def stage(include_models=False,include_webview2=False):
         for file in directory.glob('LICENSE*'):
             licenses.append(f'\n{name}\n' + file.read_text('utf-8', errors='replace'))
     (PAYLOAD / 'licenses/DESKTOP-DEPENDENCIES.txt').write_text('\n'.join(licenses), encoding='utf-8')
+    patch_release_runtime(PAYLOAD)
     verify_python(PAYLOAD)
     print(f'Staged {len(entries)} runtime files plus desktop workers.', flush=True)
 
 
 def package_portable(output: Path, version: str, include_models=False,include_webview2=False):
+    problems = runtime_problems(PAYLOAD)
+    if problems:
+        raise ValueError('\n'.join(problems))
     if include_webview2 and not (PAYLOAD/'runtime/webview2/msedgewebview2.exe').is_file():
         raise ValueError('Offline WebView2 was not staged; run without --skip-stage')
     folder = output / f'HyMT-{version}-windows-x64-portable'
@@ -85,6 +90,7 @@ def package_portable(output: Path, version: str, include_models=False,include_we
             skipped.add('src')
         return skipped
     shutil.copytree(PAYLOAD, folder / 'payload', ignore=exclude)
+    patch_release_runtime(folder / 'payload')
     for name in ROOT_DLLS:
         shutil.copy2(PAYLOAD/'runtime/vllm'/name,folder/name)
     (folder / 'portable.json').write_text('{"format":1}\n', encoding='utf-8')

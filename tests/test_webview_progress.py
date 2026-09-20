@@ -15,6 +15,7 @@ class ProgressTests(unittest.TestCase):
         callback=c.WINFUNCTYPE(w.BOOL,w.HWND,w.LPARAM)
         user.EnumWindows.argtypes=[callback,w.LPARAM]
         user.GetWindowThreadProcessId.argtypes=[w.HWND,c.POINTER(w.DWORD)]
+        user.GetClassNameW.argtypes=[w.HWND,w.LPWSTR,c.c_int]
         user.PostMessageW.argtypes=[w.HWND,w.UINT,w.WPARAM,w.LPARAM]
         root=Path(__file__).resolve().parents[1]
         script='import time; from webview_progress import run_with_progress; run_with_progress(lambda update: time.sleep(60))'
@@ -25,7 +26,11 @@ class ProgressTests(unittest.TestCase):
             @callback
             def inspect(hwnd,_):
                 pid=w.DWORD();user.GetWindowThreadProcessId(hwnd,c.byref(pid))
-                if pid.value==child.pid:owned.append(hwnd)
+                # Python can own IME/helper windows before the progress window
+                # exists. Closing the first PID match races with GUI startup.
+                name=c.create_unicode_buffer(256)
+                user.GetClassNameW(hwnd,name,len(name))
+                if pid.value==child.pid and name.value=='HyMTWebViewBootstrap':owned.append(hwnd)
                 return True
             while not owned and child.poll() is None and time.monotonic()<deadline:
                 user.EnumWindows(inspect,0);time.sleep(.05)
