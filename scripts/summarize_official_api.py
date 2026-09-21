@@ -110,6 +110,8 @@ def main():
         'total_errors':sum(p['errors'] for p in failed_metrics),
         'total_truncations':sum(p['truncated'] for p in failed_metrics),'notes':matrix['notes'],
         'detailed_report_sha256':digest(source/'matrix.json')}
+    if 'runtime_identity' in matrix:
+        result['runtime_identity']=matrix['runtime_identity']
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'summary':summary,'comparison':comparison},ensure_ascii=False,indent=2))
 

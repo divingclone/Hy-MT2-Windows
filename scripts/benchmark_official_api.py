@@ -64,9 +64,18 @@ def main():
                  'Both use shared KV pools with equal token capacity and a 2048-token per-request context limit.',
                  'Fresh server process per trial/configuration; backend and concurrency order alternate.',
                  'Unchanged 64 bilingual cases repeated eight times; not a production traffic or length distribution.']}
+    torch_root=runtime/'runtime/vllm/Lib/site-packages/torch'
+    marker=torch_root/'hymt-build.json'
+    result['runtime_identity']={'torch_cuda_sha256':digest(torch_root/'lib/torch_cuda.dll'),
+                                'custom_build_marker_present':marker.is_file()}
+    if marker.is_file():
+        build=json.loads(marker.read_text(encoding='utf-8'))
+        result['runtime_identity'].update(profile=build['profile'],inference_validated=build['inference_validated'])
     if args.resume:
         previous=json.loads((output/'matrix.json').read_text(encoding='utf-8'))
         if previous.get('client','urllib')!=args.client:raise ValueError('Resume mismatch: client')
+        if 'runtime_identity' in previous and previous['runtime_identity']!=result['runtime_identity']:
+            raise ValueError('Resume mismatch: runtime binary identity')
         for key in ('upstream','upstream_version','vllm_runtime','vllm_model','trials','warm_repeats',
                     'context_per_request','batch_tokens','llama_kv','kv_token_capacity','vllm_kv'):
             # JSON object keys become strings on disk.

@@ -4,6 +4,7 @@
 
 | 文件 | 内容 |
 | --- | --- |
+| [official-api-release024.json](official-api-release024.json) | README 主对照：0.2.4 正式运行库对比未修改官方 llama.cpp / Q4_K_M，32/256 并发、三个独立进程、TPS 与全生命周期显存 |
 | [graph-coverage-c32.json](graph-coverage-c32.json) | 32 并发同配置 CUDA Graph 覆盖对照：64 → 256 token，三组独立进程、每进程三轮热测，完整响应 TPS 与延迟、启动及捕获分配，见 [优化说明](../docs/LOW_CONCURRENCY_TPS.md) |
 | [graph-coverage-memory-c32.json](graph-coverage-memory-c32.json) | 32 并发服务进程树 WDDM 显存：请求阶段峰值增加 104 MiB，首次重编译启动峰值相同；新旧各两个进程、100 ms 目标间隔 |
 | [graph-coverage-validation.json](graph-coverage-validation.json) | 图覆盖优化的固定调度逐 token 对照、256 并发运行回归、INT4 批量功能验证、运行时与权重身份 |
