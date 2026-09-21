@@ -1,5 +1,7 @@
 # 构建 Windows 原生 vLLM 运行包
 
+正式运行、跑分和发布统一使用同版便携包的定制运行库。修改应用源码时复用其 `payload/runtime/`；以下步骤用于重建依赖，完成 [定制后端验收](PYTORCH_CUSTOM_BUILD.md) 后才能替换正式运行库。
+
 依赖固定于 `requirements-vllm-windows.txt`。使用社区 [SystemPanic/vllm-windows](https://github.com/SystemPanic/vllm-windows/releases/tag/v0.29.0) wheel；官方上游与此社区 Windows 构建须区分。NVFP4 原生模型插件只支持此验证版本。
 
 仅构建机安装 MSVC x64 C++ Build Tools、Windows SDK、CUDA Toolkit；项目验证 CUDA Toolkit 13.0 + 驱动 596.36。驱动支持下限是本项目的保守实测政策，不将 Linux 版本号误作 Windows 最低要求。CUDA 官方兼容信息见 [NVIDIA 发行说明](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/)。

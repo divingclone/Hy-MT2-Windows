@@ -1,0 +1,1134 @@
+{
+  "source_sha256": "2acce85a5ec8e3dc93f2dce6fa5398a3a87755d8e6a13b6ecf38036194573839",
+  "concurrency": 32,
+  "protocol": "non_streaming_json",
+  "model": "Hy-MT2-1.8B-NVFP4-vllm",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5090",
+    "compute_capability": "12.0",
+    "driver_version": "596.36"
+  },
+  "context": 2048,
+  "batch_tokens": 2048,
+  "kernel": "cutlass",
+  "kv_cache_dtype": "int8_per_token_head",
+  "kv_token_capacity": 49152,
+  "candidates": [
+    {
+      "candidate": 1,
+      "capture_size": 64,
+      "tps_median": 4758.165213708512,
+      "tps_process_range": [
+        4679.807257960809,
+        4777.653982046656
+      ],
+      "latency_p95_s_median": 0.5519358000019565,
+      "initialization_s_median": 30.658382800000254,
+      "records": [
+        {
+          "trial": 1,
+          "initialization_s": 31.13395499996841,
+          "graph_capture": {
+            "seconds_rounded": 1.0,
+            "gib_rounded": 0.08
+          },
+          "warm_median": {
+            "wall_s": 6.885178400028963,
+            "completion_tokens_per_second": 4777.653982046656,
+            "requests_per_second": 74.3626337986894
+          },
+          "runs": [
+            {
+              "phase": "cold",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.6097831999650225,
+                "completion_tokens": 32989,
+                "completion_tokens_per_second": 4335.077509192592,
+                "requests_per_second": 67.28181165560056,
+                "latency_s": {
+                  "p50": 0.46774639998329803,
+                  "p95": 0.640649399952963,
+                  "p99": 0.6832743000122719
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 4.256151899986435,
+                  "p95": 7.387452299997676,
+                  "p99": 7.541134999948554
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004791199986357242,
+                  "p95": 0.007869499968364835,
+                  "p99": 0.008094999997410923
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.011007499997504056,
+                  "p95": 0.01145269995322451,
+                  "p99": 0.01148240000475198
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "8f981609d3ed9cb8d342721bbba3761ae30952da402f7437c8e6305496bce45d"
+            },
+            {
+              "phase": "warm-1",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 6.6673914000275545,
+                "completion_tokens": 32935,
+                "completion_tokens_per_second": 4939.713003778943,
+                "requests_per_second": 76.79165197919595,
+                "latency_s": {
+                  "p50": 0.4022675000014715,
+                  "p95": 0.5345401999657042,
+                  "p99": 0.5606019999831915
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.524261499987915,
+                  "p95": 6.450440999993589,
+                  "p99": 6.593062200001441
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.0040633000317029655,
+                  "p95": 0.007056400005239993,
+                  "p99": 0.007282599981408566
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.00997419998748228,
+                  "p95": 0.010417499986942858,
+                  "p99": 0.01044980000006035
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "efac6d6a8c4312626d5e0c78ca060ee5708500ce5b6bc54c754f58a701dd6935"
+            },
+            {
+              "phase": "warm-2",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.653996000008192,
+                "completion_tokens": 32884,
+                "completion_tokens_per_second": 4296.317897208831,
+                "requests_per_second": 66.89316273479265,
+                "latency_s": {
+                  "p50": 0.4630829999805428,
+                  "p95": 0.6431282000266947,
+                  "p99": 0.6833136999630369
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.739514600019902,
+                  "p95": 7.442967200011481,
+                  "p99": 7.583667900005821
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004469299979973584,
+                  "p95": 0.00760960002662614,
+                  "p99": 0.007808400026988238
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010346300026867539,
+                  "p95": 0.010755399998743087,
+                  "p99": 0.010782300028949976
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "2e840b4ab665fc0f3d7d4955526958a0a30d6b833687a786234d2bcf79c64cc6"
+            },
+            {
+              "phase": "warm-3",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 6.885178400028963,
+                "completion_tokens": 32895,
+                "completion_tokens_per_second": 4777.653982046656,
+                "requests_per_second": 74.3626337986894,
+                "latency_s": {
+                  "p50": 0.41820080002071336,
+                  "p95": 0.5519358000019565,
+                  "p99": 0.5790227000252344
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.6577000000397675,
+                  "p95": 6.656358200008981,
+                  "p99": 6.815277600020636
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.0042860000394284725,
+                  "p95": 0.007465400034561753,
+                  "p99": 0.007669400016311556
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010722100036218762,
+                  "p95": 0.011376600014045835,
+                  "p99": 0.01141430001007393
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "aadf729578550377568e3a005efb12ed76a4ba483cbd828c1ff0ad544bd5b061"
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "initialization_s": 30.620267899997998,
+          "graph_capture": {
+            "seconds_rounded": 1.0,
+            "gib_rounded": 0.08
+          },
+          "warm_median": {
+            "wall_s": 6.927880500035826,
+            "completion_tokens_per_second": 4758.165213708512,
+            "requests_per_second": 73.90427707252634
+          },
+          "runs": [
+            {
+              "phase": "cold",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.6616754999849945,
+                "completion_tokens": 32967,
+                "completion_tokens_per_second": 4302.844723724538,
+                "requests_per_second": 66.82611394870518,
+                "latency_s": {
+                  "p50": 0.46649339998839423,
+                  "p95": 0.6250110999681056,
+                  "p99": 0.6881494999979623
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 4.241157699958421,
+                  "p95": 7.425269700004719,
+                  "p99": 7.577667200006545
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004701700003352016,
+                  "p95": 0.0076413999777287245,
+                  "p99": 0.007857399992644787
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.01070149999577552,
+                  "p95": 0.011182999995071441,
+                  "p99": 0.011210599972400814
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "b4802fbe2f17e9794ee95c2acf061ff00f1201edb9a3a60821dffd42785aa431"
+            },
+            {
+              "phase": "warm-1",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 6.59276690002298,
+                "completion_tokens": 32929,
+                "completion_tokens_per_second": 4994.716254852758,
+                "requests_per_second": 77.66086800341984,
+                "latency_s": {
+                  "p50": 0.40285919996676967,
+                  "p95": 0.5243077999912202,
+                  "p99": 0.5577945000259206
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.425608600024134,
+                  "p95": 6.372251900029369,
+                  "p99": 6.522102100017946
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.0038161000120453537,
+                  "p95": 0.006808799982536584,
+                  "p99": 0.007033000001683831
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.01019629999063909,
+                  "p95": 0.01071790000423789,
+                  "p99": 0.010747099993750453
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "96d24d71e5f0e797b0130e071867210111a53e1a5303a6bf88c1db03cb7b0f94"
+            },
+            {
+              "phase": "warm-2",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.787206000008155,
+                "completion_tokens": 32972,
+                "completion_tokens_per_second": 4234.124537088845,
+                "requests_per_second": 65.7488706475036,
+                "latency_s": {
+                  "p50": 0.4736682000220753,
+                  "p95": 0.6685345000005327,
+                  "p99": 0.7156343999668024
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.7914756999816746,
+                  "p95": 7.5632171999895945,
+                  "p99": 7.719473699980881
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.003939300018828362,
+                  "p95": 0.006784899975173175,
+                  "p99": 0.00697099999524653
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.009523599990643561,
+                  "p95": 0.009964400029275566,
+                  "p99": 0.009993600018788129
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "2a663b51ba15ac92df87bf91d7bedd1f910d8701e0dc344ba5f2e02ade268e39"
+            },
+            {
+              "phase": "warm-3",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 6.927880500035826,
+                "completion_tokens": 32964,
+                "completion_tokens_per_second": 4758.165213708512,
+                "requests_per_second": 73.90427707252634,
+                "latency_s": {
+                  "p50": 0.4201591999735683,
+                  "p95": 0.5516887999838218,
+                  "p99": 0.5892279000254348
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.7155981000396423,
+                  "p95": 6.688357700011693,
+                  "p99": 6.8509458000189625
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.0040086000226438046,
+                  "p95": 0.0070401999983005226,
+                  "p99": 0.007235300028696656
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.009734000021126121,
+                  "p95": 0.010169000015594065,
+                  "p99": 0.0101966000511311
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "7b98581caf2be8bd88144a417760eae1bb9a4ab8ef62b97e78615dc1869780c7"
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "initialization_s": 30.658382800000254,
+          "graph_capture": {
+            "seconds_rounded": 1.0,
+            "gib_rounded": 0.08
+          },
+          "warm_median": {
+            "wall_s": 7.0417429999797605,
+            "completion_tokens_per_second": 4679.807257960809,
+            "requests_per_second": 72.70927098609984
+          },
+          "runs": [
+            {
+              "phase": "cold",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.755909500003327,
+                "completion_tokens": 32871,
+                "completion_tokens_per_second": 4238.187668381884,
+                "requests_per_second": 66.014179252579,
+                "latency_s": {
+                  "p50": 0.4708322000224143,
+                  "p95": 0.6451624000328593,
+                  "p99": 0.7346502000000328
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 4.331666500016581,
+                  "p95": 7.527295800042339,
+                  "p99": 7.688303500006441
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.005068300000857562,
+                  "p95": 0.010313700011465698,
+                  "p99": 0.010787300008814782
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.015606400032993406,
+                  "p95": 0.016402200039010495,
+                  "p99": 0.016431800031568855
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "1396fb36a5e8407917bbec432e1d829f1d6c99bf1573b7782d2e51dadcb2942b"
+            },
+            {
+              "phase": "warm-1",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 6.5827378000249155,
+                "completion_tokens": 32928,
+                "completion_tokens_per_second": 5002.174019429328,
+                "requests_per_second": 77.77918786284668,
+                "latency_s": {
+                  "p50": 0.40245300001697615,
+                  "p95": 0.5374212000169791,
+                  "p99": 0.5762441000551917
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.5649203000357375,
+                  "p95": 6.358706000028178,
+                  "p99": 6.511554000026081
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.00410410005133599,
+                  "p95": 0.007069500046782196,
+                  "p99": 0.007295600022189319
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010011800040956587,
+                  "p95": 0.010456000047270209,
+                  "p99": 0.010485100036021322
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "b409dd71321f2e70de7155e0fe01d48a0efdbdf6fed91bfae56b7351d489b2aa"
+            },
+            {
+              "phase": "warm-2",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.9144492000341415,
+                "completion_tokens": 32951,
+                "completion_tokens_per_second": 4163.397751021998,
+                "requests_per_second": 64.69180445277118,
+                "latency_s": {
+                  "p50": 0.4787497000070289,
+                  "p95": 0.6722885000053793,
+                  "p99": 0.7364550000056624
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.938045000017155,
+                  "p95": 7.690580299997237,
+                  "p99": 7.840838700009044
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004104799998458475,
+                  "p95": 0.007331300002988428,
+                  "p99": 0.0075320000178180635
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010223800025414675,
+                  "p95": 0.01067500002682209,
+                  "p99": 0.01070300000719726
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "4fdd1a9e11f57672d6a7d6a2c09accebf496a9226e692f8ed8d4d33152bc24a7"
+            },
+            {
+              "phase": "warm-3",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 7.0417429999797605,
+                "completion_tokens": 32954,
+                "completion_tokens_per_second": 4679.807257960809,
+                "requests_per_second": 72.70927098609984,
+                "latency_s": {
+                  "p50": 0.4290087000117637,
+                  "p95": 0.566750800004229,
+                  "p99": 0.5932244000141509
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 3.81946709996555,
+                  "p95": 6.811730399960652,
+                  "p99": 6.974692299962044
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.003910399973392487,
+                  "p95": 0.006767000013496727,
+                  "p99": 0.006956900004297495
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.00960359995951876,
+                  "p95": 0.010039899963885546,
+                  "p99": 0.01006609998876229
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "90638ed2e5f806721945e1614fb2b4f342534ca91c360f269af7c7c3ee37d334"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "candidate": 2,
+      "capture_size": 256,
+      "tps_median": 7700.331699235397,
+      "tps_process_range": [
+        7640.08318654347,
+        7715.918503786618
+      ],
+      "latency_p95_s_median": 0.32997690001502633,
+      "initialization_s_median": 31.628816099953838,
+      "records": [
+        {
+          "trial": 1,
+          "initialization_s": 31.628816099953838,
+          "graph_capture": {
+            "seconds_rounded": 2.0,
+            "gib_rounded": 0.19
+          },
+          "warm_median": {
+            "wall_s": 4.318146700039506,
+            "completion_tokens_per_second": 7640.08318654347,
+            "requests_per_second": 118.56938533267427
+          },
+          "runs": [
+            {
+              "phase": "cold",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.540004100010265,
+                "completion_tokens": 32935,
+                "completion_tokens_per_second": 7254.398734997956,
+                "requests_per_second": 112.77522855075007,
+                "latency_s": {
+                  "p50": 0.26946580002550036,
+                  "p95": 0.36945290002040565,
+                  "p99": 0.454800300009083
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.4770245000254363,
+                  "p95": 4.309727100015152,
+                  "p99": 4.459250100015197
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.005051899992395192,
+                  "p95": 0.008373100019525737,
+                  "p99": 0.008600500004831702
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.011913000023923814,
+                  "p95": 0.012568100006319582,
+                  "p99": 0.012594500032719225
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "73b6ad2eed4fbb03c7900cec1b155fa08728e76ca9d9392969b326be09845b09"
+            },
+            {
+              "phase": "warm-1",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.342018699971959,
+                "completion_tokens": 33000,
+                "completion_tokens_per_second": 7600.15151482722,
+                "requests_per_second": 117.91750229065262,
+                "latency_s": {
+                  "p50": 0.26374009996652603,
+                  "p95": 0.3308425000286661,
+                  "p99": 0.3567332000238821
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.2406658999971114,
+                  "p95": 4.109303199977148,
+                  "p99": 4.272340699972119
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.003925899975001812,
+                  "p95": 0.006967400026042014,
+                  "p99": 0.007195800018962473
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010230200015939772,
+                  "p95": 0.010680700012017041,
+                  "p99": 0.01071940001565963
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "a3373157a70713627a168e3070f1b49b7346166da587e2a779b8e85d11e966af"
+            },
+            {
+              "phase": "warm-2",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.318146700039506,
+                "completion_tokens": 32991,
+                "completion_tokens_per_second": 7640.08318654347,
+                "requests_per_second": 118.56938533267427,
+                "latency_s": {
+                  "p50": 0.2606468999874778,
+                  "p95": 0.3352751000202261,
+                  "p99": 0.36540840001543984
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.2372081000357866,
+                  "p95": 4.095570600009523,
+                  "p99": 4.247619200032204
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004129400011152029,
+                  "p95": 0.0074341000290587544,
+                  "p99": 0.007630600011907518
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010334899998269975,
+                  "p95": 0.01078170002438128,
+                  "p99": 0.010810100007802248
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "f2011efedd16a06c08fc2611f6f9fce1a823cf5028da500be98ac7af07467430"
+            },
+            {
+              "phase": "warm-3",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.169765600003302,
+                "completion_tokens": 32917,
+                "completion_tokens_per_second": 7894.208729616344,
+                "requests_per_second": 122.7886766583701,
+                "latency_s": {
+                  "p50": 0.25287319999188185,
+                  "p95": 0.3210376999923028,
+                  "p99": 0.3416286999708973
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.1472315000137314,
+                  "p95": 3.954685300006531,
+                  "p99": 4.106061699974816
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004061500017996877,
+                  "p95": 0.007080200011841953,
+                  "p99": 0.007273600029293448
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.009788800030946732,
+                  "p95": 0.010198200005106628,
+                  "p99": 0.010224400029983371
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "4652b6569b7f7be6662f1fd62da3c66475b1889ce5dfb08d099b9413699ab108"
+            }
+          ]
+        },
+        {
+          "trial": 2,
+          "initialization_s": 31.12397840002086,
+          "graph_capture": {
+            "seconds_rounded": 2.0,
+            "gib_rounded": 0.19
+          },
+          "warm_median": {
+            "wall_s": 4.2742804999579675,
+            "completion_tokens_per_second": 7715.918503786618,
+            "requests_per_second": 119.78624238746964
+          },
+          "runs": [
+            {
+              "phase": "cold",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.614372200041544,
+                "completion_tokens": 32962,
+                "completion_tokens_per_second": 7143.333604450729,
+                "requests_per_second": 110.95767263754546,
+                "latency_s": {
+                  "p50": 0.27656989998649806,
+                  "p95": 0.3685692999861203,
+                  "p99": 0.45761549996677786
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.5055236000334844,
+                  "p95": 4.399702000024263,
+                  "p99": 4.543775700032711
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.005050100036896765,
+                  "p95": 0.008085900044534355,
+                  "p99": 0.008321600034832954
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.011211900040507317,
+                  "p95": 0.011668200022540987,
+                  "p99": 0.01169450004817918
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "71ca2360dec96915e449dd90cbd9d01230ae67ddf234914ea2b7f8a5af647590"
+            },
+            {
+              "phase": "warm-1",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.309934600023553,
+                "completion_tokens": 32899,
+                "completion_tokens_per_second": 7633.294481967363,
+                "requests_per_second": 118.79530608125748,
+                "latency_s": {
+                  "p50": 0.261278800026048,
+                  "p95": 0.33263229997828603,
+                  "p99": 0.3524785000481643
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.2289753000368364,
+                  "p95": 4.083320700039621,
+                  "p99": 4.243269100028556
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.003966100048273802,
+                  "p95": 0.006805900018662214,
+                  "p99": 0.007030400040093809
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.009752700047101825,
+                  "p95": 0.0101771000190638,
+                  "p99": 0.010204700054600835
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "53e74738f1b9fd1b9acfd2c8320ee42fa08ea055cf782cc0780e359e7f50ac58"
+            },
+            {
+              "phase": "warm-2",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.2742804999579675,
+                "completion_tokens": 32980,
+                "completion_tokens_per_second": 7715.918503786618,
+                "requests_per_second": 119.78624238746964,
+                "latency_s": {
+                  "p50": 0.2605848999810405,
+                  "p95": 0.32997690001502633,
+                  "p99": 0.35675749997608364
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.1737627999973483,
+                  "p95": 4.041234100004658,
+                  "p99": 4.203400500002317
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.003942699986509979,
+                  "p95": 0.006846299977041781,
+                  "p99": 0.007035299960989505
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.009697599976789206,
+                  "p95": 0.010127799992915243,
+                  "p99": 0.010155999974813312
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "17dbffedcb1ac951a48802088a02309a5e5cb7c314fc0ef82a0028125f4144e4"
+            },
+            {
+              "phase": "warm-3",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.233302399981767,
+                "completion_tokens": 32972,
+                "completion_tokens_per_second": 7788.718330195833,
+                "requests_per_second": 120.94576565146993,
+                "latency_s": {
+                  "p50": 0.2567233999725431,
+                  "p95": 0.3225028999731876,
+                  "p99": 0.33638649998465553
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.16196920000948,
+                  "p95": 3.9960585000226274,
+                  "p99": 4.1629634000128135
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.0039276999887079,
+                  "p95": 0.006954499986022711,
+                  "p99": 0.007171300007030368
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.009811800031457096,
+                  "p95": 0.010233899985905737,
+                  "p99": 0.010259600006975234
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "fa754d90418a6ca9c0bbe340761ed046089970c41668b3d3ead35a51b4e68601"
+            }
+          ]
+        },
+        {
+          "trial": 3,
+          "initialization_s": 31.65563299995847,
+          "graph_capture": {
+            "seconds_rounded": 2.0,
+            "gib_rounded": 0.19
+          },
+          "warm_median": {
+            "wall_s": 4.2839712999993935,
+            "completion_tokens_per_second": 7700.331699235397,
+            "requests_per_second": 119.51527312988127
+          },
+          "runs": [
+            {
+              "phase": "cold",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.679861400043592,
+                "completion_tokens": 32867,
+                "completion_tokens_per_second": 7023.071238753749,
+                "requests_per_second": 109.40494947034774,
+                "latency_s": {
+                  "p50": 0.28007820004131645,
+                  "p95": 0.37706089997664094,
+                  "p99": 0.4339353999821469
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.5770411000121385,
+                  "p95": 4.464622900006361,
+                  "p99": 4.605521499994211
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004837100044824183,
+                  "p95": 0.008203100005630404,
+                  "p99": 0.008445999992545694
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.011368600011337548,
+                  "p95": 0.011820600018836558,
+                  "p99": 0.01184829999692738
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "d8db93c861c4ce4bf61dd6f7e4345ed2c34bb0d7bb17b154ba5c4b618f728a1e"
+            },
+            {
+              "phase": "warm-1",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.321576900023501,
+                "completion_tokens": 32975,
+                "completion_tokens_per_second": 7630.316609620131,
+                "requests_per_second": 118.47527230100097,
+                "latency_s": {
+                  "p50": 0.2636536000063643,
+                  "p95": 0.33225199999287724,
+                  "p99": 0.3523789999890141
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.214867700007744,
+                  "p95": 4.082350599986967,
+                  "p99": 4.248022100015078
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004042399988975376,
+                  "p95": 0.006996300013270229,
+                  "p99": 0.007226700021419674
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010005399992223829,
+                  "p95": 0.010441299993544817,
+                  "p99": 0.01047039998229593
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "4635d5b37e02a4a406ea995da39754e0a57256ad115223e2cfa2a07f0360bcea"
+            },
+            {
+              "phase": "warm-2",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.2839712999993935,
+                "completion_tokens": 32988,
+                "completion_tokens_per_second": 7700.331699235397,
+                "requests_per_second": 119.51527312988127,
+                "latency_s": {
+                  "p50": 0.25716380000812933,
+                  "p95": 0.3274095000233501,
+                  "p99": 0.35205889999633655
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.216942800034303,
+                  "p95": 4.053546999988612,
+                  "p99": 4.210586200002581
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.003862100013066083,
+                  "p95": 0.0068444000207819045,
+                  "p99": 0.007041100005153567
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.01003190001938492,
+                  "p95": 0.01080099999671802,
+                  "p99": 0.010862600000109524
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "edd3bf79b45b95274cc7744fa3f786b3c44d5aefb7bf503cf787b85f4cf67fa7"
+            },
+            {
+              "phase": "warm-3",
+              "metrics": {
+                "requests": 512,
+                "completed": 512,
+                "errors": 0,
+                "truncated": 0,
+                "wall_s": 4.18505740002729,
+                "completion_tokens": 32948,
+                "completion_tokens_per_second": 7872.771350707198,
+                "requests_per_second": 122.34001856143271,
+                "latency_s": {
+                  "p50": 0.2544898000196554,
+                  "p95": 0.31965890002902597,
+                  "p99": 0.34094009996624663
+                },
+                "ttft_s": {
+                  "p50": null,
+                  "p95": null,
+                  "p99": null
+                },
+                "end_to_end_s": {
+                  "p50": 2.1489844999741763,
+                  "p95": 3.972323400026653,
+                  "p99": 4.114876099978574
+                },
+                "valid": true,
+                "first_group_client_start_s": {
+                  "p50": 0.004178199975285679,
+                  "p95": 0.007225100009236485,
+                  "p99": 0.007415900006890297
+                },
+                "first_group_headers_ready_s": {
+                  "p50": 0.010027599986642599,
+                  "p95": 0.010469299973919988,
+                  "p99": 0.010495399998035282
+                },
+                "observed_peak_in_flight": 32
+              },
+              "output_sha256": "1413415243fa00b99bcfe03b1b83f030ac2e814795b07e9095e63f6a8f4baa35"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "greedy_comparisons": [],
+  "runtime": {
+    "torch_cuda_sha256": "53ce23444795d7118d99f9231567e7f264ff4cac4bb714584454f84cd1bf3f02",
+    "custom_build_marker_present": true,
+    "profile": "hymt-cuda-delay-v1",
+    "inference_validated": true
+  },
+  "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+  "sampling": {
+    "temperature": 0.7,
+    "top_p": 0.6,
+    "top_k": 20,
+    "max_tokens": 512,
+    "repetition_penalty": 1.05,
+    "seed": "42 + request index"
+  }
+}

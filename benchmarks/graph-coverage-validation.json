@@ -1,0 +1,257 @@
+{
+  "date": "2026-09-21",
+  "runtime": "Official portable runtime, shared by workspace and release 0.2.4",
+  "runtime_identity": {
+    "torch_cuda_sha256": "53ce23444795d7118d99f9231567e7f264ff4cac4bb714584454f84cd1bf3f02",
+    "custom_build_marker_present": true,
+    "profile": "hymt-cuda-delay-v1",
+    "inference_validated": true
+  },
+  "versions": {
+    "vllm": "0.29.0+cu132",
+    "torch": "2.11.0+cu130",
+    "transformers": "5.17.0",
+    "compressed-tensors": "0.17.0",
+    "triton-windows": "3.6.0.post26"
+  },
+  "model_identity": {
+    "nvfp4": {
+      "config.json": {
+        "size_bytes": 2879,
+        "sha256": "c328a3d73e112cddce69af51c83e3ae69f35c83365b563fca5e984c3d4884e86"
+      },
+      "generation_config.json": {
+        "size_bytes": 232,
+        "sha256": "ec37b818b1bd539ca96a07da52a60630ecba2550ab8ed5d783c490880a8286a9"
+      },
+      "tokenizer_config.json": {
+        "size_bytes": 369,
+        "sha256": "578b75d18d5041b2b3bfbeca014ae27e48d7661e2a1e7786c773811901c522a5"
+      },
+      "tokenizer.json": {
+        "size_bytes": 9527287,
+        "sha256": "b475bbef1b0b2fd57dcb865332b546475bd1ede2deb3bb91bafd0c047a8a530a"
+      },
+      "chat_template.jinja": {
+        "size_bytes": 654,
+        "sha256": "b7491ec0e9c869dfce20f2176758099bf248d979dd05530ede99deb21698acee"
+      },
+      "model.safetensors": {
+        "size_bytes": 1363492720,
+        "sha256": "b4ae2931e9b24d6e0209d9062d6ec08767e61a7eaab6dff7d9fd5cd99000987e"
+      }
+    },
+    "manifest_sha256": "1ad1b25a054b24069c3e541887375e18ddff41ae8bab594eb0d4e9a5b798088a"
+  },
+  "controlled_output_check": {
+    "source_sha256": "8cef4787f11b2b07d1d81a4b4296d0bf64262242ad47dee442fe04d70eab3a74",
+    "settings": {
+      "max_num_seqs": 32,
+      "max_model_len": 2048,
+      "max_num_batched_tokens": 2048,
+      "multiprocessing": false
+    },
+    "requests": 2048,
+    "paired_outputs": 1024,
+    "all_paired_token_ids_equal": true,
+    "comparisons": [
+      {
+        "capture_size": 64,
+        "phase": "cold",
+        "requests": 512,
+        "exact_matches": 512,
+        "output_sha256": "dcb628177fa19cf4985ab2480f2331a76fbd3ebd8832301e9139f55fbf865b24"
+      },
+      {
+        "capture_size": 64,
+        "phase": "warm-1",
+        "requests": 512,
+        "exact_matches": 512,
+        "output_sha256": "dcb628177fa19cf4985ab2480f2331a76fbd3ebd8832301e9139f55fbf865b24"
+      },
+      {
+        "capture_size": 256,
+        "phase": "cold",
+        "requests": 512,
+        "exact_matches": 512,
+        "output_sha256": "dcb628177fa19cf4985ab2480f2331a76fbd3ebd8832301e9139f55fbf865b24"
+      },
+      {
+        "capture_size": 256,
+        "phase": "warm-1",
+        "requests": 512,
+        "exact_matches": 512,
+        "output_sha256": "dcb628177fa19cf4985ab2480f2331a76fbd3ebd8832301e9139f55fbf865b24"
+      }
+    ],
+    "notes": [
+      "Fixed offline scheduling for validation only; production multiprocessing unchanged.",
+      "Includes terminal EOS; not a semantic quality score or online reproducibility guarantee."
+    ]
+  },
+  "concurrency_256_regression": {
+    "source_sha256": "a2b8599475eb88e769445425ec471a01c0fd8c6faa72e99e8c7e06c30e3a0942",
+    "concurrency": 256,
+    "protocol": "non_streaming_json",
+    "model": "Hy-MT2-1.8B-NVFP4-vllm",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 5090",
+      "compute_capability": "12.0",
+      "driver_version": "596.36"
+    },
+    "context": 2048,
+    "batch_tokens": 2048,
+    "kernel": "cutlass",
+    "kv_cache_dtype": "int8_per_token_head",
+    "kv_token_capacity": 98304,
+    "candidates": [
+      {
+        "candidate": 1,
+        "capture_size": 512,
+        "tps_median": 21870.533021257128,
+        "tps_process_range": [
+          21870.533021257128,
+          21870.533021257128
+        ],
+        "latency_p95_s_median": 1.0184142999933101,
+        "initialization_s_median": 35.11317969998345,
+        "records": [
+          {
+            "trial": 1,
+            "initialization_s": 35.11317969998345,
+            "graph_capture": {
+              "seconds_rounded": 3.0,
+              "gib_rounded": 0.32
+            },
+            "warm_median": {
+              "wall_s": 1.5022039000177756,
+              "completion_tokens_per_second": 21870.533021257128,
+              "requests_per_second": 340.8325594108373
+            },
+            "runs": [
+              {
+                "phase": "cold",
+                "metrics": {
+                  "requests": 512,
+                  "completed": 512,
+                  "errors": 0,
+                  "truncated": 0,
+                  "wall_s": 1.6023199000046588,
+                  "completion_tokens": 32853,
+                  "completion_tokens_per_second": 20503.396356685378,
+                  "requests_per_second": 319.53669176705057,
+                  "latency_s": {
+                    "p50": 0.6764211999834515,
+                    "p95": 1.118472300004214,
+                    "p99": 1.1645036999834701
+                  },
+                  "ttft_s": {
+                    "p50": null,
+                    "p95": null,
+                    "p99": null
+                  },
+                  "end_to_end_s": {
+                    "p50": 1.2475990999955684,
+                    "p95": 1.5354040000238456,
+                    "p99": 1.5688264000345953
+                  },
+                  "valid": true,
+                  "first_group_client_start_s": {
+                    "p50": 0.028235500038135797,
+                    "p95": 0.05375300004379824,
+                    "p99": 0.05582230002619326
+                  },
+                  "first_group_headers_ready_s": {
+                    "p50": 0.07338120002532378,
+                    "p95": 0.07687300001271069,
+                    "p99": 0.07719720003660768
+                  },
+                  "observed_peak_in_flight": 256
+                },
+                "output_sha256": "0bd91bf73d900d5db56f2008604b11e51ef5e15599101f982b35c6082757b66f"
+              },
+              {
+                "phase": "warm-1",
+                "metrics": {
+                  "requests": 512,
+                  "completed": 512,
+                  "errors": 0,
+                  "truncated": 0,
+                  "wall_s": 1.5022039000177756,
+                  "completion_tokens": 32854,
+                  "completion_tokens_per_second": 21870.533021257128,
+                  "requests_per_second": 340.8325594108373,
+                  "latency_s": {
+                    "p50": 0.6339227999560535,
+                    "p95": 1.0184142999933101,
+                    "p99": 1.0605682999594137
+                  },
+                  "ttft_s": {
+                    "p50": null,
+                    "p95": null,
+                    "p99": null
+                  },
+                  "end_to_end_s": {
+                    "p50": 1.155293799994979,
+                    "p95": 1.4395556999952532,
+                    "p99": 1.4689873000024818
+                  },
+                  "valid": true,
+                  "first_group_client_start_s": {
+                    "p50": 0.02701870002783835,
+                    "p95": 0.05771890003234148,
+                    "p99": 0.060568600019905716
+                  },
+                  "first_group_headers_ready_s": {
+                    "p50": 0.07951950002461672,
+                    "p95": 0.08262170001398772,
+                    "p99": 0.08291290001943707
+                  },
+                  "observed_peak_in_flight": 256
+                },
+                "output_sha256": "aaf09bad0ca4dae6df45a714e53961d93c0561aa51492d31652df1952bd9f3b4"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "greedy_comparisons": [],
+    "runtime": {
+      "torch_cuda_sha256": "53ce23444795d7118d99f9231567e7f264ff4cac4bb714584454f84cd1bf3f02",
+      "custom_build_marker_present": true,
+      "profile": "hymt-cuda-delay-v1",
+      "inference_validated": true
+    },
+    "dataset_sha256": "aecb611c207d9e7a61687710e8468c04ef37b918729e56aa06d209bba385bc7c",
+    "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.6,
+      "top_k": 20,
+      "max_tokens": 512,
+      "repetition_penalty": 1.05,
+      "seed": "42 + request index"
+    }
+  },
+  "int4_compatibility": {
+    "requests": 64,
+    "failed": 0,
+    "truncated": 0,
+    "profile": "compat",
+    "kernel": "marlin",
+    "capture_size": 256,
+    "output_sha256": "a5bb072bf17ecd30a444c37f299351935faa1a56b7f37950736817d734d0da15",
+    "notes": [
+      "Functional check on RTX 5090, not RTX 30/40 hardware validation."
+    ]
+  },
+  "tests": {
+    "python_passed": 84,
+    "frontend_passed": 3,
+    "svelte_errors": 0,
+    "svelte_warnings": 0,
+    "rust_process_cleanup_passed": true,
+    "real_gpu_auth_stream_restart_cleanup_passed": true,
+    "real_gpu_log_sha256": "6106084e031230a09a079699b6181d2186ae5bc96f443a94c812924d28fa6edd"
+  }
+}

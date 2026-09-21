@@ -1,0 +1,151 @@
+{
+  "method": "WDDM GPU Process Memory counters summed for server process tree; 100ms target polling interval; observed maxima, not guaranteed absolute peaks",
+  "concurrency": 32,
+  "kv_cache_mib": 1584.0,
+  "date": "2026-09-21",
+  "gpu": "RTX 5090",
+  "runtime": {
+    "torch_cuda_sha256": "53ce23444795d7118d99f9231567e7f264ff4cac4bb714584454f84cd1bf3f02",
+    "custom_build_marker_present": true,
+    "profile": "hymt-cuda-delay-v1",
+    "inference_validated": true
+  },
+  "source_sha256": "8bb92b686d4bac906c15b38ff9848f71b10a42cf12793b9ac7ba166f1521be89",
+  "runs": [
+    {
+      "capture_size": 64,
+      "sample_count": 450,
+      "max_interval_s": 0.1399550999631174,
+      "phases": {
+        "startup": {
+          "dedicated_peak_mib": 4113.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "ready": {
+          "dedicated_peak_mib": 3723.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "requests": {
+          "dedicated_peak_mib": 3777.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "after_requests": {
+          "dedicated_peak_mib": 3777.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "all": {
+          "dedicated_peak_mib": 4113.94140625,
+          "shared_peak_mib": 86.0
+        }
+      },
+      "completed_requests": 1024,
+      "startup_recompiled": true
+    },
+    {
+      "capture_size": 256,
+      "sample_count": 411,
+      "max_interval_s": 0.1329122000024654,
+      "phases": {
+        "startup": {
+          "dedicated_peak_mib": 4113.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "ready": {
+          "dedicated_peak_mib": 3831.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "requests": {
+          "dedicated_peak_mib": 3881.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "after_requests": {
+          "dedicated_peak_mib": 3881.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "all": {
+          "dedicated_peak_mib": 4113.94140625,
+          "shared_peak_mib": 86.0
+        }
+      },
+      "completed_requests": 1024,
+      "startup_recompiled": true
+    },
+    {
+      "capture_size": 256,
+      "sample_count": 384,
+      "max_interval_s": 0.12794610002310947,
+      "phases": {
+        "startup": {
+          "dedicated_peak_mib": 3803.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "ready": {
+          "dedicated_peak_mib": 3803.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "requests": {
+          "dedicated_peak_mib": 3899.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "after_requests": {
+          "dedicated_peak_mib": 3899.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "all": {
+          "dedicated_peak_mib": 3899.94140625,
+          "shared_peak_mib": 86.0
+        }
+      },
+      "completed_requests": 1024,
+      "startup_recompiled": true
+    },
+    {
+      "capture_size": 64,
+      "sample_count": 415,
+      "max_interval_s": 0.12834759999532253,
+      "phases": {
+        "startup": {
+          "dedicated_peak_mib": 3695.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "ready": {
+          "dedicated_peak_mib": 3695.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "requests": {
+          "dedicated_peak_mib": 3795.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "after_requests": {
+          "dedicated_peak_mib": 3795.94140625,
+          "shared_peak_mib": 86.0
+        },
+        "all": {
+          "dedicated_peak_mib": 3795.94140625,
+          "shared_peak_mib": 86.0
+        }
+      },
+      "completed_requests": 1024,
+      "startup_recompiled": true
+    }
+  ],
+  "request_peak_increase_mib": 104,
+  "lifecycle_peak_with_recompilation_mib": {
+    "64": 4113.94140625,
+    "256": 4113.94140625
+  },
+  "notes": [
+    "Two independent processes per candidate, order 64/256/256/64; cold and warm 512-request passes.",
+    "Dedicated memory is summed across only the benchmark server process tree, not the whole device.",
+    "Both initial runs recompiled the model: lifecycle peak was 4113.94 MiB in each.",
+    "Cached-start lifecycle peak and request peak: 3795.94 -> 3899.94 MiB (+104 MiB).",
+    "Target interval 100ms; observed maxima can miss shorter transients.",
+    "Memory runs are separate from TPS timing."
+  ],
+  "excluded_attempts": [
+    {
+      "stage": "server startup",
+      "reason": "Concurrent restoration of the existing service caused an internal ZMQ port collision; no requests executed; repeated after the existing service was ready."
+    }
+  ]
+}

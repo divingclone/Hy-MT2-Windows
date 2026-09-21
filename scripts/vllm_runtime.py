@@ -47,10 +47,17 @@ def environment(root=ROOT, *, cache=None, gpu='0'):
 
 
 def llm_config(plan):
+    # vLLM 0.29 defaults to 2 * max_num_seqs captured tokens (64 at 32
+    # sequences). Mixed prefill + decode frequently exceeds that limit even
+    # at low request concurrency, falling back to uncaptured execution.
+    # Keep the normal 512 ceiling at 256 sequences, and respect smaller
+    # scheduler budgets. This does not increase the active sequence limit.
+    graph_tokens=min(plan['batch'],max(256,min(2*plan['parallel'],512)))
     return {'model':plan['model'],'dtype':'bfloat16','max_model_len':plan['context'],
         'max_num_seqs':plan['parallel'],'max_num_batched_tokens':plan['batch'],
         'kv_cache_memory_bytes':int(plan['budget']['kv_total_mib']*1024**2),
         'kv_cache_dtype':plan['cache'],'enable_prefix_caching':False,'disable_log_stats':True,
+        'compilation_config':{'max_cudagraph_capture_size':graph_tokens},
         'attention_config':{'backend':'TRITON_ATTN'},
         'kernel_config':{'linear_backend':plan['kernel'],'enable_flashinfer_autotune':False}}
 

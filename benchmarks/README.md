@@ -1,10 +1,13 @@
 # 公开基准证据
 
-本目录只保存实际测量的精简摘要，不包含用户路径、GPU UUID、PID、提示或逐条译文。完整评测 JSON 保留在本机忽略的 `results/`，历史报告集中在 `results/public-evidence-detailed/`，现行 API 矩阵在 `results/official-nonstream-api-async/`，旧同步客户端矩阵在 `results/official-nonstream-api/`；`detailed_report_sha256` 可核对其原始字节。版本控制保留结论、条件、聚合指标和失败计数，不收录重复的完整运行记录。
+本目录只保存实际测量的精简摘要，不包含用户路径、GPU UUID、PID、提示或逐条译文。完整评测 JSON 保留在本机忽略的 `results/`，历史报告集中在 `results/public-evidence-detailed/`，现行优化矩阵在 `results/graph-coverage-official-c32/`，历史官方 API 矩阵在 `results/official-nonstream-api-async/`，旧同步客户端矩阵在 `results/official-nonstream-api/`；`detailed_report_sha256` 可核对其原始字节。版本控制保留结论、条件、聚合指标和失败计数，不收录重复的完整运行记录。
 
 | 文件 | 内容 |
 | --- | --- |
-| [official-nonstream-api-async.json](official-nonstream-api-async.json) | README 主对照：双方使用 aiohttp 异步连接池的非流式翻译 API；未修改官方 llama.cpp + 腾讯 Q4_K_M 对比 vLLM，32/256 并发、三个独立进程、每次三轮热测，见 [优化报告](../docs/API_OPTIMIZATION.md) |
+| [graph-coverage-c32.json](graph-coverage-c32.json) | 32 并发同配置 CUDA Graph 覆盖对照：64 → 256 token，三组独立进程、每进程三轮热测，完整响应 TPS 与延迟、启动及捕获分配，见 [优化说明](../docs/LOW_CONCURRENCY_TPS.md) |
+| [graph-coverage-memory-c32.json](graph-coverage-memory-c32.json) | 32 并发服务进程树 WDDM 显存：请求阶段峰值增加 104 MiB，首次重编译启动峰值相同；新旧各两个进程、100 ms 目标间隔 |
+| [graph-coverage-validation.json](graph-coverage-validation.json) | 图覆盖优化的固定调度逐 token 对照、256 并发运行回归、INT4 批量功能验证、运行时与权重身份 |
+| [official-nonstream-api-async.json](official-nonstream-api-async.json) | 历史官方对照：双方使用 aiohttp 异步连接池的非流式翻译 API；未修改官方 llama.cpp + 腾讯 Q4_K_M 对比 vLLM，32/256 并发、三个独立进程、每次三轮热测，见 [优化报告](../docs/API_OPTIMIZATION.md) |
 | [api-optimization.json](api-optimization.json) | 同进程客户端交错对照、连接复用/事件循环/调度预算消融、相同配置的核心复查，保留 Windows 双前端启动失败和排除的干扰轮次 |
 | [official-nonstream-api.json](official-nonstream-api.json) | 历史同步 urllib 客户端的非流式 API 对照；包含客户端供给瓶颈，见 [历史报告](../docs/OFFICIAL_API_BENCHMARK.md) |
 | [teacher-fidelity.json](teacher-fidelity.json) | 原始 BF16 输出参考的量化消融，含 32/256 并发、译文一致性、固定前缀 token 概率与重复性检查，见 [保真度报告](../docs/TEACHER_FIDELITY.md) |

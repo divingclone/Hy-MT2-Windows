@@ -66,6 +66,22 @@ class VllmConfigurationTests(unittest.TestCase):
             self.assertLessEqual(p['budget']['estimated_total_mib'],9830)
             self.assertEqual(p['backend'],'vllm')
 
+    def test_graph_coverage_handles_mixed_prefill_without_raising_concurrency(self):
+        for parallel, batch, expected in ((32,2048,256),(128,2048,256),
+                                           (256,2048,512),(32,128,128),
+                                           (1,2048,256),(256,256,256)):
+            with self.subTest(parallel=parallel,batch=batch):
+                plan=self.plan(parallel=parallel,ubatch=batch)
+                plan.update(model='model-folder',kernel='cutlass')
+                cfg=llm_config(plan)
+                self.assertEqual(cfg['compilation_config']['max_cudagraph_capture_size'],expected)
+                self.assertEqual(cfg['max_num_seqs'],parallel)
+                self.assertEqual(cfg['max_num_batched_tokens'],batch)
+                self.assertEqual(cfg['kv_cache_memory_bytes'],int(plan['budget']['kv_total_mib']*1024**2))
+                with patch('vllm_runtime.python_executable',return_value=Path('runtime/vllm/python.exe')):
+                    command=server_command(plan)
+                self.assertEqual(json.loads(command[command.index('--compilation-config')+1]),cfg['compilation_config'])
+
 class CheckpointTests(unittest.TestCase):
     def fixture(self,root):
         data=b'checkpoint fixture';item={'size_bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
